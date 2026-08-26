@@ -1,4 +1,4 @@
-# Civix Backend - Complete Setup Guide
+# Civix Backend - Complete Setup Guide & API Documentation
 
 ## 🚀 Quick Start
 
@@ -204,47 +204,11 @@ Authorization: Bearer <your_token>
 
 Tokens are returned on login/signup and should be stored in localStorage or as httpOnly cookies.
 
-### Frontend Integration Example
-
-```javascript
-// Login
-const response = await fetch('http://localhost:5000/api/auth/login', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ email: 'user@example.com', password: 'pass123!' })
-});
-const { token, user } = await response.json();
-localStorage.setItem('civix_token', token);
-
-// Authenticated request
-const issues = await fetch('http://localhost:5000/api/issues', {
-  headers: { Authorization: `Bearer ${localStorage.getItem('civix_token')}` }
-});
-```
-
-Use the pre-built `src/utils/api.js` file for all API calls — it handles tokens automatically.
-
 ---
 
 ## 📤 File Upload
 
 Files are uploaded to **Cloudinary** (images, PDFs, audio, video up to 10MB).
-
-```javascript
-// Create issue with file
-const formData = new FormData();
-formData.append('title', 'Road pothole');
-formData.append('description', 'Large pothole on Main St');
-formData.append('email', 'user@example.com');
-formData.append('file', fileInput.files[0]); // image/pdf
-
-await fetch('http://localhost:5000/api/issues', {
-  method: 'POST',
-  body: formData // Don't set Content-Type header for FormData
-});
-```
-
-Supported file types: JPEG, PNG, GIF, WEBP, PDF, DOC, DOCX, MP4, MP3
 
 ---
 
