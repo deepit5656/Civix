@@ -8,7 +8,9 @@ const path = require('path');
 
 // ─── Database ─────────────────────────────────────────────────────────────────
 const connectDB = require('./config/mongo');
-connectDB();
+if (process.env.NODE_ENV !== 'test') {
+  connectDB();
+}
 
 // ─── App ──────────────────────────────────────────────────────────────────────
 const app = express();
@@ -99,14 +101,16 @@ app.use(errorHandler);
 
 // ─── Start Server ─────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`
-  ╔══════════════════════════════════════╗
-  ║       Civix Backend Running          ║
-  ║  Server: http://localhost:${PORT}        ║
-  ║  API Docs: http://localhost:${PORT}/api-docs ║
-  ╚══════════════════════════════════════╝
-  `);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`
+    ╔══════════════════════════════════════╗
+    ║       Civix Backend Running          ║
+    ║  Server: http://localhost:${PORT}        ║
+    ║  API Docs: http://localhost:${PORT}/api-docs ║
+    ╚══════════════════════════════════════╝
+    `);
+  });
+}
 
 module.exports = app;

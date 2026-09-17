@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Send, MessageSquare, Loader2, Star, Sparkles, AlertCircle, CheckCircle } from "lucide-react";
+import { Send, MessageSquare, Loader2, Star, Sparkles, AlertCircle, CheckCircle, ThumbsUp } from "lucide-react";
 import { motion } from "framer-motion";
 
 const Feedback = () => {
@@ -19,6 +19,7 @@ const Feedback = () => {
   const { category, rating, feedback, name, email, phone } = formData;
 
   const emojis = ["😡", "😞", "😐", "🙂", "🤩"];
+  const ratingsLabels = ["Very Poor", "Poor", "Average", "Good", "Excellent"];
 
   const validateForm = () => {
     const newErrors = {};
@@ -40,9 +41,6 @@ const Feedback = () => {
 
   const handleBlur = (field) => setTouched(prev => ({ ...prev, [field]: true }));
 
-  const isFieldValid = (field) => touched[field] && !errors[field] && formData[field];
-  const isFieldInvalid = (field) => touched[field] && errors[field];
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -53,183 +51,200 @@ const Feedback = () => {
       setFormData({ category: "", rating: 0, feedback: "", name: "", email: "", phone: "" });
       setErrors({});
       setTouched({});
-    }, 1200);
+    }, 1000);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50/30 via-white to-emerald-50/50 dark:from-slate-900 dark:via-slate-800 dark:to-green-950/50 p-4 sm:p-6">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-300 py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto space-y-8">
-        {/* Header */}
+        
+        {/* HEADER */}
         <div className="text-center space-y-4">
-          <div className="relative inline-block">
-            <div className="absolute inset-0 bg-gradient-to-r from-green-400/80 to-emerald-500 rounded-full blur-lg opacity-20 animate-pulse"></div>
-            <div className="relative bg-gradient-to-r from-green-500 to-emerald-600 p-4 rounded-full shadow-lg shadow-green-500/20">
-              <MessageSquare className="w-8 h-8 text-white" />
-            </div>
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-600 text-white rounded-2xl shadow-md mx-auto">
+            <MessageSquare className="w-8 h-8" />
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-green-700 via-emerald-600 to-green-800 bg-clip-text text-transparent">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             Share Your Voice
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 max-w-md mx-auto">
-            Your feedback shapes better governance. Help us serve you better.
+          <p className="text-slate-600 dark:text-slate-300 max-w-md mx-auto text-base">
+            Your feedback shapes better civic governance. Help us refine Civix to serve your community better.
           </p>
         </div>
 
         {!submitted ? (
           <motion.form
             onSubmit={handleSubmit}
-            className="relative p-8 space-y-6 rounded-3xl shadow-xl shadow-green-500/5 border border-green-100/50 dark:border-slate-700/50 bg-white/60 dark:bg-slate-800/60 backdrop-blur-xl"
-            initial={{ opacity: 0, y: 20 }}
+            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm space-y-6"
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            {/* Personal Info */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300">Personal Information (Optional)</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {["name", "email", "phone"].map((field) => (
-                  <motion.div whileFocus={{ scale: 1.02 }} key={field} className="space-y-2">
-                    <label className="block text-sm font-medium capitalize">
-                      {field.replace(/^\w/, c => c.toUpperCase())} {field !== "name" && "(optional)"}
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={field === "email" ? "email" : field === "phone" ? "tel" : "text"}
-                        value={formData[field]}
-                        onChange={(e) => handleInputChange(field, e.target.value)}
-                        onBlur={() => handleBlur(field)}
-                        className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 dark:bg-slate-800 dark:border-slate-600 transition ${
-                          isFieldValid(field) ? 'border-green-500' : ''
-                        } ${isFieldInvalid(field) ? 'border-red-500' : ''}`}
-                        placeholder={`Enter your ${field}`}
-                      />
-                      {isFieldValid(field) && <CheckCircle className="absolute right-3 top-2.5 w-5 h-5 text-green-500" />}
-                      {isFieldInvalid(field) && <AlertCircle className="absolute right-3 top-2.5 w-5 h-5 text-red-500" />}
-                    </div>
-                    {isFieldInvalid(field) && (
-                      <p className="text-sm text-red-500 flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" /> {errors[field]}
-                      </p>
-                    )}
-                  </motion.div>
-                ))}
-              </div>
+            {/* Category Selection */}
+            <div>
+              <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">
+                Feedback Category <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={category}
+                onChange={(e) => handleInputChange("category", e.target.value)}
+                onBlur={() => handleBlur("category")}
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+              >
+                <option value="">Select Category</option>
+                <option value="Bug Report">Bug Report</option>
+                <option value="Feature Request">Feature Request</option>
+                <option value="User Experience">User Experience</option>
+                <option value="City Services Integration">City Services Integration</option>
+                <option value="Other">Other</option>
+              </select>
+              {touched.category && errors.category && (
+                <p className="mt-1 text-xs text-red-500 flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  {errors.category}
+                </p>
+              )}
             </div>
 
-            <hr className="border-slate-200 dark:border-slate-700" />
+            {/* Satisfaction Rating */}
+            <div>
+              <label className="block text-sm font-bold text-slate-900 dark:text-white mb-3">
+                How would you rate your experience? <span className="text-red-500">*</span>
+              </label>
+              <div className="flex items-center justify-between gap-2">
+                {emojis.map((emoji, idx) => {
+                  const ratingValue = idx + 1;
+                  const isSelected = rating === ratingValue;
 
-            {/* Feedback Details */}
-            <div className="space-y-4">
-              {/* Category */}
-              <motion.div whileFocus={{ scale: 1.02 }} className="space-y-2">
-                <label className="block text-sm font-medium">Select Category <span className="text-red-500">*</span></label>
-                <div className="relative">
-                  <select
-                    value={category}
-                    onChange={(e) => handleInputChange('category', e.target.value)}
-                    onBlur={() => handleBlur('category')}
-                    className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 dark:bg-slate-800 dark:border-slate-600 transition ${
-                      isFieldValid('category') ? 'border-green-500' : ''
-                    } ${isFieldInvalid('category') ? 'border-red-500' : ''}`}
-                  >
-                    <option value="">-- Choose Category --</option>
-                    <option value="elections">Elections & Governance</option>
-                    <option value="schemes">Government Schemes</option>
-                    <option value="transport">Traffic & Vehicle Info</option>
-                    <option value="infrastructure">Infrastructure & Development</option>
-                    <option value="healthcare">Healthcare Services</option>
-                    <option value="education">Education</option>
-                    <option value="environment">Environment & Sanitation</option>
-                    <option value="safety">Public Safety</option>
-                    <option value="others">Others</option>
-                  </select>
-                  {isFieldValid('category') && <CheckCircle className="absolute right-3 top-2.5 w-5 h-5 text-green-500" />}
-                  {isFieldInvalid('category') && <AlertCircle className="absolute right-3 top-2.5 w-5 h-5 text-red-500" />}
-                </div>
-                {isFieldInvalid('category') && (
-                  <p className="text-sm text-red-500 flex items-center gap-1"><AlertCircle className="w-4 h-4" />{errors.category}</p>
-                )}
-              </motion.div>
-
-              {/* Emoji Rating */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium">Rate Your Experience <span className="text-red-500">*</span></label>
-                <div className="flex gap-3 justify-center p-4 bg-gradient-to-r from-green-50/30 to-emerald-50/40 dark:from-slate-800/30 dark:to-green-900/20 rounded-2xl border border-green-100/50 dark:border-slate-700/30">
-                  {emojis.map((emoji, index) => (
-                    <motion.button
-                      key={index}
+                  return (
+                    <button
+                      key={idx}
                       type="button"
-                      onClick={() => handleInputChange('rating', index + 1)}
-                      whileTap={{ scale: 0.8, rotate: -10 }}
-                      animate={rating === index + 1 ? { scale: [1, 1.3, 1], rotate: [0, 10, 0] } : { scale: 1, rotate: 0 }}
-                      transition={{ duration: 0.4 }}
-                      className={`w-16 h-16 rounded-2xl border flex items-center justify-center text-2xl transition-all ${
-                        rating === index + 1 ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg' : 'bg-white/60 dark:bg-slate-700/60 border-green-100/50 dark:border-slate-600/50 hover:bg-white/80 dark:hover:bg-slate-700/80 hover:shadow-md'
-                      } ${isFieldInvalid('rating') ? 'border-red-500' : ''}`}
+                      onClick={() => handleInputChange("rating", ratingValue)}
+                      className={`flex-1 py-3 rounded-xl border flex flex-col items-center gap-1 transition-all ${
+                        isSelected
+                          ? "bg-emerald-600 text-white border-emerald-600 shadow-md scale-105"
+                          : "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-emerald-500 text-slate-700 dark:text-slate-300"
+                      }`}
                     >
-                      {emoji}
-                    </motion.button>
-                  ))}
-                </div>
-                {isFieldInvalid('rating') && (
-                  <p className="text-sm text-red-500 flex items-center gap-1"><AlertCircle className="w-4 h-4" />{errors.rating}</p>
-                )}
+                      <span className="text-2xl">{emoji}</span>
+                      <span className={`text-[10px] font-bold ${isSelected ? "text-white" : "text-slate-500 dark:text-slate-400"}`}>
+                        {ratingsLabels[idx]}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
-
-              {/* Feedback */}
-              <motion.div whileFocus={{ scale: 1.02 }} className="space-y-2">
-                <label className="block text-sm font-medium">Your Feedback <span className="text-red-500">*</span></label>
-                <div className="relative">
-                  <textarea
-                    value={feedback}
-                    onChange={(e) => handleInputChange('feedback', e.target.value)}
-                    onBlur={() => handleBlur('feedback')}
-                    rows="4"
-                    maxLength={500}
-                    placeholder="Share your thoughts..."
-                    className={`w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 dark:bg-slate-800 dark:border-slate-600 transition ${
-                      isFieldValid('feedback') ? 'border-green-500' : ''
-                    } ${isFieldInvalid('feedback') ? 'border-red-500' : ''}`}
-                  />
-                  <Sparkles className="absolute bottom-2 right-2 w-5 h-5 text-slate-400" />
-                  {isFieldValid('feedback') && <CheckCircle className="absolute right-3 top-2.5 w-5 h-5 text-green-500" />}
-                  {isFieldInvalid('feedback') && <AlertCircle className="absolute right-3 top-2.5 w-5 h-5 text-red-500" />}
-                </div>
-                <div className="flex justify-between items-center">
-                  {isFieldInvalid('feedback') && (
-                    <p className="text-sm text-red-500 flex items-center gap-1"><AlertCircle className="w-4 h-4" />{errors.feedback}</p>
-                  )}
-                  <p className="text-sm text-slate-500 ml-auto">{feedback.length}/500 characters</p>
-                </div>
-              </motion.div>
+              {touched.rating && errors.rating && (
+                <p className="mt-2 text-xs text-red-500 flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  {errors.rating}
+                </p>
+              )}
             </div>
 
-            {/* Submit */}
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.95 }}
+            {/* Detailed Feedback Text */}
+            <div>
+              <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">
+                Your Comments & Feedback <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                rows={4}
+                value={feedback}
+                onChange={(e) => handleInputChange("feedback", e.target.value)}
+                onBlur={() => handleBlur("feedback")}
+                placeholder="Share your thoughts, suggested improvements, or issue details..."
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all resize-none"
+              />
+              <div className="flex justify-between items-center mt-1">
+                {touched.feedback && errors.feedback ? (
+                  <p className="text-xs text-red-500 flex items-center gap-1">
+                    <AlertCircle className="w-3.5 h-3.5" />
+                    {errors.feedback}
+                  </p>
+                ) : <span />}
+                <span className="text-[11px] text-slate-400">
+                  {feedback.length}/500
+                </span>
+              </div>
+            </div>
+
+            {/* Contact Details (Optional) */}
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-4">
+              <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Contact Details (Optional)
+              </h4>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    placeholder="John Doe"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    Your Email
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    placeholder="john@example.com"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 font-medium py-3 px-4 rounded-xl shadow-md bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-400 text-white font-bold py-3.5 px-6 rounded-xl shadow-md active:scale-95 transition-all text-sm flex items-center justify-center gap-2"
             >
-              {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Submitting...</> : <><Send className="w-4 h-4" /> Submit Feedback</>}
-            </motion.button>
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Submitting...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" />
+                  <span>Submit Feedback</span>
+                </>
+              )}
+            </button>
           </motion.form>
         ) : (
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="p-8 rounded-3xl shadow-xl shadow-green-500/5 border border-green-200/30 dark:border-green-700/30 bg-gradient-to-r from-green-50/30 via-white to-emerald-50/40 dark:from-green-900/10 dark:via-slate-800/60 dark:to-emerald-900/10 text-center space-y-4"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center shadow-sm space-y-5"
           >
-            <p className="text-4xl animate-bounce">🎉</p>
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent">Thank You!</h2>
-            <p className="text-slate-600 dark:text-slate-400">Your feedback has been submitted successfully. We appreciate your input!</p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
+            <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mx-auto border border-emerald-200 dark:border-emerald-800">
+              <ThumbsUp className="w-8 h-8" />
+            </div>
+
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+              Thank You for Your Feedback!
+            </h2>
+
+            <p className="text-slate-600 dark:text-slate-300 text-sm max-w-md mx-auto">
+              We appreciate your time and insight. Your responses help our team continuously improve the Civix platform.
+            </p>
+
+            <button
               onClick={() => setSubmitted(false)}
-              className="mt-4 px-6 py-2 rounded-2xl border border-green-300 dark:border-green-600 bg-white/80 dark:bg-slate-700/80 shadow-md hover:shadow-lg transition"
+              className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-sm text-sm active:scale-95 transition-all"
             >
-              Share More Feedback
-            </motion.button>
+              Submit Another Response
+            </button>
           </motion.div>
         )}
       </div>

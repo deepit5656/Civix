@@ -22,7 +22,7 @@ import {
   FaChevronDown,
   FaApple,
   FaGooglePlay,
-  FaSparkles,
+  FaWandMagicSparkles,
   FaWrench,
   FaPlay,
   FaChartLine,
@@ -190,14 +190,14 @@ const Home = () => {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-950 text-slate-100 font-inter selection:bg-emerald-500 selection:text-white">
+    <div className="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-inter selection:bg-emerald-500 selection:text-white transition-colors duration-300">
       <ToastContainer
         position="bottom-right"
         autoClose={3000}
         closeOnClick
         pauseOnHover
         theme="dark"
-        toastClassName="!bg-slate-900 !text-slate-100 !border !border-slate-800 !rounded-xl shadow-2xl"
+        toastClassName="!bg-white dark:!bg-slate-900 !text-slate-800 dark:!text-slate-100 !border !border-slate-200 dark:!border-slate-800 !rounded-xl shadow-2xl"
       />
 
       <Helmet>
@@ -213,7 +213,7 @@ const Home = () => {
         <ProfileCompletionBanner />
 
         {/* ─── HERO SECTION ────────────────────────────────────────────────────────── */}
-        <section className="relative py-16 lg:py-24 bg-slate-950 border-b border-slate-900 overflow-hidden">
+        <section className="relative py-16 lg:py-24 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-900 overflow-hidden transition-colors">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
               
@@ -225,19 +225,19 @@ const Home = () => {
                 className="lg:col-span-7 flex flex-col items-start space-y-6"
               >
                 {/* Top Badge */}
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 text-xs font-semibold uppercase tracking-wider shadow-sm">
-                  <FaSparkles className="text-emerald-400" />
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-400 text-xs font-semibold uppercase tracking-wider shadow-sm">
+                  <FaWandMagicSparkles className="text-emerald-600 dark:text-emerald-400" />
                   <span>India's Leading Civic Action Platform</span>
                 </div>
 
                 {/* Main Headline */}
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
                   Report Civic Issues. <br />
-                  <span className="text-emerald-400">Transform Your City.</span>
+                  <span className="text-emerald-600 dark:text-emerald-400">Transform Your City.</span>
                 </h1>
 
                 {/* Subtitle */}
-                <p className="text-lg sm:text-xl text-slate-400 max-w-2xl leading-relaxed font-normal">
+                <p className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl leading-relaxed font-normal">
                   Civix bridges citizens and municipal authorities to fast-track repairs for potholes, broken lights, sanitation, and public infrastructure.
                 </p>
 
@@ -245,7 +245,7 @@ const Home = () => {
                 <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto pt-2">
                   <button
                     onClick={handleCTA}
-                    className="inline-flex items-center justify-center px-7 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-base rounded-xl transition-all duration-200 shadow-lg shadow-emerald-950/40 hover:scale-[1.02] active:scale-[0.98] group"
+                    className="inline-flex items-center justify-center px-7 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-base rounded-xl transition-all duration-200 shadow-lg shadow-emerald-900/20 hover:scale-[1.02] active:scale-[0.98] group"
                   >
                     <span>{isSignedIn ? "Go to Dashboard" : "Get Started Now"}</span>
                     <FaArrowRight className="ml-2.5 text-sm transition-transform group-hover:translate-x-1" />
@@ -255,21 +255,21 @@ const Home = () => {
                     onClick={() => {
                       document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
                     }}
-                    className="inline-flex items-center justify-center px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-slate-200 font-semibold text-base rounded-xl border border-slate-800 transition-all duration-200 group"
+                    className="inline-flex items-center justify-center px-6 py-3.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold text-base rounded-xl border border-slate-300 dark:border-slate-800 transition-all duration-200 group"
                   >
-                    <FaPlay className="mr-2 text-xs text-emerald-400" />
+                    <FaPlay className="mr-2 text-xs text-emerald-600 dark:text-emerald-400" />
                     <span>How It Works</span>
                   </button>
                 </div>
 
                 {/* Rating & Social Proof */}
-                <div className="pt-4 flex items-center gap-4 text-sm text-slate-400">
-                  <div className="flex text-amber-400 gap-1">
+                <div className="pt-4 flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
+                  <div className="flex text-amber-500 dark:text-amber-400 gap-1">
                     {[...Array(5)].map((_, i) => (
                       <FaStar key={i} className="w-4 h-4 fill-current" />
                     ))}
                   </div>
-                  <span className="font-medium text-slate-300">
+                  <span className="font-medium text-slate-700 dark:text-slate-300">
                     <strong>4.9/5</strong> rating from 25,000+ active citizens
                   </span>
                 </div>
@@ -282,40 +282,40 @@ const Home = () => {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="lg:col-span-5 flex justify-center"
               >
-                <div className="relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-5">
+                <div className="relative w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl dark:shadow-2xl space-y-5 transition-colors">
                   {/* Card Header */}
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-950 border border-emerald-800/80 flex items-center justify-center text-emerald-400">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800/80 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                         <FaShieldHalved className="text-lg" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-bold text-white">Live Complaint Tracker</h3>
-                        <p className="text-xs text-slate-400">Ticket #CX-89420 • Indiranagar</p>
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-white">Live Complaint Tracker</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Ticket #CX-89420 • Indiranagar</p>
                       </div>
                     </div>
-                    <span className="px-3 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 text-xs font-semibold">
+                    <span className="px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-xs font-semibold">
                       In Progress
                     </span>
                   </div>
 
                   {/* Complaint Preview */}
                   <div className="space-y-3">
-                    <div className="relative h-44 rounded-2xl overflow-hidden border border-slate-800">
+                    <div className="relative h-44 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
                       <img
                         src="https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80"
                         alt="Road Maintenance Demo"
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute top-3 left-3 bg-slate-950/90 border border-slate-800 text-slate-200 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+                      <div className="absolute top-3 left-3 bg-slate-900/90 dark:bg-slate-950/90 border border-slate-700 dark:border-slate-800 text-slate-100 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
                         <FaLocationDot className="text-emerald-400" />
                         <span>Bengaluru East • 12.9716° N</span>
                       </div>
                     </div>
 
-                    <div className="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-                      <h4 className="text-sm font-bold text-white mb-1">Pothole Repair Request</h4>
-                      <p className="text-xs text-slate-400 leading-relaxed">
+                    <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800/80">
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1">Pothole Repair Request</h4>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                         Assigned to Public Works Department. Crew dispatched with road paving equipment.
                       </p>
                     </div>
@@ -323,11 +323,11 @@ const Home = () => {
 
                   {/* Micro Progress Bar */}
                   <div className="pt-1">
-                    <div className="flex justify-between text-xs text-slate-400 mb-1.5 font-medium">
+                    <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-1.5 font-medium">
                       <span>Verification</span>
-                      <span className="text-emerald-400 font-bold">75% Completed</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">75% Completed</span>
                     </div>
-                    <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
                       <div className="h-full bg-emerald-500 rounded-full w-3/4"></div>
                     </div>
                   </div>
@@ -339,7 +339,7 @@ const Home = () => {
         </section>
 
         {/* ─── KEY FEATURES SECTION ──────────────────────────────────────────────── */}
-        <section className="py-20 bg-slate-900 border-b border-slate-800">
+        <section className="py-20 bg-slate-100/70 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 25 }}
@@ -348,13 +348,13 @@ const Home = () => {
               transition={{ duration: 0.5 }}
               className="text-center max-w-3xl mx-auto mb-16 space-y-3"
             >
-              <span className="px-3.5 py-1.5 rounded-full bg-emerald-950 border border-emerald-800 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+              <span className="px-3.5 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
                 Core Capabilities
               </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Built For Citizens & Municipal Speed
               </h2>
-              <p className="text-base sm:text-lg text-slate-400">
+              <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400">
                 Civix delivers end-to-end transparency, removing bureaucracy and delivering verified community repairs.
               </p>
             </motion.div>
@@ -367,24 +367,24 @@ const Home = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: idx * 0.15 }}
-                  className="bg-slate-950 border border-slate-800 rounded-3xl p-8 hover:border-emerald-500/60 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl group relative overflow-hidden"
+                  className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 hover:border-emerald-500/60 transition-all duration-300 hover:-translate-y-2 shadow-md hover:shadow-2xl group relative overflow-hidden"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-950/80 border border-emerald-800 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                     {feat.icon}
                   </div>
 
-                  <h3 className="text-xl font-bold text-white mb-3 group-hover:text-emerald-400 transition-colors">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                     {feat.title}
                   </h3>
 
-                  <p className="text-sm text-slate-400 leading-relaxed mb-6">
+                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
                     {feat.description}
                   </p>
 
-                  <ul className="space-y-2.5 pt-2 border-t border-slate-900">
+                  <ul className="space-y-2.5 pt-2 border-t border-slate-100 dark:border-slate-900">
                     {feat.highlights.map((item, i) => (
-                      <li key={i} className="flex items-center text-xs font-semibold text-slate-300 gap-2">
-                        <FaCircleCheck className="text-emerald-400 flex-shrink-0" />
+                      <li key={i} className="flex items-center text-xs font-semibold text-slate-700 dark:text-slate-300 gap-2">
+                        <FaCircleCheck className="text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                         <span>{item}</span>
                       </li>
                     ))}
@@ -396,7 +396,7 @@ const Home = () => {
         </section>
 
         {/* ─── HOW IT WORKS SECTION ─────────────────────────────────────────────── */}
-        <section id="how-it-works" className="py-20 bg-slate-950 border-b border-slate-900">
+        <section id="how-it-works" className="py-20 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-900 transition-colors">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 25 }}
@@ -405,13 +405,13 @@ const Home = () => {
               transition={{ duration: 0.5 }}
               className="text-center max-w-3xl mx-auto mb-16 space-y-3"
             >
-              <span className="px-3.5 py-1.5 rounded-full bg-emerald-950 border border-emerald-800 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+              <span className="px-3.5 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
                 Simple Workflow
               </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 3 Steps to a Better Neighborhood
               </h2>
-              <p className="text-base sm:text-lg text-slate-400">
+              <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400">
                 From identifying a problem to final inspection, experience seamless digital civic resolution.
               </p>
             </motion.div>
@@ -424,19 +424,19 @@ const Home = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: idx * 0.15 }}
-                  className="relative bg-slate-900 border border-slate-800 rounded-3xl p-8 hover:border-emerald-500/60 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
+                  className="relative bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 hover:border-emerald-500/60 transition-all duration-300 hover:-translate-y-2 shadow-sm hover:shadow-2xl"
                 >
                   <div className="flex items-center justify-between mb-6">
-                    <span className="text-3xl font-extrabold text-emerald-400 tracking-wider">
+                    <span className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 tracking-wider">
                       {st.step}
                     </span>
-                    <div className="w-12 h-12 rounded-xl bg-emerald-950 border border-emerald-800 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center">
                       {st.icon}
                     </div>
                   </div>
 
-                  <h3 className="text-xl font-bold text-white mb-3">{st.title}</h3>
-                  <p className="text-sm text-slate-400 leading-relaxed">{st.description}</p>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{st.title}</h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{st.description}</p>
                 </motion.div>
               ))}
             </div>
@@ -444,7 +444,7 @@ const Home = () => {
         </section>
 
         {/* ─── TESTIMONIALS & CAROUSEL ────────────────────────────────────────────── */}
-        <section className="py-20 bg-slate-900 border-b border-slate-800">
+        <section className="py-20 bg-slate-100/70 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 25 }}
@@ -453,13 +453,13 @@ const Home = () => {
               transition={{ duration: 0.5 }}
               className="text-center max-w-3xl mx-auto mb-16 space-y-3"
             >
-              <span className="px-3.5 py-1.5 rounded-full bg-emerald-950 border border-emerald-800 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+              <span className="px-3.5 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
                 Community Feedback
               </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Loved By Citizens & Administration
               </h2>
-              <p className="text-base sm:text-lg text-slate-400">
+              <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400">
                 Read authentic testimonials from residents and municipal leaders using Civix daily.
               </p>
             </motion.div>
@@ -472,34 +472,34 @@ const Home = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: idx * 0.1 }}
-                  className="bg-slate-950 border border-slate-800 rounded-3xl p-8 hover:border-emerald-500/50 transition-all duration-300 hover:-translate-y-1 shadow-lg relative flex flex-col justify-between"
+                  className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 hover:border-emerald-500/50 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-xl relative flex flex-col justify-between"
                 >
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-emerald-400 text-xs font-semibold">
+                      <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
                         {item.category}
                       </span>
-                      <div className="flex text-amber-400 gap-1 text-xs">
+                      <div className="flex text-amber-500 dark:text-amber-400 gap-1 text-xs">
                         {[...Array(item.rating)].map((_, i) => (
                           <FaStar key={i} />
                         ))}
                       </div>
                     </div>
 
-                    <p className="text-slate-300 text-base italic leading-relaxed">
+                    <p className="text-slate-700 dark:text-slate-300 text-base italic leading-relaxed">
                       "{item.quote}"
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-4 pt-6 mt-6 border-t border-slate-900">
+                  <div className="flex items-center gap-4 pt-6 mt-6 border-t border-slate-100 dark:border-slate-900">
                     <img
                       src={item.avatar}
                       alt={item.name}
                       className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500"
                     />
                     <div>
-                      <h4 className="text-sm font-bold text-white">{item.name}</h4>
-                      <p className="text-xs text-slate-400">{item.role}</p>
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white">{item.name}</h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{item.role}</p>
                     </div>
                   </div>
                 </motion.div>
@@ -512,7 +512,7 @@ const Home = () => {
         </section>
 
         {/* ─── FAQ SECTION ───────────────────────────────────────────────────────── */}
-        <section id="faqs" className="py-20 bg-slate-950 border-b border-slate-900">
+        <section id="faqs" className="py-20 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-900 transition-colors">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 25 }}
@@ -521,13 +521,13 @@ const Home = () => {
               transition={{ duration: 0.5 }}
               className="text-center space-y-3 mb-12"
             >
-              <span className="px-3.5 py-1.5 rounded-full bg-emerald-950 border border-emerald-800 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+              <span className="px-3.5 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
                 Help & Information
               </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Frequently Asked Questions
               </h2>
-              <p className="text-base text-slate-400">
+              <p className="text-base text-slate-600 dark:text-slate-400">
                 Everything you need to know about using Civix in your locality.
               </p>
 
@@ -540,7 +540,7 @@ const Home = () => {
                     className={`px-5 py-2 text-xs font-bold rounded-xl transition-all ${
                       faqFilter === type
                         ? "bg-emerald-600 text-white shadow-md"
-                        : "bg-slate-900 text-slate-400 border border-slate-800 hover:text-white"
+                        : "bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
                     {type} Questions
@@ -556,7 +556,7 @@ const Home = () => {
                 return (
                   <div
                     key={q.id}
-                    className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden transition-all duration-200 hover:border-slate-700"
+                    className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden transition-all duration-200 hover:border-slate-300 dark:hover:border-slate-700"
                   >
                     <button
                       onClick={() => setActiveFaq(isOpen ? null : q.id)}
@@ -564,11 +564,11 @@ const Home = () => {
                     >
                       <div className="flex items-center gap-3">
                         {q.icon}
-                        <span className="text-base font-bold text-white">{q.question}</span>
+                        <span className="text-base font-bold text-slate-900 dark:text-white">{q.question}</span>
                       </div>
                       <FaChevronDown
                         className={`text-slate-400 text-xs transition-transform duration-300 ${
-                          isOpen ? "rotate-180 text-emerald-400" : ""
+                          isOpen ? "rotate-180 text-emerald-600 dark:text-emerald-400" : ""
                         }`}
                       />
                     </button>
@@ -580,7 +580,7 @@ const Home = () => {
                           animate={{ opacity: 1, height: "auto" }}
                           exit={{ opacity: 0, height: 0 }}
                           transition={{ duration: 0.3 }}
-                          className="px-5 pb-5 pt-1 text-sm text-slate-300 border-t border-slate-800/80 leading-relaxed"
+                          className="px-5 pb-5 pt-1 text-sm text-slate-700 dark:text-slate-300 border-t border-slate-200 dark:border-slate-800/80 leading-relaxed"
                         >
                           {q.answer}
                         </motion.div>
@@ -594,34 +594,34 @@ const Home = () => {
         </section>
 
         {/* ─── DOWNLOAD / QR CODE SECTION ───────────────────────────────────────── */}
-        <section id="download" className="py-20 bg-slate-900">
+        <section id="download" className="py-20 bg-slate-100/70 dark:bg-slate-900 transition-colors">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-8 sm:p-12 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center shadow-2xl">
+            <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 sm:p-12 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center shadow-xl dark:shadow-2xl">
               
               <div className="lg:col-span-7 space-y-6">
-                <span className="px-3 py-1 rounded-full bg-emerald-950 border border-emerald-800 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
                   Mobile Apps Available
                 </span>
 
-                <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                   Get Civix On Your Mobile Device
                 </h2>
 
-                <p className="text-slate-400 text-base leading-relaxed max-w-xl">
+                <p className="text-slate-600 dark:text-slate-400 text-base leading-relaxed max-w-xl">
                   Download the official Civix mobile app to capture geotagged issues on the go, receive push status updates, and stay active in community voting.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-2">
                   <Link to="/download-ios">
-                    <button className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-xl transition-all duration-200 gap-2.5 shadow-lg shadow-emerald-950/40">
+                    <button className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-xl transition-all duration-200 gap-2.5 shadow-lg shadow-emerald-900/20">
                       <FaApple className="text-lg" />
                       <span>Download for iOS</span>
                     </button>
                   </Link>
 
                   <Link to="/download-android">
-                    <button className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-slate-200 font-bold text-sm rounded-xl border border-slate-800 transition-all duration-200 gap-2.5">
-                      <FaGooglePlay className="text-base text-emerald-400" />
+                    <button className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-sm rounded-xl border border-slate-300 dark:border-slate-800 transition-all duration-200 gap-2.5">
+                      <FaGooglePlay className="text-base text-emerald-600 dark:text-emerald-400" />
                       <span>Download for Android</span>
                     </button>
                   </Link>

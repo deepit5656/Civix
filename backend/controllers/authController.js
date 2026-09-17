@@ -7,11 +7,16 @@ const { generateToken } = require('../utils/token');
 const sendEmail = require('../utils/sendEmail');
 require('dotenv').config();
 
-// Check if MongoDB is connected
-const checkDbConnection = (res) => {
+const connectDB = require('../config/mongo');
+
+// Check if MongoDB is connected (attempts connection automatically)
+const checkDbConnection = async (res) => {
+  if (mongoose.connection.readyState !== 1) {
+    await connectDB();
+  }
   if (mongoose.connection.readyState !== 1) {
     res.status(503).json({
-      error: 'MongoDB Atlas is not connected. Please whitelist your IP address in MongoDB Atlas Network Access (0.0.0.0/0).',
+      error: 'MongoDB is not connected. Please ensure MongoDB Atlas IP is whitelisted (0.0.0.0/0) or local MongoDB is running.',
     });
     return false;
   }
@@ -32,9 +37,11 @@ const determineUserRole = (email) => {
   return 'user';
 };
 
+const inMemoryOtpCache = new Map();
+
 // ─── SEND OTP ─────────────────────────────────────────────────────────────────
 exports.sendOTP = asyncHandler(async (req, res) => {
-  if (!checkDbConnection(res)) return;
+  await checkDbConnection(res);
 
   const { email, type = 'signup' } = req.body;
 
@@ -48,16 +55,22 @@ exports.sendOTP = asyncHandler(async (req, res) => {
   const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-  // Delete previous OTPs for this email and type
-  await OTP.deleteMany({ email: cleanEmail, type });
-
-  // Save new OTP
-  await OTP.create({
-    email: cleanEmail,
-    otp: generatedOtp,
-    type,
-    expiresAt,
-  });
+  if (mongoose.connection.readyState === 1) {
+    try {
+      await OTP.deleteMany({ email: cleanEmail, type });
+      await OTP.create({
+        email: cleanEmail,
+        otp: generatedOtp,
+        type,
+        expiresAt,
+      });
+    } catch (dbErr) {
+      console.warn('⚠️ MongoDB write failed, using in-memory OTP cache fallback:', dbErr.message);
+      inMemoryOtpCache.set(`${cleanEmail}_${type}`, { otp: generatedOtp, expiresAt });
+    }
+  } else {
+    inMemoryOtpCache.set(`${cleanEmail}_${type}`, { otp: generatedOtp, expiresAt });
+  }
 
   // Compose Email
   const subject = type === 'signup' 
@@ -65,7 +78,7 @@ exports.sendOTP = asyncHandler(async (req, res) => {
     : 'Civix Login Verification OTP 🔐';
   
   const htmlContent = `
-    <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; rounded-radius: 8px;">
+    <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
       <h2 style="color: #16a34a; text-align: center;">Civix Verification Code</h2>
       <p>Hello,</p>
       <p>Your 6-digit verification code is:</p>
@@ -89,7 +102,7 @@ exports.sendOTP = asyncHandler(async (req, res) => {
 
 // ─── VERIFY OTP ───────────────────────────────────────────────────────────────
 exports.verifyOTP = asyncHandler(async (req, res) => {
-  if (!checkDbConnection(res)) return;
+  await checkDbConnection(res);
 
   const { email, otp, type = 'signup' } = req.body;
 
@@ -98,26 +111,50 @@ exports.verifyOTP = asyncHandler(async (req, res) => {
   }
 
   const cleanEmail = email.toLowerCase().trim();
-  const otpRecord = await OTP.findOne({ email: cleanEmail, otp, type });
+  let otpRecord = null;
+
+  if (mongoose.connection.readyState === 1) {
+    try {
+      otpRecord = await OTP.findOne({ email: cleanEmail, otp, type });
+    } catch (err) {
+      const cached = inMemoryOtpCache.get(`${cleanEmail}_${type}`);
+      if (cached && cached.otp === String(otp).trim()) {
+        otpRecord = cached;
+      }
+    }
+  }
+  
+  if (!otpRecord) {
+    const cached = inMemoryOtpCache.get(`${cleanEmail}_${type}`);
+    if (cached && cached.otp === String(otp).trim()) {
+      otpRecord = cached;
+    }
+  }
 
   if (!otpRecord) {
     return res.status(400).json({ error: 'Invalid or expired verification code' });
   }
 
   if (new Date() > otpRecord.expiresAt) {
-    await OTP.deleteOne({ _id: otpRecord._id });
+    inMemoryOtpCache.delete(`${cleanEmail}_${type}`);
+    if (mongoose.connection.readyState === 1 && otpRecord._id) {
+      await OTP.deleteOne({ _id: otpRecord._id }).catch(() => {});
+    }
     return res.status(400).json({ error: 'Verification code has expired' });
   }
 
   // Delete OTP after successful validation
-  await OTP.deleteOne({ _id: otpRecord._id });
+  inMemoryOtpCache.delete(`${cleanEmail}_${type}`);
+  if (mongoose.connection.readyState === 1 && otpRecord._id) {
+    await OTP.deleteOne({ _id: otpRecord._id }).catch(() => {});
+  }
 
   res.json({ message: 'OTP verified successfully', verified: true });
 });
 
 // ─── SIGNUP ───────────────────────────────────────────────────────────────────
 exports.signup = asyncHandler(async (req, res) => {
-  if (!checkDbConnection(res)) return;
+  if (!await checkDbConnection(res)) return;
 
   const { username, email, password, name, otp } = req.body;
 
@@ -184,7 +221,7 @@ exports.signup = asyncHandler(async (req, res) => {
 
 // ─── LOGIN ────────────────────────────────────────────────────────────────────
 exports.login = asyncHandler(async (req, res) => {
-  if (!checkDbConnection(res)) return;
+  if (!await checkDbConnection(res)) return;
 
   const { email, password, otp } = req.body;
 
@@ -268,7 +305,7 @@ exports.logout = asyncHandler(async (req, res) => {
 
 // ─── GET ME ───────────────────────────────────────────────────────────────────
 exports.getMe = asyncHandler(async (req, res) => {
-  if (!checkDbConnection(res)) return;
+  if (!await checkDbConnection(res)) return;
 
   const user = await User.findById(req.user.id);
   if (!user) return res.status(404).json({ error: 'User not found' });
@@ -285,7 +322,7 @@ exports.getMe = asyncHandler(async (req, res) => {
 
 // ─── CHANGE PASSWORD ──────────────────────────────────────────────────────────
 exports.changePassword = asyncHandler(async (req, res) => {
-  if (!checkDbConnection(res)) return;
+  if (!await checkDbConnection(res)) return;
 
   const { currentPassword, newPassword } = req.body;
 

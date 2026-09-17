@@ -137,7 +137,7 @@ const App = () => {
               path="/profile-setup"
               element={
                 <PrivateRoute allowedRoles={['user', 'admin']}>
-                  <ProfileSetup onComplete={() => setIsProfileComplete(true)}/>
+                  <ProfileSetup />
                 </PrivateRoute>
               }
             />

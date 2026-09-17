@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -6,14 +6,32 @@ import {
   BarChart3, 
   Users, 
   TrendingUp,
-  CheckCircle2
+  CheckCircle2,
+  Sparkles,
+  Layers,
+  Send
 } from 'lucide-react';
 import VotingFeedbackModal from '../components/voting/VotingFeedbackModal';
 import toast from 'react-hot-toast';
 
 const VotingSystem = () => {
   const [activeTab, setActiveTab] = useState('browse');
-  const [polls, setPolls] = useState([]);
+  const [polls, setPolls] = useState([
+    {
+      id: 1,
+      title: "Should the city prioritize installing solar streetlights along West Avenue?",
+      options: ["Yes, install solar lights", "No, keep existing electric grid", "Need more information"],
+      votes: [42, 12, 5],
+      category: "Infrastructure"
+    },
+    {
+      id: 2,
+      title: "Proposed community park renovation in Sector 4",
+      options: ["Add children's playground", "Create walking track & gardens", "Install open-air gymnasium"],
+      votes: [28, 35, 19],
+      category: "Community"
+    }
+  ]);
   const [newTitle, setNewTitle] = useState('');
   const [newOptions, setNewOptions] = useState('');
   const [votedPolls, setVotedPolls] = useState(new Set());
@@ -21,7 +39,10 @@ const VotingSystem = () => {
   const [currentPollForFeedback, setCurrentPollForFeedback] = useState(null);
 
   const handleVote = (pollId, optionIndex) => {
-    if (votedPolls.has(pollId)) return;
+    if (votedPolls.has(pollId)) {
+      toast.error('You have already voted on this poll!');
+      return;
+    }
     setPolls((prevPolls) =>
       prevPolls.map((poll) => {
         if (poll.id === pollId) {
@@ -36,11 +57,12 @@ const VotingSystem = () => {
     const poll = polls.find(p => p.id === pollId);
     setCurrentPollForFeedback(poll);
     setShowFeedbackModal(true);
+    toast.success('Vote recorded successfully!');
   };
 
   const handleFeedbackSubmit = async (formData) => {
     try {
-      toast.success('Thank you for your feedback!');
+      toast.success('Thank you for your civic feedback!');
     } catch (error) {
       toast.error('Failed to submit feedback. Please try again.');
     }
@@ -49,333 +71,255 @@ const VotingSystem = () => {
   const handleCreatePoll = (e) => {
     e.preventDefault();
     const optionsArray = newOptions.split('\n').map(opt => opt.trim()).filter(opt => opt);
-    if (!newTitle.trim() || optionsArray.length < 2) return;
+    if (!newTitle.trim() || optionsArray.length < 2) {
+      toast.error('Please enter a valid title and at least two options.');
+      return;
+    }
     const newPoll = {
       id: Date.now(),
       title: newTitle.trim(),
       options: optionsArray,
       votes: Array(optionsArray.length).fill(0),
+      category: "General"
     };
-    setPolls((prevPolls) => [...prevPolls, newPoll]);
+    setPolls((prevPolls) => [newPoll, ...prevPolls]);
     setNewTitle('');
     setNewOptions('');
     setActiveTab('browse');
+    toast.success('Poll created successfully!');
   };
 
   const getTotalVotes = (poll) => poll.votes.reduce((a, v) => a + v, 0);
   const getVotePercentage = (votes, total) => total > 0 ? Math.round((votes / total) * 100) : 0;
 
+  const totalAllVotes = polls.reduce((sum, p) => sum + getTotalVotes(p), 0);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white/90 to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-tr from-emerald-400 to-teal-400 dark:from-green-500 dark:to-emerald-600 rounded-3xl mb-6 shadow-xl">
-            <Vote className="w-12 h-12 text-white" />
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-300 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto space-y-10">
+        
+        {/* HEADER SECTION */}
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-600 text-white rounded-2xl shadow-md mx-auto">
+            <Vote className="w-8 h-8" />
           </div>
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-400 dark:to-emerald-400 bg-clip-text text-transparent mb-4 pb-2">
-            Voting System
+
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Community Voting System
           </h1>
-          <p className="text-xl text-gray-700 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-            Create polls, vote, and view results, all in a secure, beautiful platform.
+          <p className="text-slate-600 dark:text-slate-300 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
+            Vote on local civic initiatives, share your voice on infrastructure spending, and create transparent community polls.
           </p>
-        </motion.div>
+        </div>
 
-        {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
-        >
-          {/* Stat Card */}
-          {[
-            {
-              icon: <Vote className="w-7 h-7 text-emerald-600 dark:text-emerald-400"/>,
-              label: "Active Polls",
-              value: polls.length,
-              bg: "from-emerald-100 to-teal-100 dark:from-green-900 dark:to-emerald-900"
-            },
-            {
-              icon: <Users className="w-7 h-7 text-teal-600 dark:text-teal-400"/>,
-              label: "Total Votes",
-              value: polls.reduce((acc, poll) => acc + poll.votes.reduce((a, v) => a + v, 0), 0),
-              bg: "from-teal-100 to-lime-100 dark:from-teal-900 dark:to-lime-900"
-            },
-            {
-              icon: <TrendingUp className="w-7 h-7 text-lime-600 dark:text-lime-400"/>,
-              label: "Engagement",
-              value: polls.length > 0 ? Math.round(
-                polls.reduce((acc, poll) => acc + getTotalVotes(poll), 0) / polls.length
-              ) : 0,
-              bg: "from-lime-100 to-emerald-100 dark:from-lime-900 dark:to-emerald-900"
-            }
-          ].map((stat, idx) => (
-            <div
-              key={idx}
-              className={`bg-gradient-to-tl ${stat.bg} backdrop-blur-md border border-emerald-100 dark:border-gray-700 rounded-2xl p-6 shadow-md flex items-center gap-4`}
-            >
-              <div className="w-14 h-14 rounded-2xl bg-white/70 dark:bg-black/25 flex items-center justify-center shadow">
-                {stat.icon}
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mb-1">{stat.label}</p>
-                <div className="text-3xl font-extrabold text-gray-900 dark:text-white">{stat.value}</div>
-              </div>
+        {/* STATS BAR */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:border-emerald-500/50 hover:-translate-y-1 transition-all duration-300 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <Layers className="w-6 h-6" />
             </div>
-          ))}
-        </motion.div>
-
-        {/* Tabs */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
-          className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-emerald-100 dark:border-gray-700 rounded-2xl shadow-xl mb-8 overflow-hidden"
-        >
-          <div className="flex">
-            {[
-              { id: 'browse', label: 'Browse Polls', icon: Vote },
-              { id: 'create', label: 'Create Poll', icon: Plus },
-              { id: 'results', label: 'Analytics', icon: BarChart3 }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex items-center justify-center px-8 py-6 text-base font-semibold transition-all duration-300 relative focus:outline-none capitalize ${
-                  activeTab === tab.id
-                    ? 'text-emerald-600 dark:text-emerald-400 bg-gradient-to-b from-emerald-50 dark:from-emerald-950'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-                }`}
-              >
-                <tab.icon className="w-5 h-5 mr-3" />
-                {tab.label}
-                {activeTab === tab.id && (
-                  <motion.div
-                    layoutId="activeTabBar"
-                    className="absolute bottom-0 left-8 right-8 h-1 bg-gradient-to-r from-emerald-400 to-teal-400 dark:from-emerald-600 dark:to-teal-600 rounded"
-                  />
-                )}
-              </button>
-            ))}
+            <div>
+              <div className="text-2xl font-black text-slate-900 dark:text-white">{polls.length}</div>
+              <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Active Polls</div>
+            </div>
           </div>
-        </motion.div>
 
-        {/* Tab Content */}
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, x: 15 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3 }}
-          className="bg-white/90 dark:bg-gray-800/80 backdrop-blur-2xl border border-emerald-100/60 dark:border-gray-700 rounded-2xl shadow-2xl p-8"
-        >
-          {/* Browse Polls */}
-          {activeTab === 'browse' && (
-            <div className="space-y-8">
-              {polls.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="w-24 h-24 bg-emerald-100 dark:bg-emerald-900 rounded-full flex items-center justify-center mx-auto mb-6 shadow">
-                    <Vote className="w-12 h-12 text-emerald-500 dark:text-emerald-400" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">No polls yet</h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-6">
-                    Create your first poll to get started!
-                  </p>
-                  <button
-                    onClick={() => setActiveTab('create')}
-                    className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-8 py-3 rounded-xl font-semibold hover:from-emerald-600 hover:to-teal-600 transition-all duration-300 shadow-lg"
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:border-emerald-500/50 hover:-translate-y-1 transition-all duration-300 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <Users className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="text-2xl font-black text-slate-900 dark:text-white">{totalAllVotes}</div>
+              <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Total Votes Cast</div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm hover:border-emerald-500/50 hover:-translate-y-1 transition-all duration-300 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="text-2xl font-black text-slate-900 dark:text-white">{votedPolls.size}</div>
+              <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Your Participated Votes</div>
+            </div>
+          </div>
+        </div>
+
+        {/* TAB CONTROLS */}
+        <div className="flex justify-center">
+          <div className="bg-slate-200/80 dark:bg-slate-800 p-1.5 rounded-xl border border-slate-300/60 dark:border-slate-700/60 flex items-center gap-2 max-w-sm w-full">
+            <button
+              onClick={() => setActiveTab('browse')}
+              className={`flex-1 py-2 px-4 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-2 ${
+                activeTab === 'browse'
+                  ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span>Browse Polls</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('create')}
+              className={`flex-1 py-2 px-4 rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-2 ${
+                activeTab === 'create'
+                  ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <Plus className="w-4 h-4" />
+              <span>Create Poll</span>
+            </button>
+          </div>
+        </div>
+
+        {/* MAIN TAB CONTENT */}
+        <AnimatePresence mode="wait">
+          {activeTab === 'browse' ? (
+            <motion.div
+              key="browse"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6"
+            >
+              {polls.map((poll) => {
+                const totalVotes = getTotalVotes(poll);
+                const hasVoted = votedPolls.has(poll.id);
+
+                return (
+                  <div
+                    key={poll.id}
+                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm hover:shadow-xl hover:border-emerald-500/50 transition-all duration-300 space-y-6"
                   >
-                    Create Poll
-                  </button>
-                </div>
-              ) : (
-                polls.map((poll) => {
-                  const totalVotes = getTotalVotes(poll);
-                  const hasVoted = votedPolls.has(poll.id);
-                  return (
-                    <div key={poll.id} className="border border-emerald-200/70 dark:border-emerald-900 rounded-xl p-6 bg-gradient-to-br from-white via-emerald-50/80 to-white/80 dark:from-gray-900 dark:to-emerald-950 hover:shadow-xl transition-all duration-300">
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{poll.title}</h3>
-                      {!hasVoted ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          {poll.options.map((option, idx) => (
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-4">
+                      <div>
+                        <span className="inline-block px-2.5 py-1 text-[11px] font-bold rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 mb-2">
+                          {poll.category || "General"}
+                        </span>
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-snug">
+                          {poll.title}
+                        </h3>
+                      </div>
+                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0">
+                        {totalVotes} total votes
+                      </span>
+                    </div>
+
+                    {/* Options list */}
+                    <div className="space-y-3">
+                      {poll.options.map((option, idx) => {
+                        const count = poll.votes[idx] || 0;
+                        const percentage = getVotePercentage(count, totalVotes);
+
+                        return (
+                          <div key={idx} className="space-y-1.5">
                             <button
-                              key={idx}
                               onClick={() => handleVote(poll.id, idx)}
-                              className="bg-white/90 dark:bg-emerald-950 border-2 border-emerald-200 dark:border-emerald-800 hover:border-emerald-400 dark:hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900 text-gray-900 dark:text-gray-100 px-6 py-4 rounded-xl font-medium transition-all duration-300 hover:shadow-md text-left"
+                              disabled={hasVoted}
+                              className={`w-full p-4 rounded-xl border text-left font-semibold text-sm transition-all flex items-center justify-between group ${
+                                hasVoted
+                                  ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-800 cursor-default'
+                                  : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/40 text-slate-900 dark:text-white'
+                              }`}
                             >
-                              {option}
+                              <span className="flex items-center gap-2">
+                                <span className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs flex items-center justify-center font-bold">
+                                  {idx + 1}
+                                </span>
+                                <span>{option}</span>
+                              </span>
+                              
+                              {!hasVoted && (
+                                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  Vote
+                                </span>
+                              )}
                             </button>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          {poll.options.map((option, idx) => {
-                            const votes = poll.votes[idx] || 0;
-                            const percentage = getVotePercentage(votes, totalVotes);
-                            return (
-                              <div key={idx} className="bg-white/95 dark:bg-emerald-950 rounded-lg p-4 border border-emerald-200/80 dark:border-emerald-800">
-                                <div className="flex justify-between items-center mb-2">
-                                  <span className="font-medium text-gray-900 dark:text-white">{option}</span>
-                                  <span className="text-sm text-gray-600 dark:text-gray-300">{votes} votes ({percentage}%)</span>
+
+                            {/* Vote progress bar */}
+                            {hasVoted && (
+                              <div className="space-y-1 px-1">
+                                <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                  <span>{count} votes</span>
+                                  <span>{percentage}%</span>
                                 </div>
-                                <div className="w-full bg-emerald-100 dark:bg-emerald-900 rounded-full h-2">
-                                  <motion.div
-                                    className="bg-gradient-to-r from-emerald-400 to-teal-400 dark:from-emerald-600 dark:to-teal-600 h-2 rounded-full"
-                                    animate={{ width: `${percentage}%` }}
+                                <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                                  <div
+                                    className="h-full bg-emerald-600 rounded-full transition-all duration-500"
                                     style={{ width: `${percentage}%` }}
-                                    transition={{ duration: 0.8 }}
                                   />
                                 </div>
                               </div>
-                            );
-                          })}
-                          <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400 mt-4">
-                            <div className="flex items-center">
-                              <CheckCircle2 className="w-5 h-5 mr-2" />
-                              <span className="font-medium">You voted in this poll</span>
-                            </div>
-                            <button
-                              onClick={() => {
-                                setCurrentPollForFeedback(poll);
-                                setShowFeedbackModal(true);
-                              }}
-                              className="text-sm text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 underline"
-                            >
-                              Share feedback
-                            </button>
+                            )}
                           </div>
-                        </div>
-                      )}
+                        );
+                      })}
                     </div>
-                  );
-                })
-              )}
-            </div>
-          )}
+                  </div>
+                );
+              })}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="create"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-sm"
+            >
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Create a New Civic Poll</h2>
 
-          {/* Create Poll */}
-          {activeTab === 'create' && (
-            <div className="max-w-2xl mx-auto">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Create New Poll</h2>
-                <p className="text-gray-600 dark:text-gray-300">Design a poll to gather opinions</p>
-              </div>
-              <form className="space-y-6" onSubmit={handleCreatePoll}>
+              <form onSubmit={handleCreatePoll} className="space-y-6">
                 <div>
-                  <label htmlFor="title" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Poll Question
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Poll Question / Title
                   </label>
                   <input
                     type="text"
-                    id="title"
+                    required
+                    placeholder="e.g. Should the city add a bike lane on 5th Street?"
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
-                    className="w-full rounded-xl border-2 border-emerald-200 dark:border-emerald-800 px-4 py-3 text-lg focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-400 focus:ring-emerald-100 dark:focus:ring-emerald-800 transition-all duration-300 bg-white dark:bg-emerald-950 text-gray-900 dark:text-white"
-                    placeholder="What would you like to ask?"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                   />
                 </div>
+
                 <div>
-                  <label htmlFor="options" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Answer Options
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Voting Options (One per line)
                   </label>
                   <textarea
-                    id="options"
+                    required
+                    rows={4}
+                    placeholder={`Option 1\nOption 2\nOption 3`}
                     value={newOptions}
                     onChange={(e) => setNewOptions(e.target.value)}
-                    rows={5}
-                    className="w-full rounded-xl border-2 border-emerald-200 dark:border-emerald-800 px-4 py-3 text-lg focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-400 focus:ring-emerald-100 dark:focus:ring-emerald-800 transition-all duration-300 bg-white dark:bg-emerald-950 text-gray-900 dark:text-white resize-none"
-                    placeholder="Each option on a new line"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all resize-none"
                   />
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Enter at least 2 options</p>
                 </div>
+
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl flex items-center justify-center transition-all duration-300"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md active:scale-95 transition-all text-sm flex items-center justify-center gap-2"
                 >
-                  <Plus className="w-5 h-5 mr-2" />
-                  Create Poll
+                  <Send className="w-4 h-4" />
+                  <span>Publish Community Poll</span>
                 </button>
               </form>
-            </div>
+            </motion.div>
           )}
+        </AnimatePresence>
 
-          {/* Analytics Tab */}
-          {activeTab === 'results' && (
-            <div>
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Poll Analytics</h2>
-                <p className="text-gray-600 dark:text-gray-300">Insights & voting patterns</p>
-              </div>
-              <div className="space-y-8">
-                {polls.length === 0 ? (
-                  <div className="text-center py-16">
-                    <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900 rounded-full flex items-center justify-center mx-auto mb-5">
-                      <BarChart3 className="w-12 h-12 text-emerald-500 dark:text-emerald-400" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">No analytics available</h3>
-                    <p className="text-gray-600 dark:text-gray-300">Create and vote on polls to see analytics.</p>
-                  </div>
-                ) : (
-                  polls.map((poll) => {
-                    const totalVotes = getTotalVotes(poll);
-                    const topVotes = Math.max(...poll.votes);
-                    return (
-                      <div key={poll.id} className="border border-emerald-200 dark:border-emerald-900 rounded-xl p-6 bg-gradient-to-br from-white via-emerald-50/70 to-white/80 dark:from-emerald-950 dark:to-emerald-900">
-                        <div className="flex flex-wrap justify-between items-start mb-6 gap-2">
-                          <div>
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">{poll.title}</h3>
-                            <span className="text-gray-600 dark:text-gray-300">Total responses: {totalVotes}</span>
-                          </div>
-                          <div className="text-right">
-                            <span className="text-xs text-gray-500 dark:text-gray-400">Engagement</span>
-                            <div className="text-xl font-bold text-emerald-700 dark:text-emerald-400">{totalVotes > 0 ? '100%' : '0%'}</div>
-                          </div>
-                        </div>
-                        <div className="space-y-4">
-                          {poll.options.map((option, idx) => {
-                            const votes = poll.votes[idx] || 0;
-                            const percentage = getVotePercentage(votes, totalVotes);
-                            const leading = votes === topVotes && totalVotes > 0;
-                            return (
-                              <div key={idx} className="bg-white/95 dark:bg-emerald-950 rounded-lg p-4 border border-emerald-200 dark:border-emerald-900">
-                                <div className="flex justify-between items-center mb-2">
-                                  <span className="font-semibold text-gray-900 dark:text-white">{option} {leading && totalVotes > 0 &&
-                                    <span className="ml-2 bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-200 text-xs font-medium px-2 py-0.5 rounded-full animate-pulse">Leading</span>
-                                  }</span>
-                                  <span className="font-bold text-gray-900 dark:text-white">{votes}</span>
-                                  <span className="text-sm text-gray-500 dark:text-gray-400">{percentage}%</span>
-                                </div>
-                                <div className="w-full bg-emerald-100 dark:bg-emerald-900 rounded-full h-3">
-                                  <div
-                                    className={`h-3 rounded-full transition-all duration-700 ${leading ? 'bg-gradient-to-r from-emerald-500 to-teal-400 dark:from-emerald-600 dark:to-teal-600' : 'bg-gradient-to-r from-emerald-300 to-teal-300 dark:from-emerald-700 dark:to-teal-700'}`}
-                                    style={{ width: `${percentage}%` }}
-                                  />
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          )}
-        </motion.div>
+        {showFeedbackModal && (
+          <VotingFeedbackModal
+            isOpen={showFeedbackModal}
+            onClose={() => setShowFeedbackModal(false)}
+            onSubmit={handleFeedbackSubmit}
+            poll={currentPollForFeedback}
+          />
+        )}
       </div>
-
-      {/* Feedback Modal */}
-      <VotingFeedbackModal
-        isOpen={showFeedbackModal}
-        onClose={() => setShowFeedbackModal(false)}
-        onSubmit={handleFeedbackSubmit}
-        pollTitle={currentPollForFeedback?.title}
-      />
     </div>
   );
 };

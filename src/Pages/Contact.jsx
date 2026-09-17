@@ -197,7 +197,7 @@ const ContactForm = () => {
         type="button"
         onClick={handleSubmit}
         disabled={isLoading || submitted}
-        className="group relative w-full bg-gradient-to-r from-emerald-500 to-lime-400 hover:from-emerald-600 hover:to-lime-500 disabled:from-gray-400 disabled:to-gray-400 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 disabled:opacity-70"
+        className="group relative w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-400 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg shadow-emerald-900/10 active:scale-[0.99]"
       >
         <div className="flex items-center justify-center gap-3 relative z-20">
           {isLoading ? (
@@ -207,21 +207,21 @@ const ContactForm = () => {
             </>
           ) : submitted ? (
             <>
-              <CheckCircle className="w-5 h-5" />
+              <CheckCircle className="w-5 h-5 text-white" />
               <span>Message Sent!</span>
             </>
           ) : (
             <>
-              <Send className="w-5 h-5" />
+              <Send className="w-5 h-5 text-white" />
               <span>Send Message</span>
             </>
           )}
         </div>
       </button>
       {submitted && (
-        <div className="flex items-center justify-center gap-3 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700/50 rounded-xl animate-fade-in">
-          <CheckCircle className="w-6 h-6 text-emerald-500 dark:text-emerald-400" />
-          <span className="text-green-700 dark:text-green-300 font-medium">
+        <div className="flex items-center justify-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl animate-fade-in">
+          <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+          <span className="text-emerald-800 dark:text-emerald-200 font-medium">
             Thank you! We'll get back to you soon.
           </span>
         </div>
@@ -232,72 +232,72 @@ const ContactForm = () => {
 
 function Contact() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-green-950 dark:via-slate-900 dark:to-emerald-950 px-4 py-12 sm:py-16 overflow-x-hidden select-none transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 px-4 py-12 sm:py-16 overflow-x-hidden select-none transition-colors duration-300">
       <div className="max-w-5xl mx-auto">
         <div className="grid lg:grid-cols-5 gap-10 items-start">
           {/* Sidebar Info */}
           <div className="lg:col-span-2 space-y-8">
             <div>
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-400 to-lime-400 rounded-2xl shadow-md mb-4">
-                <Sparkles className="w-8 h-8 text-white drop-shadow" />
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-emerald-600 rounded-2xl shadow-lg mb-4 text-white">
+                <Sparkles className="w-7 h-7 text-white" />
               </div>
-              <h1 className="text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-emerald-600 to-lime-700 dark:from-emerald-400 dark:to-lime-500 bg-clip-text text-transparent mb-3 leading-tight">
+              <h1 className="text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white mb-3 leading-tight tracking-tight">
                 Contact Us
               </h1>
-              <div className="w-20 h-1 bg-gradient-to-r from-emerald-400 to-lime-400 rounded-full mb-4"></div>
-              <p className="text-lg text-green-800/90 dark:text-green-200/90 leading-relaxed">
+              <div className="w-16 h-1 bg-emerald-600 rounded-full mb-4"></div>
+              <p className="text-base text-slate-600 dark:text-slate-400 leading-relaxed">
                 Have questions or need help? We'd love to hear from you.
                 <br />
-                Fill out the form and we'll respond quickly.
+                Fill out the form and our team will respond promptly.
               </p>
             </div>
             <div className="space-y-4">
-              <div className="group p-4 bg-white dark:bg-slate-800 rounded-xl border border-green-200 dark:border-emerald-700/50 hover:border-lime-300 dark:hover:border-lime-400/50 shadow-md hover:shadow-lg transition-all duration-300">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-emerald-100 to-lime-100 dark:from-emerald-900/50 dark:to-lime-900/50 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <div className="group p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-emerald-500/60 shadow-sm hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
                     <Mail className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-green-900 dark:text-green-100 mb-1">
+                    <h3 className="font-bold text-slate-900 dark:text-white text-sm mb-0.5">
                       Email Us
                     </h3>
                     <a
                       href="mailto:support@civix.com"
-                      className="text-emerald-600 dark:text-emerald-400 hover:text-lime-700 dark:hover:text-lime-300 transition-colors font-medium"
+                      className="text-emerald-600 dark:text-emerald-400 hover:underline font-medium text-xs"
                     >
                       support@civix.com
                     </a>
                   </div>
                 </div>
               </div>
-              <div className="group p-4 bg-white dark:bg-slate-800 rounded-xl border border-green-200 dark:border-emerald-700/50 hover:border-lime-300 dark:hover:border-lime-400/50 shadow-md hover:shadow-lg transition-all duration-300">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-emerald-100 to-lime-100 dark:from-emerald-900/50 dark:to-lime-900/50 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <div className="group p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-emerald-500/60 shadow-sm hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
                     <Clock className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-green-900 dark:text-green-100 mb-1">
+                    <h3 className="font-bold text-slate-900 dark:text-white text-sm mb-0.5">
                       Response Time
                     </h3>
-                    <p className="text-green-700 dark:text-green-300 font-medium">
+                    <p className="text-slate-600 dark:text-slate-400 font-medium text-xs">
                       Within 24 hours
                     </p>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="p-4 bg-gradient-to-br from-green-50 to-lime-50 dark:from-green-950/50 dark:to-lime-950/30 rounded-xl border border-lime-200/50 dark:border-lime-700/30">
-              <h3 className="text-base font-semibold text-emerald-800 dark:text-emerald-200 mb-2">
+            <div className="p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-3">
                 Why Contact Us?
               </h3>
-              <ul className="space-y-1 text-sm text-emerald-700 dark:text-emerald-300">
+              <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-400">
                 {[
                   "Technical support and assistance",
                   "Feature requests and feedback",
                   "General inquiries and questions",
-                ].map((txt, idx) => (
-                  <li key={txt} className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-lime-600 dark:text-lime-400" />
+                ].map((txt) => (
+                  <li key={txt} className="flex items-center gap-2 font-medium">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <span>{txt}</span>
                   </li>
                 ))}
@@ -306,12 +306,12 @@ function Contact() {
           </div>
           {/* Form */}
           <div className="lg:col-span-3">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-emerald-100 dark:border-emerald-700/50 p-8 md:p-10">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl dark:shadow-2xl border border-slate-200 dark:border-slate-800 p-8 md:p-10">
               <div className="mb-8 text-center">
-                <h2 className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mb-1">
+                <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-1">
                   Send us a Message
                 </h2>
-                <p className="text-green-700/80 dark:text-green-300/80">
+                <p className="text-sm text-slate-500 dark:text-slate-400">
                   We'll respond as quickly as possible
                 </p>
               </div>

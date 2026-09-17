@@ -1,10 +1,6 @@
-// src/components/About.js
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
-import './About.css';
 import mission from '../assets/mission.png';
 import { 
   Users, 
@@ -14,241 +10,289 @@ import {
   Zap, 
   Shield,
   Award,
-  Smartphone
+  Smartphone,
+  ChevronRight,
+  CheckCircle2,
+  Sparkles,
+  ArrowRight
 } from 'lucide-react';
 
-function About() {
-  const [isDarkMode, setIsDarkMode] = useState(
-    () => window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-  );
+export default function About() {
   const [activeFeature, setActiveFeature] = useState(null);
-  const [showMore, setShowMore] = useState(false);
-  const learnMoreRef = useRef(null);
-
-  useEffect(() => {
-    if (showMore && learnMoreRef.current) {
-      setTimeout(() => {
-        learnMoreRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        AOS.refresh();
-      }, 60);
-    }
-  }, [showMore]);
-
-  useEffect(() => {
-    AOS.init({
-      duration: 800,
-      easing: 'ease-in-out',
-      once: false,
-      mirror: true,
-    });
-
-    const refreshAOS = () => AOS.refresh();
-    window.addEventListener('load', refreshAOS);
-    window.addEventListener('resize', refreshAOS);
-    const timeoutId = setTimeout(refreshAOS, 600);
-
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = () => setIsDarkMode(mq.matches);
-    mq.addEventListener && mq.addEventListener('change', handleChange);
-
-    return () => {
-      window.removeEventListener('load', refreshAOS);
-      window.removeEventListener('resize', refreshAOS);
-      clearTimeout(timeoutId);
-      mq.removeEventListener && mq.removeEventListener('change', handleChange);
-    };
-  }, []);
-  
 
   const features = [
     {
-      icon: <Users className="w-7 h-7" />,
+      icon: Users,
       title: "Community Building",
       description: "Connect with like-minded individuals in your area",
-      details: "Create lasting relationships and build stronger neighborhoods through our advanced matching system."
+      details: "Create lasting relationships and build stronger neighborhoods through our civic platform."
     },
     {
-      icon: <Globe className="w-7 h-7" />,
+      icon: Globe,
       title: "Global Impact",
-      description: "Make a difference on a worldwide scale",
-      details: "Join international initiatives and see how your local actions contribute to global change."
+      description: "Make a difference on a local & worldwide scale",
+      details: "Join community initiatives and see how local actions contribute to systemic change."
     },
     {
-      icon: <Heart className="w-7 h-7" />,
+      icon: Heart,
       title: "Social Good",
       description: "Focus on projects that truly matter",
-      details: "Our AI-powered system helps identify the most impactful opportunities in your community."
+      details: "Our system helps prioritize the most impactful civic opportunities in your area."
     },
     {
-      icon: <Target className="w-7 h-7" />,
+      icon: Target,
       title: "Goal Tracking",
       description: "Measure your impact with precision",
-      details: "Advanced analytics and reporting tools help you track progress and celebrate achievements."
+      details: "Real-time analytics and transparent updates help you track issue resolution progress."
     },
     {
-      icon: <Zap className="w-7 h-7" />,
+      icon: Zap,
       title: "Quick Actions",
       description: "Take immediate action when it matters",
-      details: "Real-time notifications and one-click participation make helping others effortless."
+      details: "Instant reporting and one-click participation make reporting civic issues effortless."
     },
     {
-      icon: <Shield className="w-7 h-7" />,
+      icon: Shield,
       title: "Verified Projects",
-      description: "Trust in legitimate, vetted opportunities",
-      details: "Every project undergoes rigorous verification to ensure your time and effort create real impact."
+      description: "Trust in legitimate, vetted civic responses",
+      details: "Every issue report undergoes verification to ensure official municipal action."
     },
     {
-      icon: <Award className="w-7 h-7" />,
+      icon: Award,
       title: "Recognition System",
       description: "Get acknowledged for your contributions",
-      details: "Earn badges, certificates, and community recognition for your volunteer work and achievements."
+      details: "Earn badges and community recognition for your active civic participation."
     },
     {
-      icon: <Smartphone className="w-7 h-7" />,
+      icon: Smartphone,
       title: "Mobile First",
-      description: "Volunteer on the go with our mobile app",
-      details: "Native iOS and Android apps with offline capabilities and push notifications."
+      description: "Participate on the go with mobile access",
+      details: "Responsive access with real-time notifications and location tag capabilities."
     }
   ];
 
+  const stats = [
+    { label: "Issues Resolved", value: "25,000+" },
+    { label: "Active Citizens", value: "100,000+" },
+    { label: "Cities Covered", value: "45+" },
+    { label: "Avg Resolution Rate", value: "94%" }
+  ];
+
   return (
-    <div className={`about-container ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
-      <div className="content-wrapper">
-        {/* HERO */}
-        <section className="hero-section" data-aos="fade-up">
-          <div className="hero-content">
-            <div className="glitter-container" aria-hidden>
-              {[...Array(10)].map((_, i) => (
-                <span
-                  key={i}
-                  className="glitter-star"
-                  style={{
-                    top: `${Math.random() * 100}%`,
-                    left: `${Math.random() * 100}%`,
-                    animationDelay: `${Math.random() * 5}s`,
-                    animationDuration: `${3 + Math.random() * 2}s`,
-                  }}
-                />
-              ))}
-            </div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-300">
+      {/* HERO SECTION */}
+      <section className="relative pt-12 pb-16 px-4 sm:px-6 lg:px-8 border-b border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900/60">
+        <div className="max-w-5xl mx-auto text-center space-y-6">
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-semibold text-xs tracking-wide shadow-sm"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>Empowering Citizens & Local Governance</span>
+          </motion.div>
 
-            <motion.div
-              initial={{ scale: 0.85, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.6, type: 'spring', stiffness: 120 }}
-              className="hero-badge"
+          <motion.h1 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight"
+          >
+            Report Local Issues.{' '}
+            <span className="text-emerald-600 dark:text-emerald-400">Make Your City Better.</span>
+          </motion.h1>
+
+          <motion.p 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed"
+          >
+            Civix is a modern civic engagement platform connecting citizens directly with municipal authorities. We turn everyday observations into real, actionable community improvements.
+          </motion.p>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-wrap items-center justify-center gap-4 pt-4"
+          >
+            <Link
+              to="/report-issue"
+              className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all duration-200 text-sm"
             >
-              ✨ Empowering Citizens
+              <span>Report an Issue</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              to="/user-map"
+              className="inline-flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold px-6 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 active:scale-95 transition-all duration-200 text-sm"
+            >
+              <span>Explore Issue Map</span>
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* STATS BAR */}
+      <section className="py-10 px-4 sm:px-6 lg:px-8 bg-slate-100/70 dark:bg-slate-900/40 border-b border-slate-200/80 dark:border-slate-800/80">
+        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          {stats.map((stat, idx) => (
+            <motion.div 
+              key={idx}
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:border-emerald-500/50 transition-all duration-300"
+            >
+              <div className="text-3xl sm:text-4xl font-black text-emerald-600 dark:text-emerald-400">
+                {stat.value}
+              </div>
+              <div className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
+                {stat.label}
+              </div>
             </motion.div>
+          ))}
+        </div>
+      </section>
 
-            <h1 className="hero-title">
-              Report Local Issues.
-              <br />
-              <span className="gradient-text">Make Your City Better.</span>
-            </h1>
+      {/* FEATURES GRID */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+            Designed for Citizen Empowerment
+          </h2>
+          <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base">
+            Everything you need to report problems, vote on priorities, and track resolutions.
+          </p>
+        </div>
 
-            <p className="hero-description">
-              Civix helps citizens report and track local civic issues like potholes, broken lights,
-              and garbage collection problems with unprecedented ease and transparency.
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {features.map((feature, index) => {
+            const IconComponent = feature.icon;
+            const isSelected = activeFeature === index;
+
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.05 }}
+                onClick={() => setActiveFeature(isSelected ? null : index)}
+                className={`bg-white dark:bg-slate-900 border ${
+                  isSelected ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-200 dark:border-slate-800'
+                } rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-emerald-500/50 transition-all duration-300 cursor-pointer group flex flex-col justify-between`}
+              >
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-5 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-sm">
+                    <IconComponent className="w-6 h-6" />
+                  </div>
+
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                    {feature.title}
+                  </h3>
+
+                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+                    {feature.description}
+                  </p>
+                </div>
+
+                <AnimatePresence>
+                  {isSelected && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 leading-relaxed"
+                    >
+                      {feature.details}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <div className="flex items-center justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400 pt-2">
+                  <span>{isSelected ? 'Less details' : 'Learn more'}</span>
+                  <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isSelected ? 'rotate-90' : 'group-hover:translate-x-1'}`} />
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* MISSION SECTION */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-200/80 dark:border-slate-800/80">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold text-xs">
+              OUR MISSION
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Building Accountable, Responsive Communities
+            </h2>
+            <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+              We believe every citizen deserves a clean, safe, and efficiently managed neighborhood. Civix bridges the communication gap between citizens and authorities through real-time tracking, transparent voting, and verified status updates.
             </p>
 
-            <div className="hero-cta">
-              <Link to="/signup">
-                <button className="cta-primary">Get Started</button>
-              </Link>
-
-              <button onClick={() => setShowMore(!showMore)}>
-                {showMore ? "Show Less" : "Learn More"}
-              </button>
+            <div className="space-y-3 pt-2">
+              {[
+                "Instant geotagged issue reporting with photo uploads",
+                "Transparent municipal workflow and status tracking",
+                "Community voting to prioritize high-urgency fixes",
+                "Direct feedback loop with local representatives"
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{item}</span>
+                </div>
+              ))}
             </div>
           </div>
-        </section>
 
-        {/* EXPANDABLE SECTION */}
-        <AnimatePresence initial={false}>
-          {showMore && (
-            <motion.div
-              key="learn-more"
-              ref={learnMoreRef}
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              style={{ overflow: "hidden" }}
-              className="mt-10 space-y-16"
+          <div className="relative flex justify-center">
+            <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+              <img 
+                src={mission} 
+                alt="Civix Mission" 
+                className="w-full h-auto rounded-2xl object-cover mb-4"
+              />
+              <div className="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Civic Core Commitment</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-white mt-1">
+                  100% Transparent. Powered by Citizens, Built for Everyone.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CALL TO ACTION */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+        <div className="bg-slate-900 dark:bg-slate-900 text-white rounded-3xl p-8 sm:p-12 text-center relative overflow-hidden shadow-2xl border border-slate-800">
+          <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">
+            Ready to Make a Real Impact?
+          </h2>
+          <p className="text-slate-300 max-w-2xl mx-auto mb-8 text-sm sm:text-base">
+            Join thousands of active citizens transforming their local neighborhoods today.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link
+              to="/report-issue"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg active:scale-95 transition-all text-sm"
             >
-
-              {/* FEATURES */}
-              <section className="relative py-20 px-6 ">
-                <div className="relative max-w-6xl mx-auto">
-                  <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                      Everything you need to make a 
-                      <span className="block text-green-600">real difference</span>
-                    </h2>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {features.map((feature, index) => (
-                      <div
-                        key={index}
-                        className={`group relative p-6 rounded-2xl transition-all duration-300 cursor-pointer
-                          ${activeFeature === index 
-                            ? 'bg-white shadow-xl border border-green-200 transform translate-y-[-4px]' 
-                            : 'bg-white/70 hover:bg-white hover:shadow-lg border border-white/50'
-                          }`}
-                        onMouseEnter={() => setActiveFeature(index)}
-                        onMouseLeave={() => setActiveFeature(null)}
-                      >
-                        <div className="relative mb-5 w-14 h-14 rounded-xl flex items-center justify-center bg-green-50 text-green-600">
-                          {feature.icon}
-                        </div>
-                        <h3 className="text-lg font-semibold mb-3">{feature.title}</h3>
-                        <p className="text-sm mb-3">{feature.description}</p>
-                        {activeFeature === index && (
-                          <p className="text-xs text-slate-500">{feature.details}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </section>
-
-              {/* WHY SECTION */}
-              <section className="why-section py-16 px-6 md:px-12 bg-gradient-to-r from-green-600 to-emerald-500 rounded-2xl shadow-lg" data-aos="fade-up" data-aos-delay="300">
-                <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12">
-                  <div className="why-text text-white md:w-2/3">
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose Civix?</h2>
-                    <p className="text-lg opacity-90 leading-relaxed mb-8">
-                      Civix empowers citizens by simplifying the process to voice concerns and foster positive
-                      change in communities. We connect the public with civic authorities for enhanced governance,
-                      transparency, and real results that matter.
-                    </p>
-                  </div>
-                </div>
-              </section>
-
-              {/* MISSION & VISION */}
-              <section className="mission-vision-section" data-aos="fade-up" data-aos-delay="400">
-                <div className="mv-container">
-                  <div className="mv-text">
-                    <h2 className="section-title">Our Mission</h2>
-                    <p>To empower every citizen to take action and improve their city by making civic reporting simple, transparent, and impactful.</p>
-                    <h2 className="section-title">Our Vision</h2>
-                    <p>A world where communities and governments work hand-in-hand to create cleaner, safer, and more livable cities for everyone.</p>
-                  </div>
-                  <div className="mv-image">
-                    <img src={mission} alt="Mission" onLoad={() => AOS.refresh()} />
-                  </div>
-                </div>
-              </section>
-
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+              Get Started Now
+            </Link>
+            <Link
+              to="/contact"
+              className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold px-8 py-3.5 rounded-xl border border-slate-700 active:scale-95 transition-all text-sm"
+            >
+              Contact Us
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
-
-export default About;
