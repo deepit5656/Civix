@@ -1,5 +1,4 @@
-import React from "react";
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   FileText, 
@@ -24,188 +23,85 @@ import {
   ReceiptIndianRupee,
   TrainFront,
   School,
-  Plane
+  ArrowRight
 } from "lucide-react";
 
+const DashboardCard = ({ title, description, onClick, icon: Icon, badgeColor = "bg-emerald-600", tag = "SERVICE" }) => {
+  return (
+    <div
+      onClick={onClick}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") onClick();
+      }}
+      className="group relative bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-[24px] p-6 border border-slate-200/80 dark:border-slate-800/80 shadow-sm hover:shadow-2xl hover:shadow-emerald-950/10 hover:border-emerald-500/40 cursor-pointer transition-all duration-300 hover:-translate-y-1.5 overflow-hidden flex flex-col justify-between min-h-[200px]"
+    >
+      {/* Top Header Row with Floating 3D Badge & Category Tag */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <div className={`w-13 h-13 ${badgeColor} text-white rounded-2xl flex items-center justify-center shrink-0 shadow-md shadow-slate-900/10 border border-white/20 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 p-3`}>
+            <Icon className="w-6 h-6 text-white" />
+          </div>
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-950 group-hover:text-emerald-600 border border-slate-200/60 dark:border-slate-700/60 transition-colors">
+            {tag}
+          </span>
+        </div>
+
+        {/* Content */}
+        <div className="space-y-1.5">
+          <h3 className="text-lg font-extrabold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors tracking-tight">
+            {title}
+          </h3>
+          <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed line-clamp-2">
+            {description}
+          </p>
+        </div>
+      </div>
+
+      {/* Action Footer */}
+      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors pt-3 border-t border-slate-100 dark:border-slate-800/80 mt-4">
+        <span>Open Section</span>
+        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1.5 transition-transform duration-200" />
+      </div>
+    </div>
+  );
+};
 
 const UserDashboard = () => {
+  const navigate = useNavigate();
+  const dropdownRef = useRef(null);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const [notifications, setNotifications] = useState([
     { id: 1, title: "Complaint Update", message: "Your complaint #12345 has been reviewed", time: "2 hours ago", unread: true },
     { id: 2, title: "Community Vote", message: "New voting topic: Street Light Installation", time: "1 day ago", unread: true },
     { id: 3, title: "Profile Update", message: "Your profile information was successfully updated", time: "3 days ago", unread: false }
   ]);
-  const [searchTerm, setSearchTerm] = useState("");
-
 
   const dashboardItems = [
-    {
-      title: "File a Complaint",
-      description: "Submit a new issue with full details.",
-      onClick: () => navigate("/report-issue"),
-      icon: FileText,
-      gradient: "from-green-500 to-green-600",
-      shadowColor: "shadow-green-500/20"
-    },
-    {
-      title: "My Complaints",
-      description: "Track all complaints you've raised.",
-      onClick: () => navigate("/complaints"),
-      icon: List,
-      gradient: "from-emerald-500 to-emerald-600",
-      shadowColor: "shadow-emerald-500/20"
-    },
-    {
-      title: "Profile",
-      description: "View or edit your profile details.",
-      onClick: () => navigate("/profile"),
-      icon: User,
-      gradient: "from-teal-500 to-teal-600",
-      shadowColor: "shadow-teal-500/20"
-    },
-    {
-      title: "Support",
-      description: "Need help? Contact our support.",
-      onClick: () => navigate("/contact"),
-      icon: Headphones,
-      gradient: "from-green-600 to-emerald-700",
-      shadowColor: "shadow-green-600/20"
-    },
-    {
-      title: "Community Voting",
-      description: "Interact with the community by casting your vote on trending topics, events, and decisions that matter.",
-      onClick: () => navigate("/community-voting"),
-      icon: BarChart3,
-      gradient: "from-emerald-600 to-teal-700",
-      shadowColor: "shadow-emerald-600/20"
-    },
-    {
-      title: "Resources",
-      description: "Read FAQs, citizen rights, and more.",
-      onClick: () => navigate("/resources"),
-      icon: BookOpen,
-      gradient: "from-teal-600 to-green-700",
-      shadowColor: "shadow-teal-600/20"
-    },
-    {
-      title: "Chat Room",
-      description: "Join the community chat and engage in real-time discussions.",
-      onClick: () => navigate("/chatroom"),
-      icon: MessageCircle,
-      gradient: "from-green-700 to-teal-700",
-      shadowColor: "shadow-green-700/20"
-    },
-    {
-      title: "Nearby Services",
-      description: "Find hospitals, police stations, and fire stations close to you.",
-      onClick: () => navigate("/nearby-services"),
-      icon: MapPin,
-      gradient: "from-green-500 to-green-800",
-      shadowColor: "shadow-green-500/20"
-    },
-    {
-      title: "Lost & Found",
-      description: "Bringing lost items back to their owners.",
-      onClick: () => navigate("/lost-found"),
-      icon: Search,
-      gradient: "from-green-500 to-green-600",
-      shadowColor: "shadow-green-500/20"
-    },
-    {
-      title: "Community Holidays",
-      description: "Look for the Community Holidays approaching soon to you",
-      onClick: () => navigate("/community-holidays"),
-      icon: Calendar,
-      gradient: "from-emerald-600 to-teal-700",
-      shadowColor: "shadow-emerald-600/20"
-    },
-    {
-      title: "Public Transport",
-      description: "Powered by Delhi Transport Corporation the real-time transit information",
-      onClick: () => navigate("/transport"),
-      icon: Bus,
-      gradient: "from-teal-500 to-teal-600",
-      shadowColor: "shadow-teal-500/20"
-    },
-    {
-      title: "Civic Statistics",
-      description: "Comprehensive Population & Water Resources Analytics.",
-      onClick: () => navigate("/civic-stats"),
-      icon: ChartColumn,
-      gradient: "from-teal-600 to-green-700",
-      shadowColor: "shadow-teal-600/20"
-    },
-    {
-      title: "Election & Governance Info",
-      description: "Comprehensive Electoral Information & Voter Analytics.",
-      onClick: () => navigate("/elections-info"),
-      icon: Vote,
-      gradient: "from-teal-500 to-teal-600",
-      shadowColor: "shadow-teal-500/20"
-    },
-    {
-      title: "Government Schemes",
-      description: "Comprehensive Government Schemes & Financial Analytics",
-      onClick: () => navigate("/govt-schemes"),
-      icon: Building2,
-      gradient: "from-green-600 to-emerald-700",
-      shadowColor: "shadow-green-600/20"
-    },
-    {
-      title: "Traffic Fines & Vehicle Info",
-      description: "Quick access to essential vehicle and transport services",
-      onClick: () => navigate("/vehical"),
-      icon: Car,
-      gradient: "from-emerald-600 to-teal-700",
-      shadowColor: "shadow-emerald-600/20"
-    },
-    {
-      title: "Water & Electricity Schedule",
-      description: "Real-time updates regarding water supply schedules, power outage notifications, and restoration timelines",
-      onClick: () => navigate("/electricity"),
-      icon: Zap,
-      gradient: "from-teal-500 to-teal-600",
-      shadowColor: "shadow-teal-500/20"
-    },
-    {
-      title: "SDRF Allocation and NFSA Beneficiary",
-      description: "State Disaster Response Fund (SDRF) Allocation & Release Module and National Food Security Act (NFSA) Beneficiary Coverage.",
-      onClick: () => navigate("/sdrf"),
-      icon: HandCoins,
-      gradient: "from-green-500 to-green-800",
-      shadowColor: "shadow-green-500/20"
-    },
-    {
-      title: "Budget Estimates",
-      description: "Analytics framework for rendering and evaluating Budget Estimates",
-      onClick: () => navigate("/budget"),
-      icon: ReceiptIndianRupee,
-      gradient: "from-green-500 to-green-600",
-      shadowColor: "shadow-green-500/20"
-    },
-    {
-      title: "Real-Time Train Schedule",
-      description: "Real-Time Train Schedule Rendering Subsystem (TSRS)",
-      onClick: () => navigate("/train"),
-      icon: TrainFront,
-      gradient: "from-green-500 to-green-600",
-      shadowColor: "shadow-green-500/20"
-    },
-    {
-      title: "Pan-India School Statistics",
-      description: "Architecture that seamlessly processes nationwide school data",
-      onClick: () => navigate("/school"),
-      icon: School,
-      gradient: "from-emerald-600 to-teal-700",
-      shadowColor: "shadow-emerald-600/20"
-    }
+    { title: "File a Complaint", description: "Submit a new issue with full details.", onClick: () => navigate("/report-issue"), icon: FileText, badgeColor: "bg-emerald-600", tag: "REPORT ISSUE" },
+    { title: "My Complaints", description: "Track all complaints you've raised.", onClick: () => navigate("/complaints"), icon: List, badgeColor: "bg-teal-600", tag: "MY COMPLAINTS" },
+    { title: "Profile", description: "View or edit your profile details.", onClick: () => navigate("/profile"), icon: User, badgeColor: "bg-slate-900 dark:bg-slate-700", tag: "ACCOUNT" },
+    { title: "Support", description: "Need help? Contact our support.", onClick: () => navigate("/contact"), icon: Headphones, badgeColor: "bg-indigo-600", tag: "HELP DESK" },
+    { title: "Community Voting", description: "Interact with the community by casting your vote on trending topics.", onClick: () => navigate("/community-voting"), icon: BarChart3, badgeColor: "bg-amber-600", tag: "CIVIC VOTING" },
+    { title: "Resources", description: "Read FAQs, citizen rights, and more.", onClick: () => navigate("/resources"), icon: BookOpen, badgeColor: "bg-emerald-600", tag: "KNOWLEDGE" },
+    { title: "Chat Room", description: "Join the community chat and engage in real-time discussions.", onClick: () => navigate("/chatroom"), icon: MessageCircle, badgeColor: "bg-teal-600", tag: "COMMUNITY" },
+    { title: "Nearby Services", description: "Find hospitals, police stations, and fire stations close to you.", onClick: () => navigate("/nearby-services"), icon: MapPin, badgeColor: "bg-rose-600", tag: "LOCAL MAP" },
+    { title: "Lost & Found", description: "Bringing lost items back to their owners.", onClick: () => navigate("/lost-found"), icon: Search, badgeColor: "bg-emerald-600", tag: "RECOVERY" },
+    { title: "Community Holidays", description: "Look for upcoming community holidays.", onClick: () => navigate("/community-holidays"), icon: Calendar, badgeColor: "bg-indigo-600", tag: "EVENTS" },
+    { title: "Public Transport", description: "Real-time transit information.", onClick: () => navigate("/transport"), icon: Bus, badgeColor: "bg-amber-600", tag: "TRANSIT" },
+    { title: "Civic Statistics", description: "Comprehensive Population & Water Analytics.", onClick: () => navigate("/civic-stats"), icon: ChartColumn, badgeColor: "bg-slate-900 dark:bg-slate-700", tag: "ANALYTICS" },
+    { title: "Election & Governance", description: "Electoral Information & Voter Analytics.", onClick: () => navigate("/elections-info"), icon: Vote, badgeColor: "bg-emerald-600", tag: "GOVERNANCE" },
+    { title: "Government Schemes", description: "Government Schemes & Financial Analytics.", onClick: () => navigate("/govt-schemes"), icon: Building2, badgeColor: "bg-teal-600", tag: "SCHEMES" },
+    { title: "Traffic & Vehicle Info", description: "Access vehicle and transport services.", onClick: () => navigate("/vehical"), icon: Car, badgeColor: "bg-indigo-600", tag: "VEHICLE" },
+    { title: "Utilities Schedule", description: "Updates on water supply and power outages.", onClick: () => navigate("/electricity"), icon: Zap, badgeColor: "bg-amber-600", tag: "UTILITIES" },
+    { title: "Disaster & Food Security", description: "SDRF Allocation & NFSA Coverage.", onClick: () => navigate("/sdrf"), icon: HandCoins, badgeColor: "bg-rose-600", tag: "SECURITY" },
+    { title: "Budget Estimates", description: "Budget Estimates evaluation.", onClick: () => navigate("/budget"), icon: ReceiptIndianRupee, badgeColor: "bg-emerald-600", tag: "FINANCE" },
+    { title: "Real-Time Train Schedule", description: "Real-time train schedule subsystem.", onClick: () => navigate("/train"), icon: TrainFront, badgeColor: "bg-teal-600", tag: "RAILWAYS" },
+    { title: "School Statistics", description: "Nationwide school statistics architecture.", onClick: () => navigate("/school"), icon: School, badgeColor: "bg-indigo-600", tag: "EDUCATION" }
   ];
 
-
   const unreadCount = notifications.filter(n => n.unread).length;
-  const navigate = useNavigate();
-  const dropdownRef = useRef(null);
-
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -214,116 +110,69 @@ const UserDashboard = () => {
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [dropdownRef]);
-
 
   const markAllAsRead = (e) => {
     e.stopPropagation();
     setNotifications(notifications.map(n => ({ ...n, unread: false })));
   };
 
-
   const markAsRead = (e, id) => {
     e.stopPropagation();
-    setNotifications(notifications.map(n => 
-      n.id === id ? { ...n, unread: false } : n
-    ));
+    setNotifications(notifications.map(n => n.id === id ? { ...n, unread: false } : n));
   };
-
-
-  const removeNotification = (e, id) => {
-    e.stopPropagation();
-    setNotifications(notifications.filter(n => n.id !== id));
-  };
-
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-gray-900 dark:via-gray-900 dark:to-black">
-      <div className="absolute top-20 right-6 z-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 lg:p-8">
+      {/* Top Header Row */}
+      <div className="max-w-7xl mx-auto flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Citizen Dashboard
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+            Your centralized portal for civic engagement & local services
+          </p>
+        </div>
+
+        {/* Notifications Button */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl border border-white/20 dark:border-gray-700 shadow-lg hover:shadow-xl hover:shadow-green-500/20 transition-all duration-300 hover:scale-105 group"
+            className="relative p-2.5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shadow-sm"
           >
-            <Bell className="w-6 h-6 text-gray-600 dark:text-gray-300 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-300" />
+            <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+              <span className="absolute -top-1 -right-1 bg-rose-600 text-white text-[10px] font-extrabold rounded-full w-4 h-4 flex items-center justify-center">
                 {unreadCount}
               </span>
             )}
           </button>
 
-
           {showNotifications && (
-            <div 
-              className="absolute top-full right-0 mt-2 w-80 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-2xl border border-white/20 dark:border-gray-700 shadow-2xl shadow-green-500/10 overflow-hidden animate-in slide-in-from-top-2 duration-200"
-            >
-              <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gradient-to-r from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-800">
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Notifications</h3>
-                <button
-                  onClick={() => setShowNotifications(false)}
-                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200"
-                >
-                  <X className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+            <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl z-50 overflow-hidden">
+              <div className="p-3.5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/60">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">Notifications</h3>
+                <button onClick={() => setShowNotifications(false)}>
+                  <X className="w-4 h-4 text-slate-400 hover:text-slate-600" />
                 </button>
               </div>
-              <div className="max-h-96 overflow-y-auto">
-                {notifications.length > 0 ? (
-                  notifications.map((notification, index) => (
-                    <div
-                      key={notification.id}
-                      className={`relative p-4 ${index !== notifications.length - 1 ? 'border-b border-gray-100 dark:border-gray-700' : ''} hover:bg-green-50/50 dark:hover:bg-gray-700/50 transition-colors duration-200 group ${
-                        notification.unread ? 'bg-green-50/30 dark:bg-green-900/10' : ''
-                      }`}
-                      onClick={(e) => markAsRead(e, notification.id)}
-                    >
-                      <button 
-                        onClick={(e) => removeNotification(e, notification.id)}
-                        className="absolute top-2 right-2 p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                      <div className="flex items-start space-x-3">
-                        {notification.unread && (
-                          <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0 animate-pulse"></div>
-                        )}
-                        <div className="flex-1">
-                          <h4 className="text-sm font-medium text-gray-800 dark:text-gray-100">
-                            {notification.title}
-                          </h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                            {notification.message}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                            {notification.time}
-                          </p>
-                        </div>
-                      </div>
+              <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+                {notifications.map((n) => (
+                  <div key={n.id} onClick={(e) => markAsRead(e, n.id)} className={`p-3 text-xs cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/40 ${n.unread ? "font-semibold" : ""}`}>
+                    <div className="flex justify-between">
+                      <span className="text-slate-900 dark:text-white">{n.title}</span>
+                      <span className="text-[10px] text-slate-400">{n.time}</span>
                     </div>
-                  ))
-                ) : (
-                  <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                    <Bell className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>No notifications yet</p>
+                    <p className="text-slate-500 dark:text-slate-400 mt-1">{n.message}</p>
                   </div>
-                )}
+                ))}
               </div>
               {notifications.length > 0 && (
-                <div className="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex space-x-2">
-                  <button 
-                    onClick={markAllAsRead}
-                    className="flex-1 text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium transition-colors duration-200 py-1"
-                  >
-                    Mark All Read
-                  </button>
-                  <button 
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex-1 text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium transition-colors duration-200 py-1"
-                  >
-                    View All
+                <div className="p-2 border-t border-slate-100 dark:border-slate-800 text-center">
+                  <button onClick={markAllAsRead} className="text-xs font-semibold text-emerald-600 hover:underline">
+                    Mark all read
                   </button>
                 </div>
               )}
@@ -331,83 +180,34 @@ const UserDashboard = () => {
           )}
         </div>
       </div>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-4 dark:from-green-400 dark:to-emerald-400">
-            Welcome, Citizen 👋
-          </h2>
-          <p className="text-gray-600 dark:text-gray-300 text-lg">
-            Your digital gateway to civic engagement and community services
-          </p>
+
+      {/* Search Input Bar */}
+      <div className="max-w-7xl mx-auto mb-8">
+        <div className="relative max-w-md">
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search civic features & services..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 text-sm focus:outline-none focus:border-emerald-500 shadow-sm"
+          />
         </div>
+      </div>
 
-
-<div className="mb-6 flex justify-center">
-  <input
-    type="text"
-    placeholder="Search dashboard features..."
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    className="w-full max-w-md px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
-  />
-</div>
-
-
-<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-  {dashboardItems
-    .filter(item =>
-      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .map((item, index) => (
-      <DashboardCard key={index} {...item} />
-  ))}
-</div>
+      {/* Feature Grid */}
+      <main className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {dashboardItems
+          .filter(item =>
+            item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.description.toLowerCase().includes(searchTerm.toLowerCase())
+          )
+          .map((item, index) => (
+            <DashboardCard key={index} {...item} />
+          ))}
       </main>
     </div>
   );
 };
-
-
-const DashboardCard = ({ title, description, onClick, icon: Icon, gradient, shadowColor }) => {
-  return (
-    <div
-      onClick={onClick}
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") onClick();
-      }}
-      className={`group relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl p-6 border border-white/20 dark:border-gray-700 shadow-lg ${shadowColor} hover:shadow-2xl hover:shadow-green-500/30 cursor-pointer transition-all duration-500 hover:-translate-y-2 hover:scale-105 overflow-hidden`}
-    >
-      <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500 rounded-3xl`} />
-      
-      <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 opacity-0 group-hover:opacity-20 blur-sm transition-opacity duration-500" />
-      
-
-
-      <div className="relative z-10">
-    
-        <div className={`w-20 h-20 bg-gradient-to-br ${gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg`}>
-          <Icon className="w-10 h-10 text-white" />
-        </div>
-      
-        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4 group-hover:text-green-700 dark:group-hover:text-green-400 transition-colors duration-300">
-          {title}
-        </h3>
-      
-        <p className="text-gray-600 dark:text-gray-300 leading-relaxed group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors duration-300">
-          {description}
-        </p>
-        
-      </div>
- 
-      <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${gradient} scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left rounded-b-3xl`} />
-
-
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
-    </div>
-  );
-};
-
 
 export default UserDashboard;
