@@ -67,11 +67,12 @@ const ProfileSetup = ({onComplete}) => {
       let uploadedProfileUrl = null;
 
       // If user selected an image, upload it first
+      const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
       if (profileImageFile) {
         try {
           const fd = new FormData();
           fd.append('image', profileImageFile);
-          const uploadRes = await csrfManager.secureFetch(`http://localhost:5000/api/profile/${user.id}/profile-picture`, {
+          const uploadRes = await csrfManager.secureFetch(`${baseUrl}/profile/${user.id}/profile-picture`, {
             method: 'POST',
             body: fd
           });
@@ -103,7 +104,7 @@ const ProfileSetup = ({onComplete}) => {
       console.log(localStorage.getItem("profileComplete"));
       onComplete();
       
-      const profileResponse = await csrfManager.secureFetch('http://localhost:5000/api/profile/create-or-update', {
+      const profileResponse = await csrfManager.secureFetch(`${baseUrl}/profile/create-or-update`, {
         method: 'POST',
         body: JSON.stringify({
           clerkUserId: user.id,

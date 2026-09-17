@@ -15,8 +15,8 @@ const useProfileStatus = () => {
 
     try {
       console.log('Fetching profile data for user:', user.id);
-      // The API endpoint expects clerkUserId, not just id
-      const response = await fetch(`http://localhost:5000/api/profile/${user.id}`, {
+      const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const response = await fetch(`${baseUrl}/profile/${user.id}`, {
         credentials: 'include',
       });
       

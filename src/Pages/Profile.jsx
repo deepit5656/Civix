@@ -94,7 +94,8 @@ const Profile = () => {
     }
     setIsSaving(true);
     try {
-      const profileResponse = await csrfManager.secureFetch('http://localhost:5000/api/profile/create-or-update', {
+      const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const profileResponse = await csrfManager.secureFetch(`${baseUrl}/profile/create-or-update`, {
         method: 'POST',
         body: JSON.stringify({
           clerkUserId: clerkUser.id,
