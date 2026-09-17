@@ -106,9 +106,11 @@ export const contributorsAPI = {
 export const saveAuthData = (token, user) => {
   localStorage.setItem('civix_token', token);
   localStorage.setItem('civix_user', JSON.stringify(user));
-  if (user?.isProfileComplete !== undefined) {
-    localStorage.setItem('profileComplete', String(user.isProfileComplete));
-  }
+  const isComplete = Boolean(
+    user?.isProfileComplete ||
+    (user?.name && user?.email && user?.location)
+  );
+  localStorage.setItem('profileComplete', String(isComplete));
 };
 
 export const clearAuthData = () => {

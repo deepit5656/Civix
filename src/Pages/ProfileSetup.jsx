@@ -346,6 +346,18 @@ const ProfileSetup = ({onComplete}) => {
     );
   };
 
+  const handleBack = () => {
+    if (user) {
+      if (user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/user/dashboard');
+      }
+    } else {
+      navigate('/');
+    }
+  };
+
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-green-50/30 to-emerald-50 dark:from-gray-950 dark:via-gray-900 dark:to-emerald-950/20">
@@ -377,7 +389,7 @@ const ProfileSetup = ({onComplete}) => {
         <div className="mb-6">
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={handleBack}
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-600 transition-all group"
           >
             <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

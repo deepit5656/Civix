@@ -424,16 +424,11 @@ body {
 }
 
 .col {
-  background: linear-gradient(90deg, #e4e4e4, #5f5f5f);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #64748B;
 }
 
 .text-emerald-500 {
-  color: rgb(16 185 129);
-  background: linear-gradient(90deg, #39f79e, #3b82f6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #10B981;
 }
 
 .text-emerald-700 {

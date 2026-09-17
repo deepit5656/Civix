@@ -13,7 +13,18 @@ const floatAnimation = {
 
 const Signup = () => {
   const navigate = useNavigate();
-  const { signup, sendOTP, verifyOTP } = useAuthContext();
+  const { signup, sendOTP, verifyOTP, isAuthenticated, user } = useAuthContext();
+
+  // Redirect if already authenticated
+  React.useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'admin') {
+        navigate('/admin/dashboard', { replace: true });
+      } else {
+        navigate('/user/dashboard', { replace: true });
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const [formData, setFormData] = useState({
     username: '',

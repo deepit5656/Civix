@@ -13,7 +13,7 @@ const floatAnimation = {
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, sendOTP } = useAuthContext();
+  const { login, sendOTP, isAuthenticated, user } = useAuthContext();
 
   const [mode, setMode] = useState('password'); // 'password' | 'otp'
   const [step, setStep] = useState(1); // For OTP mode: 1 = Email, 2 = Code
@@ -23,6 +23,17 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [debugOtp, setDebugOtp] = useState('');
+
+  // Redirect if already authenticated
+  React.useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'admin') {
+        navigate('/admin/dashboard', { replace: true });
+      } else {
+        navigate('/user/dashboard', { replace: true });
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
 
   // Password Login Handler
   const handlePasswordLogin = async (e) => {
@@ -37,11 +48,21 @@ const Login = () => {
       const data = await login({ email, password });
       toast.success(data.user?.role === 'admin' ? '👑 Admin Login Successful!' : '🎉 Login Successful!');
       
+      const isComplete = Boolean(
+        data.user?.isProfileComplete ||
+        (data.user?.name && data.user?.email && data.user?.location)
+      );
+      if (isComplete) {
+        localStorage.setItem('profileComplete', 'true');
+      }
+
       setTimeout(() => {
         if (data.user?.role === 'admin') {
           navigate('/admin/dashboard');
-        } else {
+        } else if (isComplete) {
           navigate('/user/dashboard');
+        } else {
+          navigate('/profile-setup');
         }
       }, 800);
     } catch (err) {
@@ -87,11 +108,22 @@ const Login = () => {
     try {
       const data = await login({ email, otp: fullOtp });
       toast.success(data.user?.role === 'admin' ? '👑 Admin Login Successful!' : '🎉 Login Successful!');
+      
+      const isComplete = Boolean(
+        data.user?.isProfileComplete ||
+        (data.user?.name && data.user?.email && data.user?.location)
+      );
+      if (isComplete) {
+        localStorage.setItem('profileComplete', 'true');
+      }
+
       setTimeout(() => {
         if (data.user?.role === 'admin') {
           navigate('/admin/dashboard');
-        } else {
+        } else if (isComplete) {
           navigate('/user/dashboard');
+        } else {
+          navigate('/profile-setup');
         }
       }, 800);
     } catch (err) {

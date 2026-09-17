@@ -65,15 +65,15 @@ import School from './Pages/School';
 import UserMap from './Pages/UserMap';
 
 const App = () => {
-  const { isAuthenticated: isSignedIn } = useAuthContext();
+  const { user, isAuthenticated: isSignedIn } = useAuthContext();
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
-  const [isProfileComplete, setIsProfileComplete] = useState(false);
 
-  useEffect(() => {
-    const profileStatus = localStorage.getItem("profileComplete") === "true";
-    setIsProfileComplete(profileStatus);
-  }, []);
+  const isProfileComplete = Boolean(
+    user?.isProfileComplete ||
+    (user?.name && user?.email && user?.location) ||
+    localStorage.getItem("profileComplete") === "true"
+  );
 
   const renderDashboard = () => {
     if (!isProfileComplete) return <Navigate to="/profile-setup" replace />;
