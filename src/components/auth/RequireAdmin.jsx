@@ -1,33 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
-import {jwtDecode} from 'jwt-decode';
+import { useAuthContext } from '../../context/AuthContext';
 
 const RequireAdmin = ({ children }) => {
-  const [isAdmin, setIsAdmin] = useState(null);
+  const { isAuthenticated, isAdmin, loading } = useAuthContext();
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setIsAdmin(false);
-      return;
-    }
+  if (loading) return null;
 
-    try {
-      const decoded = jwtDecode(token);
-      if (decoded.role === 'admin') {
-        setIsAdmin(true);
-      } else {
-        setIsAdmin(false);
-      }
-    } catch (err) {
-      console.error('Invalid token');
-      setIsAdmin(false);
-    }
-  }, []);
-
-  if (isAdmin === null) return null; // Optional: Loading spinner
-
-  return isAdmin ? children : <Navigate to="/login" />;
+  return isAuthenticated && isAdmin ? children : <Navigate to="/login" replace />;
 };
 
 export default RequireAdmin;

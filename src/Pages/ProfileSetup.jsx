@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '@clerk/clerk-react';
+import { useAuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import useProfileStatus from '../hooks/useProfileStatus';
 import csrfManager from '../utils/csrfManager';
 import 'react-toastify/dist/ReactToastify.css';
 
 const ProfileSetup = ({onComplete}) => {
-  const { user } = useUser();
+  const { user } = useAuthContext();
   const navigate = useNavigate();
   const { refetch } = useProfileStatus();
   const [formData, setFormData] = useState({
@@ -107,7 +107,7 @@ const ProfileSetup = ({onComplete}) => {
       const profileResponse = await csrfManager.secureFetch(`${baseUrl}/profile/create-or-update`, {
         method: 'POST',
         body: JSON.stringify({
-          clerkUserId: user.id,
+          userId: user?.id || user?._id,
           email: formData.email,
           name: formData.name,
           location: formData.location,
@@ -124,36 +124,13 @@ const ProfileSetup = ({onComplete}) => {
       const profileData = await profileResponse.json();
       console.log('Profile saved successfully:', profileData);
       
-      // Mark profile as submitted to prevent redirect loop
       setProfileSubmitted(true);
-      
-      // Force update the profile status to prevent redirect loop
-      if (profileData.isProfileComplete) {
-        toast.success('Profile setup completed successfully! Redirecting to home page...');
-        
-        // Update the profile status hook immediately
-        refetch();
-        // Use a more reliable redirect method
-        setTimeout(() => {
-          console.log('Redirecting to home page...');
-          // Force a hard redirect to home page
-          window.location.replace('/');
-        }, 1500);
-        
-      } else {
-        console.warn('Profile marked as incomplete, but redirecting anyway');
-        toast.success('Profile saved! Redirecting to home page...');
-        
-        // Update the profile status hook immediately
-        refetch();
-        
-        // Use a more reliable redirect method
-        setTimeout(() => {
-          console.log('Redirecting to home page (profile incomplete)...');
-          // Force a hard redirect to home page
-          window.location.replace('/');
-        }, 1500);
-      }
+      toast.success('Profile setup completed successfully! Redirecting to Dashboard...');
+      refetch();
+
+      setTimeout(() => {
+        window.location.replace('/user/dashboard');
+      }, 1000);
       
     } catch (error) {
       console.error('Profile setup error:', error);
@@ -396,6 +373,20 @@ const ProfileSetup = ({onComplete}) => {
       <div className="absolute inset-0 bg-gradient-to-tr from-green-400/10 via-transparent to-emerald-400/10 dark:from-green-400/5 dark:to-emerald-400/5"></div>
       
       <div className="relative max-w-2xl mx-auto">
+        {/* Back Button */}
+        <div className="mb-6">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-600 transition-all group"
+          >
+            <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span>Back</span>
+          </button>
+        </div>
+
         {/* Header Section */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-500 via-green-500 to-teal-600 rounded-2xl mb-8 shadow-2xl">

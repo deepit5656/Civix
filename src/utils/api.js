@@ -34,6 +34,8 @@ const apiFetch = async (endpoint, options = {}) => {
 
 // ─── AUTH ──────────────────────────────────────────────────────────────────────
 export const authAPI = {
+  sendOTP: (data) => apiFetch('/auth/send-otp', { method: 'POST', body: JSON.stringify(data) }),
+  verifyOTP: (data) => apiFetch('/auth/verify-otp', { method: 'POST', body: JSON.stringify(data) }),
   signup: (data) => apiFetch('/auth/signup', { method: 'POST', body: JSON.stringify(data) }),
   login: (data) => apiFetch('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
   logout: () => apiFetch('/auth/logout', { method: 'POST' }),

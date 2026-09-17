@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   User,
   Mail,
@@ -8,28 +9,16 @@ import {
   Edit3,
   Save,
   Lock,
-  CheckCircle
+  CheckCircle,
+  ArrowLeft
 } from 'lucide-react';
 
-// Mock hooks and utilities for demonstration
-const useUser = () => ({ user: { id: 'mock-user-id' } });
-const useProfileStatus = () => ({
-  profileData: {
-    name: 'User Name',
-    email: 'user@example.com',
-    location: 'City, Country',
-    profilePictureUrl: null
-  },
-  isLoading: false,
-  refetch: () => {}
-});
-const toast = { success: (msg) => console.log('Success:', msg), error: (msg) => console.log('Error:', msg) };
-const csrfManager = {
-  secureFetch: (url, options) => Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
-};
+import { useAuthContext } from '../context/AuthContext';
+import useProfileStatus from '../hooks/useProfileStatus';
 
 const Profile = () => {
-  const { user: clerkUser } = useUser();
+  const navigate = useNavigate();
+  const { user: authUser, updateUser } = useAuthContext();
   const { profileData, isLoading, refetch } = useProfileStatus();
   const [user, setUser] = useState({
     username: '',
@@ -139,6 +128,17 @@ const Profile = () => {
       
       <div className="relative z-10 p-4 sm:p-6 lg:p-8">
         <div className="max-w-3xl mx-auto">
+          {/* Back Button */}
+          <div className="mb-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-600 transition-all group"
+            >
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+              <span>Back</span>
+            </button>
+          </div>
+
           {/* Modern card with glass morphism */}
           <div className="bg-white/60 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/30 overflow-hidden relative">
             {/* Subtle gradient overlay */}

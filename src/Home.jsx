@@ -3,8 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from "react-helmet-async";
 import "./Home.css";
 import { motion } from "framer-motion";
-import Switch from "./DarkModeToggle";
-import { useAuth, useUser, SignInButton, SignUpButton, UserButton } from "@clerk/clerk-react";
+import { useAuthContext } from "./context/AuthContext";
 import { toast, ToastContainer } from 'react-toastify';
 import Navbar from "./components/Navbar";
 
@@ -21,8 +20,7 @@ function Home() {
   const [activeFaq, setActiveFaq] = useState(null);
   const [faqFilter, setFaqFilter] = useState("All");
   const navigate = useNavigate();
-  const { isSignedIn, signOut } = useAuth();
-  const { user } = useUser();
+  const { user, isAuthenticated: isSignedIn, logout: signOut } = useAuthContext();
   const { isProfileComplete, isLoading: profileLoading } = useProfileStatus();
 
   useEffect(() => {

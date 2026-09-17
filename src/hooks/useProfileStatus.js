@@ -1,49 +1,41 @@
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-react';
+import { useAuthContext } from '../context/AuthContext';
 
 const useProfileStatus = () => {
-  const { user, isSignedIn } = useUser();
+  const { user, isAuthenticated } = useAuthContext();
   const [isProfileComplete, setIsProfileComplete] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [profileData, setProfileData] = useState(null);
 
   const checkProfileStatus = async () => {
-    if (!isSignedIn || !user) {
+    if (!isAuthenticated || !user) {
       setIsLoading(false);
       return;
     }
 
     try {
-      console.log('Fetching profile data for user:', user.id);
       const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-      const response = await fetch(`${baseUrl}/profile/${user.id}`, {
+      const response = await fetch(`${baseUrl}/profile/me`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('civix_token')}`,
+        },
         credentials: 'include',
       });
       
-      console.log('Profile API response status:', response.status);
-      
       if (response.ok) {
-        // Ensure we can parse JSON; guard against HTML error pages
         const contentType = response.headers.get('content-type') || '';
         if (!contentType.includes('application/json')) {
           throw new Error('Invalid response format for profile status');
         }
         const data = await response.json();
-        console.log('Profile data received:', data);
-        setProfileData(data);
-        setIsProfileComplete(Boolean(data.isProfileComplete));
-      } else if (response.status === 404) {
-        // User doesn't exist in our database yet
-        console.log('User profile not found (404)');
-        setIsProfileComplete(false);
-        setProfileData(null);
+        setProfileData(data.user || data);
+        setIsProfileComplete(Boolean(data.user?.isProfileComplete || user?.isProfileComplete));
       } else {
-        console.error('Failed to fetch profile status, status code:', response.status);
-        setIsProfileComplete(false);
+        setIsProfileComplete(Boolean(user?.isProfileComplete));
       }
     } catch (error) {
       console.error('Error checking profile status:', error);
-      setIsProfileComplete(false);
+      setIsProfileComplete(Boolean(user?.isProfileComplete));
     } finally {
       setIsLoading(false);
     }
@@ -51,7 +43,7 @@ const useProfileStatus = () => {
 
   useEffect(() => {
     checkProfileStatus();
-  }, [isSignedIn, user]);
+  }, [isAuthenticated, user]);
 
   return {
     isProfileComplete,
@@ -59,7 +51,6 @@ const useProfileStatus = () => {
     profileData,
     refetch: () => {
       setIsLoading(true);
-      // Trigger a re-fetch by changing the dependency
       checkProfileStatus();
     }
   };

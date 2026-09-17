@@ -12,7 +12,6 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
-    "@clerk/clerk-react": "^5.32.3",
     "@emailjs/browser": "^4.4.1",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { SignIn, SignUp, useAuth } from '@clerk/clerk-react';
+import { useAuthContext } from './context/AuthContext';
 import { AnimatePresence } from 'framer-motion';
 
 import Home from './Home';
@@ -64,25 +64,19 @@ import Train from './Pages/Train';
 import School from './Pages/School';
 import UserMap from './Pages/UserMap';
 
-
-
 const App = () => {
-  const { isSignedIn } = useAuth();
+  const { isAuthenticated: isSignedIn } = useAuthContext();
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
   const [isProfileComplete, setIsProfileComplete] = useState(false);
 
   useEffect(() => {
-    // Example: Fetch from backend/localStorage
     const profileStatus = localStorage.getItem("profileComplete") === "true";
-    console.log(profileStatus)
     setIsProfileComplete(profileStatus);
   }, []);
 
   const renderDashboard = () => {
-
     if (!isProfileComplete) return <Navigate to="/profile-setup" replace />;
-
     return <UserDashboard />;
   };
 
@@ -110,15 +104,9 @@ const App = () => {
       <main className="min-h-screen">
         <AnimatePresence mode="wait" initial={false}>
           <Routes location={location} key={location.pathname}>
-            {/* Clerk Auth Routes */}
-            <Route
-              path="/sign-in/*"
-              element={<SignIn routing="path" path="/sign-in" redirectUrl="/" />}
-            />
-            <Route
-              path="/signup/*"
-              element={<SignUp routing="path" path="/signup" redirectUrl="/" />}
-            />
+            {/* Redirect legacy Clerk routes */}
+            <Route path="/sign-in/*" element={<Navigate to="/login" replace />} />
+            <Route path="/signup/*" element={<Navigate to="/signup" replace />} />
 
             {/* Public Routes */}
             <Route path="/" element={<Home />} />

@@ -22,11 +22,14 @@ const createIssue = asyncHandler(async (req, res) => {
     fileUrl = cloudRes.secure_url;
   }
 
+  const authenticatedEmail = req.user?.email || email;
+  const authenticatedPhone = req.user?.phone || phone || null;
+
   const issue = await Issue.create({
     title,
     description,
-    phone: phone || null,
-    email,
+    phone: authenticatedPhone,
+    email: authenticatedEmail,
     notifyByEmail: notifyByEmail === 'true' || notifyByEmail === true,
     fileUrl,
     category: category || 'Other',

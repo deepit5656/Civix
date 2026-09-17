@@ -32,9 +32,15 @@ const getUserById = asyncHandler(async (req, res) => {
   res.json(user.toSafeObject());
 });
 
-// ─── GET USER BY CLERK ID ─────────────────────────────────────────────────────
+// ─── GET USER BY CLERK OR UNIQUE ID ─────────────────────────────────────────────
 const getUserByClerkId = asyncHandler(async (req, res) => {
-  const user = await User.findByClerkId(req.params.clerkUserId);
+  const { clerkUserId } = req.params;
+  let user = null;
+  if (clerkUserId.includes('@')) {
+    user = await User.findOne({ email: clerkUserId.toLowerCase() });
+  } else if (clerkUserId.match(/^[0-9a-fA-F]{24}$/)) {
+    user = await User.findById(clerkUserId);
+  }
   if (!user) return res.status(404).json({ error: 'User not found' });
   res.json(user.toSafeObject());
 });
@@ -94,34 +100,40 @@ const updateByClerkId = asyncHandler(async (req, res) => {
   res.json({ message: 'Profile updated', user: user.toSafeObject() });
 });
 
-// ─── CREATE OR UPDATE USER (Clerk integration) ────────────────────────────────
+// ─── CREATE OR UPDATE USER ────────────────────────────────
 const createOrUpdateUserProfile = asyncHandler(async (req, res) => {
-  const { clerkUserId, email, name, location, profilePictureUrl } = req.body;
+  const { userId, clerkUserId, email, name, location, profilePictureUrl } = req.body;
 
-  if (!clerkUserId || !email) {
-    return res.status(400).json({ error: 'Clerk user ID and email are required' });
+  const searchEmail = email ? email.toLowerCase().trim() : null;
+
+  let user = null;
+  if (userId) {
+    user = await User.findById(userId);
+  }
+  if (!user && searchEmail) {
+    user = await User.findOne({ email: searchEmail });
   }
 
-  let user = await User.findByClerkId(clerkUserId);
-
   if (user) {
-    user.email = email;
+    if (searchEmail) user.email = searchEmail;
     if (name) user.name = name;
     if (location) user.location = location;
     if (profilePictureUrl) user.profilePictureUrl = profilePictureUrl;
     await user.save();
-  } else {
-    const username = email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '') + '_' + Date.now().toString().slice(-4);
+  } else if (searchEmail) {
+    const username = searchEmail.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '') + '_' + Date.now().toString().slice(-4);
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin123@gmail.com';
     user = await User.create({
-      clerkUserId,
-      email,
+      email: searchEmail,
       username,
       name: name || null,
       location: location || null,
       profilePictureUrl: profilePictureUrl || null,
-      password: 'clerk-auth',
-      role: (process.env.DOMAIN_NAME && email.endsWith(process.env.DOMAIN_NAME)) ? 'admin' : 'user',
+      password: Math.random().toString(36).slice(-10),
+      role: searchEmail === adminEmail.toLowerCase() ? 'admin' : 'user',
     });
+  } else {
+    return res.status(400).json({ error: 'Valid user ID or email is required' });
   }
 
   res.json({ user: user.toSafeObject(), isProfileComplete: user.isProfileComplete() });

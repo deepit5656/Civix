@@ -19,15 +19,13 @@ const userSchema = new mongoose.Schema({
   bio: { type: String, default: null, maxlength: 500 },
   phone: { type: String, default: null },
   isActive: { type: Boolean, default: true },
+  isVerified: { type: Boolean, default: false },
   lastLogin: { type: Date, default: null },
-  // Clerk integration (optional)
-  clerkUserId: { type: String, unique: true, sparse: true },
 }, { timestamps: true });
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  if (this.password === 'clerk-auth') return next(); // Clerk placeholder
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
@@ -42,11 +40,6 @@ userSchema.methods.isProfileComplete = function () {
   return !!(this.name && this.email && this.location);
 };
 
-// Find by Clerk ID
-userSchema.statics.findByClerkId = function (clerkUserId) {
-  return this.findOne({ clerkUserId });
-};
-
 // Remove sensitive fields from JSON output
 userSchema.methods.toSafeObject = function () {
   return {
@@ -59,6 +52,7 @@ userSchema.methods.toSafeObject = function () {
     profilePictureUrl: this.profilePictureUrl,
     bio: this.bio,
     phone: this.phone,
+    isVerified: this.isVerified,
     isProfileComplete: this.isProfileComplete(),
     createdAt: this.createdAt,
     lastLogin: this.lastLogin,
