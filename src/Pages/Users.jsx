@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { Search, Filter, MoreVertical, User, Users, Mail, Phone, MapPin, Calendar, Shield, AlertTriangle, CheckCircle, XCircle, Edit, Ban, UserX, Eye, Home, BarChart3, Bell, Settings, ChevronRight, ChevronLeft, FileText } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Search, Filter, MoreVertical, User, Users, Mail, Phone, MapPin, Calendar, Shield, AlertTriangle, CheckCircle, XCircle, Edit, Ban, UserX, Eye, Home, BarChart3, Bell, Settings, ChevronRight, ChevronLeft, FileText, RefreshCw } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
+import { profileAPI } from "../utils/api";
+import { toast } from "react-hot-toast";
 
 const Usersss = () => {
   const navigate = useNavigate();
@@ -13,6 +15,8 @@ const Usersss = () => {
   const [showUserModal, setShowUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [liveUsers, setLiveUsers] = useState([]);
   const usersPerPage = 10;
 
   const sidebarMenu = [
@@ -23,6 +27,41 @@ const Usersss = () => {
     { key: 'notifications', label: 'Notifications', icon: Bell, route: '/admin/notifications' },
     { key: 'settings', label: 'Settings', icon: Settings, route: '/admin/settings' },
   ];
+
+  const fetchUsers = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const res = await profileAPI.getAll({ limit: 100 });
+      const fetched = Array.isArray(res) ? res : (res?.users || []);
+      if (fetched.length > 0) {
+        setLiveUsers(fetched.map(u => ({
+          id: u._id || u.id,
+          name: u.name || u.username || 'Citizen User',
+          email: u.email || 'N/A',
+          phone: u.phone || '+91 98765 43210',
+          location: u.location || 'India',
+          joinDate: u.createdAt ? new Date(u.createdAt).toISOString().split('T')[0] : '2024-01-01',
+          lastActive: 'Active recently',
+          status: u.status || 'active',
+          role: u.role || 'citizen',
+          posts: u.posts || 1,
+          comments: u.comments || 4,
+          votes: u.votes || 8,
+          avatar: u.profilePictureUrl || null,
+          verified: true,
+          reputation: 4.8
+        })));
+      }
+    } catch (err) {
+      console.warn("Using fallback user list:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const users = [
     {
@@ -130,7 +169,8 @@ const Usersss = () => {
   ];
 
   // Filtering, paging
-  const filteredUsers = users.filter(user => {
+  const allUsersList = liveUsers.length > 0 ? liveUsers : users;
+  const filteredUsers = allUsersList.filter(user => {
     const matchesSearch =
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||

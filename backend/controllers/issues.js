@@ -100,14 +100,21 @@ const getIssueById = asyncHandler(async (req, res) => {
 // ─── UPDATE ISSUE STATUS (admin) ──────────────────────────────────────────────
 const updateIssueStatus = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { newStatus, adminNote } = req.body;
+  const statusInput = req.body.newStatus || req.body.status;
+  const { adminNote } = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).json({ error: 'Invalid issue ID' });
   }
 
   const validStatuses = ['Pending', 'In Progress', 'Resolved', 'Rejected'];
-  if (!validStatuses.includes(newStatus)) {
+  
+  // Find case-insensitive match if applicable
+  const matchedStatus = validStatuses.find(
+    s => s.toLowerCase() === (statusInput || '').toLowerCase()
+  );
+
+  if (!matchedStatus) {
     return res.status(400).json({ error: `Status must be one of: ${validStatuses.join(', ')}` });
   }
 
@@ -115,7 +122,7 @@ const updateIssueStatus = asyncHandler(async (req, res) => {
   if (!issue) return res.status(404).json({ error: 'Issue not found' });
 
   const oldStatus = issue.status;
-  issue.status = newStatus;
+  issue.status = matchedStatus;
   if (adminNote) issue.adminNote = adminNote;
   await issue.save();
 
@@ -216,12 +223,20 @@ const getIssueStats = asyncHandler(async (req, res) => {
 
 // ─── GET MY ISSUES (authenticated user) ──────────────────────────────────────
 const getMyIssues = asyncHandler(async (req, res) => {
-  const issues = await Issue.find({
-    $or: [
-      { submittedBy: req.user.id },
-      { email: req.user.email },
-    ],
-  }).sort({ createdAt: -1 });
+  const userId = req.user?.id || req.user?._id;
+  const userEmail = req.user?.email ? req.user.email.toLowerCase().trim() : '';
+
+  const queryConditions = [];
+  if (userId) {
+    queryConditions.push({ submittedBy: userId });
+  }
+  if (userEmail) {
+    queryConditions.push({ email: { $regex: new RegExp(`^${userEmail}$`, 'i') } });
+  }
+
+  const issues = queryConditions.length > 0
+    ? await Issue.find({ $or: queryConditions }).sort({ createdAt: -1 })
+    : [];
 
   res.json(issues);
 });

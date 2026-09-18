@@ -22,6 +22,9 @@ import {
   ChevronRight
 } from "lucide-react";
 
+import { issuesAPI } from "../utils/api";
+import { toast } from "react-hot-toast";
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [issues, setIssues] = useState([]);
@@ -39,73 +42,53 @@ const AdminDashboard = () => {
     { key: 'settings', label: 'Settings', icon: Settings, route: '/admin/settings' },
   ];
 
-  const mockIssues = [
-    {
-      _id: "1",
-      title: "Pothole on Main Street",
-      description: "Large pothole causing traffic issues near downtown area",
-      phone: "+91 8264192031",
-      email: "ragesh1251@gmail.com",
-      status: "In Progress",
-      priority: "High",
-      dateReported: "2024-08-06",
-      category: "Infrastructure"
-    },
-    {
-      _id: "2",
-      title: "Broken Street Light",
-      description: "Street light not working on Oak Avenue, creating safety concerns",
-      phone: "+91 758393985",
-      email: "kunalar12@gmail.com",
-      status: "Pending",
-      priority: "Medium",
-      dateReported: "2024-08-05",
-      category: "Public Safety"
-    },
-    {
-      _id: "3",
-      title: "Park Maintenance Request",
-      description: "Playground equipment needs repair at Central Park",
-      phone: "+91 8793837454",
-      email: "meerasingh123@gmail.com",
-      status: "Resolved",
-      priority: "Low",
-      dateReported: "2024-08-04",
-      category: "Parks & Recreation"
-    }
-  ];
-
-  const fetchIssues = React.useCallback(async () => {
+  const fetchIssues = React.useCallback(async (showToast = false) => {
     setIsRefreshing(true);
-    setTimeout(() => {
-      setIssues(mockIssues);
+    try {
+      const res = await issuesAPI.getAll({ limit: 100 });
+      const issueList = Array.isArray(res) ? res : (res?.issues || []);
+      setIssues(issueList);
+      if (showToast) toast.success("Live issues loaded from database");
+    } catch (err) {
+      console.error("Error fetching live issues:", err);
+      toast.error("Failed to fetch live issues from server");
+    } finally {
       setIsRefreshing(false);
-    }, 600);
+    }
   }, []);
 
   useEffect(() => { fetchIssues(); }, [fetchIssues]);
 
   const filteredIssues = issues.filter(issue => {
-    const matchesSearch = issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          issue.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const titleMatch = (issue.title || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const descMatch = (issue.description || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const locationMatch = (issue.location || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = titleMatch || descMatch || locationMatch;
     const matchesStatus = statusFilter === "all" || issue.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const stats = {
     total: issues.length,
-    pending: issues.filter(i => i.status === "Pending").length,
+    pending: issues.filter(i => (i.status || "Pending") === "Pending").length,
     inProgress: issues.filter(i => i.status === "In Progress").length,
     resolved: issues.filter(i => i.status === "Resolved").length,
     rejected: issues.filter(i => i.status === "Rejected").length
   };
 
-  const handleStatusChange = (issueId, newStatus) => {
-    setIssues(prev => 
-      prev.map(issue => 
-        issue._id === issueId ? { ...issue, status: newStatus } : issue
-      )
-    );
+  const handleStatusChange = async (issueId, newStatus) => {
+    try {
+      await issuesAPI.updateStatus(issueId, { newStatus, status: newStatus });
+      setIssues(prev => 
+        prev.map(issue => 
+          issue._id === issueId ? { ...issue, status: newStatus } : issue
+        )
+      );
+      toast.success(`Issue status updated to ${newStatus}`);
+    } catch (err) {
+      console.error("Failed to update status:", err);
+      toast.error(err.message || "Failed to update status on server");
+    }
   };
 
   return (

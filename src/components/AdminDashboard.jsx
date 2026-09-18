@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 
 import { motion } from "framer-motion";
+import { issuesAPI } from "../utils/api";
+import { toast } from "react-hot-toast";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -143,12 +145,19 @@ const AdminDashboard = () => {
     "Low": "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700"
   };
 
-  const fetchIssues = React.useCallback(async () => {
+  const fetchIssues = React.useCallback(async (showToast = false) => {
     setIsRefreshing(true);
-    setTimeout(() => {
-      setIssues(mockIssues);
+    try {
+      const res = await issuesAPI.getAll({ limit: 100 });
+      const issueList = Array.isArray(res) ? res : (res?.issues || []);
+      setIssues(issueList);
+      if (showToast) toast.success("Live issues loaded");
+    } catch (err) {
+      console.error("Error fetching live issues:", err);
+      toast.error("Failed to fetch live issues from server");
+    } finally {
       setIsRefreshing(false);
-    }, 1000);
+    }
   }, []);
 
   useEffect(() => {
@@ -156,26 +165,34 @@ const AdminDashboard = () => {
   }, [fetchIssues]);
 
   const filteredIssues = issues.filter(issue => {
-    const matchesSearch = issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         issue.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const titleMatch = (issue.title || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const descMatch = (issue.description || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = titleMatch || descMatch;
     const matchesStatus = statusFilter === "all" || issue.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const stats = {
     total: issues.length,
-    pending: issues.filter(i => i.status === "Pending").length,
+    pending: issues.filter(i => (i.status || "Pending") === "Pending").length,
     inProgress: issues.filter(i => i.status === "In Progress").length,
     resolved: issues.filter(i => i.status === "Resolved").length,
     rejected: issues.filter(i => i.status === "Rejected").length
   };
 
-  const handleStatusChange = (issueId, newStatus) => {
-    setIssues(prev => 
-      prev.map(issue => 
-        issue._id === issueId ? { ...issue, status: newStatus } : issue
-      )
-    );
+  const handleStatusChange = async (issueId, newStatus) => {
+    try {
+      await issuesAPI.updateStatus(issueId, { newStatus, status: newStatus });
+      setIssues(prev => 
+        prev.map(issue => 
+          issue._id === issueId ? { ...issue, status: newStatus } : issue
+        )
+      );
+      toast.success(`Issue status updated to ${newStatus}`);
+    } catch (err) {
+      console.error("Failed to update status:", err);
+      toast.error(err.message || "Failed to update status on server");
+    }
   };
 
 
