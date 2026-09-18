@@ -67,6 +67,31 @@ Civix now includes a standalone interactive simulator that allows users to step 
 - 🏅 **XP & Badges** – Earn experience points and unlock achievement badges locally  
 - 💡 **Frontend-Only Logic** – Built entirely in React with `localStorage` persistence for decision history and XP tracking
 
+### 🏛️ Verified Public Governance Portals & Official Data Sources
+Every section now includes a clear **Section Purpose & Guide** banner detailing its purpose, usage steps, and official data provenance:
+
+| Portal / Section | Route | Official Authenticated Source | Geographic Scope |
+| :--- | :--- | :--- | :--- |
+| **Transit Stops** | `/transport` | OpenStreetMap Overpass (Live GPS) + Delhi DTC GTFS | Dynamic GPS Nearby (Nationwide) + Delhi |
+| **Train Schedules** | `/train` | Ministry of Railways / data.gov.in | All India Indian Railways Network |
+| **Govt Schemes** | `/govt-schemes` | Ministry of Social Justice & Empowerment (data.gov.in) | All 28 States & 8 UTs |
+| **Union Budget** | `/budget` | Rajya Sabha / Ministry of Finance (sansad.in) | Union & State Allocations |
+| **Disaster Relief & NFSA** | `/sdrf` | Ministry of Home Affairs & Consumer Affairs | State & District-wise Quotas |
+| **Civic Statistics** | `/civic-stats` | Census of India & Ministry of Jal Shakti | National & State Indicators |
+| **School Data** | `/school` | UDISE+ / Ministry of Education (udiseplus.gov.in) | State, District & Block Level |
+| **Voter & Election Portal** | `/elections-info` | Election Commission of India (eci.gov.in) | National & Constituency Level |
+| **Vehicle Services** | `/vehical` | MoRTH Parivahan Seva / Vahan / Sarathi | All State & UT RTOs |
+| **Emergency Services** | `/nearby-services`| OpenStreetMap Overpass Geocoder | Live 10km GPS Radius |
+
+### 🗳️ Community Civic Voting & Lost-and-Found
+- **City & Area Filtering**: Toggle between **"📍 In My City / Area"** (auto-detected from your verified profile) and **"🌐 All Areas / Nationwide"**.
+- **Live Civic Upvoting**: Real-time community upvoting on reported municipal hazards (potholes, streetlights, sanitation issues) to elevate municipal priority.
+- **Lost & Found Registry**: Area-based notices to reunite lost belongings with citizens.
+
+### 🛡️ Unified Navigation & Admin Sync
+- **Smart Back Navigation**: Integrated universal `BackButton` component across all subpages with history detection and dashboard fallback.
+- **Live Admin Redressal**: Real-time status updates (*Pending → In Progress → Resolved → Rejected*) synchronized between the Admin Dashboard and Citizen's *My Complaints* portal.
+
 ## 🛠️ Tech Stack  
 ### Frontend  
 - React.js  
