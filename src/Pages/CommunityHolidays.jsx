@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, Calendar, AlertCircle, Globe, Sparkles, MapPin } from "lucide-react";
+import BackButton from "../components/ui/BackButton";
+import SectionGuide from "../components/ui/SectionGuide";
 
 export default function Holidays() {
   const [holidays, setHolidays] = useState([]);
@@ -82,7 +84,10 @@ export default function Holidays() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50/40 via-white to-emerald-50/60 dark:from-emerald-950 dark:via-gray-900 dark:to-green-950 p-6">
-      <div className="max-w-7xl mx-auto space-y-10">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div>
+          <BackButton />
+        </div>
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-7">
           <div className="flex items-center gap-5">
@@ -117,6 +122,20 @@ export default function Holidays() {
             </div>
           </div>
         </div>
+
+        {/* Section Guide */}
+        <SectionGuide
+          title="National & Community Gazette Public Holidays"
+          purpose="Provides an official calendar of gazetted national holidays, religious festivities, and cultural observances for citizen scheduling, municipal office closures, and public transit schedules."
+          steps={[
+            "Select your country/region from the dropdown to load the official holiday calendar.",
+            "Review holiday dates, day-of-week designations, and cultural significance descriptions.",
+            "Use this schedule to identify days when government administrative offices & banks are closed."
+          ]}
+          source="Ministry of Personnel, Public Grievances and Pensions (Gazetted Holidays List)"
+          scope="National & Central Government Public Holidays Calendar"
+          category="Public Schedule & Observances"
+        />
 
         {/* Loading */}
         {loading && (

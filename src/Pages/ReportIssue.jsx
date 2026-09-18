@@ -18,6 +18,7 @@ import {
 import { useAuthContext } from "../context/AuthContext";
 import { toast } from "react-hot-toast";
 import { issuesAPI } from "../utils/api";
+import SectionGuide from "../components/ui/SectionGuide";
 
 const FormInput = ({
   type = "text",
@@ -334,6 +335,22 @@ export default function ReportIssue() {
           <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Report a Civic Issue</h1>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">Help improve your community by reporting local problems directly to governance.</p>
         </div>
+
+        {/* Section Purpose Guide */}
+        <SectionGuide
+          title="Citizen Grievance & Issue Reporting Desk"
+          purpose="This portal enables citizens anywhere to lodge civic infrastructure complaints directly into the municipal tracking system. Issues are routed by department (roads, lighting, sanitation, water, drainage) and assigned for resolution."
+          steps={[
+            "Provide accurate contact details (pre-filled from your verified profile) for ticket updates.",
+            "Enter a descriptive title and detailed description outlining the civic failure.",
+            "Use 'Get Current GPS Location' to capture precise coordinates, or enter the street address.",
+            "Attach clear photo evidence of the issue (road damage, garbage heap, broken light).",
+            "Submit the complaint to receive a live tracking ticket ID and email confirmation."
+          ]}
+          source="Civix Civic Governance System & Local Municipal Corporation Routing"
+          scope="Local Ward / Municipality / District Level (Active Nationwide across all registered wards)"
+          category="Civic Redressal"
+        />
 
         {/* Form Container */}
         <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/50 dark:border-slate-800 p-6 sm:p-8 space-y-5">

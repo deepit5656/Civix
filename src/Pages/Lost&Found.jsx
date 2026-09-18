@@ -1,37 +1,87 @@
-import { useState } from "react";
-import { Search, Plus, MapPin, Calendar, User, Phone, Mail, X } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Search, Plus, MapPin, Calendar, User, Phone, Mail, X, Building, Compass } from "lucide-react";
+import BackButton from "../components/ui/BackButton";
+import SectionGuide from "../components/ui/SectionGuide";
+import { useAuthContext } from "../context/AuthContext";
+import { toast } from "react-hot-toast";
 
 export default function LostAndFoundPage() {
-  const [items, setItems] = useState([]);
+  const { user } = useAuthContext();
+  const [scopeTab, setScopeTab] = useState("all"); // "my_area" or "all"
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [showForm, setShowForm] = useState(false);
+
+  // Extract user city
+  const userCity = useMemo(() => {
+    if (!user?.location) return "";
+    return user.location.split(",")[0]?.trim() || "";
+  }, [user?.location]);
+
+  const [items, setItems] = useState([
+    {
+      id: "lf-1",
+      type: "lost",
+      name: "Black Leather Wallet with ID",
+      description: "Lost near City Center Metro Station exit gate 2. Contains Aadhaar card and Metro card.",
+      location: userCity || "Anand",
+      date: "2025-01-14",
+      contactName: user?.name || "Deep Patel",
+      contactPhone: user?.phone || "+91 98765 43210",
+      contactEmail: user?.email || "citizen@civix.gov.in"
+    },
+    {
+      id: "lf-2",
+      type: "found",
+      name: "Silver Car Keys (Honda)",
+      description: "Found on public park bench near children play area. Has a red key-chain.",
+      location: userCity || "Anand",
+      date: "2025-01-15",
+      contactName: "Community Patrol Officer",
+      contactPhone: "+91 98234 56789",
+      contactEmail: "patrol@civix.gov.in"
+    },
+    {
+      id: "lf-3",
+      type: "lost",
+      name: "Dell Laptop Charger 65W",
+      description: "Left behind in Municipal Library reading room 3.",
+      location: "Central Library",
+      date: "2025-01-12",
+      contactName: "Priya Sharma",
+      contactPhone: "+91 98123 45678",
+      contactEmail: "priya.s@example.com"
+    }
+  ]);
+
   const [formData, setFormData] = useState({
     type: "lost",
     name: "",
     description: "",
-    location: "",
-    date: "",
-    contactName: "",
-    contactPhone: "",
-    contactEmail: "",
+    location: userCity || user?.location || "",
+    date: new Date().toISOString().split("T")[0],
+    contactName: user?.name || "",
+    contactPhone: user?.phone || "",
+    contactEmail: user?.email || "",
   });
 
   const handleSubmit = () => {
     if (!formData.name || !formData.description || !formData.location || !formData.date || 
         !formData.contactName || !formData.contactPhone || !formData.contactEmail) {
+      toast.error("Please fill in all required fields.");
       return;
     }
-    setItems([...items, { ...formData, id: Date.now(), type: formData.type }]);
+    setItems([{ ...formData, id: Date.now(), type: formData.type }, ...items]);
+    toast.success("Item notice published to community board!");
     setFormData({
       type: "lost",
       name: "",
       description: "",
-      location: "",
-      date: "",
-      contactName: "",
-      contactPhone: "",
-      contactEmail: "",
+      location: userCity || user?.location || "",
+      date: new Date().toISOString().split("T")[0],
+      contactName: user?.name || "",
+      contactPhone: user?.phone || "",
+      contactEmail: user?.email || "",
     });
     setShowForm(false);
   };
@@ -39,9 +89,17 @@ export default function LostAndFoundPage() {
   const filteredItems = items.filter((item) => {
     const matchesTab = activeTab === "all" || item.type === activeTab;
     const matchesSearch =
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesTab && matchesSearch;
+      (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.description || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.location || "").toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Scope filter
+    let matchesScope = true;
+    if (scopeTab === "my_area" && userCity) {
+      matchesScope = (item.location || "").toLowerCase().includes(userCity.toLowerCase());
+    }
+
+    return matchesTab && matchesSearch && matchesScope;
   });
 
   return (
@@ -51,8 +109,11 @@ export default function LostAndFoundPage() {
       <div className="absolute bottom-32 left-20 w-60 h-60 bg-emerald-200/15 dark:bg-green-500/8 rounded-full blur-3xl pointer-events-none animate-pulse delay-1000"></div>
 
       <div className="relative z-10 max-w-7xl mx-auto">
+        <div className="mb-6">
+          <BackButton />
+        </div>
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
           <div>
             <h1 className="text-4xl font-extrabold bg-gradient-to-r from-emerald-800 via-green-600 to-teal-500 dark:from-white dark:via-green-300 dark:to-green-400 bg-clip-text text-transparent mb-2 tracking-tight">
               Lost & Found
@@ -68,13 +129,62 @@ export default function LostAndFoundPage() {
           </button>
         </div>
 
+        {/* Section Guide */}
+        <SectionGuide
+          title="Community Lost & Found Item Registry"
+          purpose="A community-powered recovery bulletin where citizens can post lost possessions (keys, wallets, documents, pets) or report found items to safely reconnect them with their rightful owners."
+          steps={[
+            "Browse existing listings or use the search bar to check if your lost item was already found.",
+            "Switch between tabs: 'All', 'Lost Items', or 'Found Items'.",
+            "Click '+ Add Item' to publish a new notice with item photo/description, location last seen, and your contact info.",
+            "Directly call or email verified contacts when you recognize an item."
+          ]}
+          source="Civix Community Notice Registry"
+          scope="Local Community & City-Wide"
+          category="Citizen Community Recovery"
+        />
+
+        {/* Location Scope Selector */}
+        <div className="bg-white/90 dark:bg-emerald-950/70 p-3 rounded-2xl shadow-sm border border-emerald-100 dark:border-emerald-900/60 mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={() => setScopeTab("my_area")}
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                scopeTab === "my_area"
+                  ? "bg-gradient-to-r from-emerald-600 to-green-600 text-white shadow-md shadow-emerald-600/20"
+                  : "bg-emerald-50/80 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-100"
+              }`}
+            >
+              <Building className="w-4 h-4" />
+              <span>In My City / Area {userCity ? `(${userCity})` : ""}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setScopeTab("all")}
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                scopeTab === "all"
+                  ? "bg-gradient-to-r from-emerald-600 to-green-600 text-white shadow-md shadow-emerald-600/20"
+                  : "bg-emerald-50/80 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-100"
+              }`}
+            >
+              <Compass className="w-4 h-4" />
+              <span>All Locations & Cities</span>
+            </button>
+          </div>
+          <span className="text-xs text-emerald-700/80 dark:text-emerald-300/80 font-medium px-2">
+            Showing {filteredItems.length} notice{filteredItems.length === 1 ? '' : 's'}
+          </span>
+        </div>
+
         {/* Search & Tabs */}
         <div className="flex flex-col lg:flex-row gap-4 mb-10">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400 w-5 h-5" />
             <input
               type="text"
-              placeholder="Search items by name or description..."
+              placeholder="Search items by name, description, or city/area..."
               className="w-full pl-12 pr-4 py-4 bg-white/70 dark:bg-emerald-900/80 backdrop-blur border border-emerald-100/70 dark:border-emerald-900/50 rounded-xl text-emerald-900 dark:text-white placeholder:text-emerald-500 font-medium shadow focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}

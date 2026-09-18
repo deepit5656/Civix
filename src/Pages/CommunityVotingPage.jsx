@@ -1,5 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import BackButton from "../components/ui/BackButton";
+import SectionGuide from "../components/ui/SectionGuide";
+import { useAuthContext } from "../context/AuthContext";
+import { issuesAPI } from "../utils/api";
+import { toast } from "react-hot-toast";
 import {
   MapPin,
   Clock,
@@ -10,18 +15,31 @@ import {
   ChevronDown,
   Moon,
   Sun,
+  Building,
+  Compass,
+  RefreshCw
 } from "lucide-react";
 
 const CommunityVotingPage = () => {
+  const { user } = useAuthContext();
+  const [scopeTab, setScopeTab] = useState("all"); // 'my_area' or 'all'
   const [selectedArea, setSelectedArea] = useState("All Areas");
   const [sortBy, setSortBy] = useState("Most Votes");
   const [isDark, setIsDark] = useState(false);
   const [votedIssues, setVotedIssues] = useState({});
   const [confetti, setConfetti] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [issues, setIssues] = useState([
+  // Extract user city / area from profile location
+  const userCity = useMemo(() => {
+    if (!user?.location) return "";
+    const parts = user.location.split(",");
+    return parts[0]?.trim() || "";
+  }, [user?.location]);
+
+  const defaultMockIssues = [
     {
-      id: 1,
+      id: "mock-1",
       title: "Pothole on Main Street",
       area: "Noida",
       daysOpen: 3,
@@ -31,7 +49,7 @@ const CommunityVotingPage = () => {
       priority: "high",
     },
     {
-      id: 2,
+      id: "mock-2",
       title: "Broken Street Light",
       area: "East Delhi",
       daysOpen: 5,
@@ -41,7 +59,7 @@ const CommunityVotingPage = () => {
       priority: "medium",
     },
     {
-      id: 3,
+      id: "mock-3",
       title: "Garbage Not Collected",
       area: "South Delhi",
       daysOpen: 7,
@@ -51,7 +69,7 @@ const CommunityVotingPage = () => {
       priority: "low",
     },
     {
-      id: 4,
+      id: "mock-4",
       title: "Water Leakage Issue",
       area: "West Delhi",
       daysOpen: 2,
@@ -60,17 +78,59 @@ const CommunityVotingPage = () => {
       status: "In Progress",
       priority: "high",
     },
-  ]);
-
-  const areas = [
-    "All Areas",
-    "Noida",
-    "East Delhi",
-    "West Delhi",
-    "North Delhi",
-    "South Delhi",
-    "Ghaziabad",
   ];
+
+  const [issues, setIssues] = useState(defaultMockIssues);
+
+  const fetchLiveIssues = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const res = await issuesAPI.getAll({ limit: 100 });
+      const liveList = Array.isArray(res) ? res : (res?.issues || []);
+      
+      if (liveList.length > 0) {
+        const transformedLive = liveList.map((item, idx) => {
+          const createdDate = item.createdAt ? new Date(item.createdAt) : new Date();
+          const diffDays = Math.max(1, Math.floor((new Date() - createdDate) / (1000 * 60 * 60 * 24)));
+          
+          return {
+            id: item._id || `live-${idx}`,
+            title: item.title || "Civic Complaint",
+            area: item.location ? item.location.split(",")[0].trim() : (item.category || "Local Ward"),
+            fullLocation: item.location || "Local Ward",
+            daysOpen: diffDays,
+            votes: (item.upvotes || 0) + 1,
+            accidentsReported: item.priority === 'High' ? 1 : 0,
+            status: item.status || "Open",
+            priority: item.priority ? item.priority.toLowerCase() : "medium",
+          };
+        });
+
+        // Merge live issues with defaults
+        setIssues([...transformedLive, ...defaultMockIssues]);
+      }
+    } catch (err) {
+      console.warn("Could not load live issues for voting, using local set:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchLiveIssues();
+  }, [fetchLiveIssues]);
+
+  // Extract all unique areas
+  const areas = useMemo(() => {
+    const set = new Set();
+    set.add("All Areas");
+    if (userCity) set.add(userCity);
+    issues.forEach(i => {
+      if (i.area) set.add(i.area);
+    });
+    return Array.from(set);
+  }, [issues, userCity]);
+
   const sortOptions = [
     "Most Votes",
     "Most Recent",
@@ -79,13 +139,26 @@ const CommunityVotingPage = () => {
   ];
 
   const filteredIssues = issues
-    .filter(
-      (issue) => selectedArea === "All Areas" || issue.area === selectedArea
-    )
+    .filter((issue) => {
+      // Tab filter
+      if (scopeTab === "my_area" && userCity) {
+        const itemLocation = ((issue.area || "") + " " + (issue.fullLocation || "")).toLowerCase();
+        if (!itemLocation.includes(userCity.toLowerCase())) {
+          return false;
+        }
+      }
+      
+      // Dropdown filter
+      if (selectedArea !== "All Areas" && issue.area !== selectedArea) {
+        return false;
+      }
+
+      return true;
+    })
     .sort((a, b) => {
       if (sortBy === "Most Votes") return b.votes - a.votes;
-      if (sortBy === "Most Recent") return b.daysOpen - a.daysOpen;
-      if (sortBy === "Longest Open") return a.daysOpen - b.daysOpen;
+      if (sortBy === "Most Recent") return a.daysOpen - b.daysOpen;
+      if (sortBy === "Longest Open") return b.daysOpen - a.daysOpen;
       if (sortBy === "Most Accidents")
         return b.accidentsReported - a.accidentsReported;
       return 0;
@@ -106,6 +179,7 @@ const CommunityVotingPage = () => {
     }));
     if (!hasVoted) {
       setConfetti(id);
+      toast.success("Vote recorded! Thank you for prioritizing this issue.");
       setTimeout(() => setConfetti(null), 1200);
     }
   };
@@ -149,27 +223,44 @@ const CommunityVotingPage = () => {
     <div className={isDark ? "dark" : ""}>
       <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:from-green-950 dark:via-gray-900 dark:to-emerald-900 transition-colors duration-300">
         {/* Header */}
-        <div className="max-w-3xl mx-auto px-4 py-10 text-center relative">
+        <div className="max-w-3xl mx-auto px-4 pt-8 pb-4 relative">
+          <div className="flex items-center justify-between mb-4">
+            <BackButton />
+            <button
+              onClick={() => setIsDark(!isDark)}
+              className="p-2.5 rounded-2xl bg-white/80 dark:bg-green-900/80 backdrop-blur-md border border-slate-200 dark:border-green-800 text-slate-700 dark:text-slate-200 hover:scale-105 transition shadow-sm"
+              aria-label="Toggle Dark Mode"
+            >
+              {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+          </div>
           <motion.h1
-            className="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-400 dark:to-emerald-400 bg-clip-text text-transparent"
+            className="text-4xl sm:text-5xl font-extrabold text-center bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-400 dark:to-emerald-400 bg-clip-text text-transparent"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
           >
             Community Voting
           </motion.h1>
-          <p className="mt-3 text-green-700 dark:text-green-300">
+          <p className="mt-3 text-center text-green-700 dark:text-green-300">
             Support civic issues with one click and make a difference.
           </p>
-          <button
-            onClick={() => setIsDark(!isDark)}
-            className="absolute right-4 top-4 p-2 rounded-full bg-green-100 dark:bg-green-900 hover:scale-105 transition"
-            aria-label="Toggle Dark Mode"
-          >
-            {isDark ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
         </div>
 
         <div className="max-w-3xl mx-auto px-4">
+          <SectionGuide
+            title="Community Civic Upvoting & Issue Prioritization"
+            purpose="Enables local citizens to upvote pending community issues (such as road hazards, broken lights, and water leaks). Ward councilors and municipal administrators use these vote counts to prioritize emergency repairs and allocate civic budgets."
+            steps={[
+              "Filter neighborhood issues by area or sort by Most Votes, Most Recent, or Most Accidents.",
+              "Click the Upvote button on any civic problem to raise its urgency ranking.",
+              "Track issue status transitions from 'Open' to 'In Progress' and 'Resolved'.",
+              "Share high-priority issues with neighbors to gather collective community momentum."
+            ]}
+            source="Civix Civic Democratic Voting Engine"
+            scope="Local Ward & City Zones"
+            category="Community Governance"
+          />
+
           {/* Stats */}
           <motion.div
             className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8"
@@ -220,6 +311,50 @@ const CommunityVotingPage = () => {
             ))}
           </motion.div>
 
+          {/* Location Scope Selector */}
+          <div className="bg-white/90 dark:bg-green-950/70 p-3 rounded-2xl shadow-sm border border-green-100 dark:border-green-800 mb-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={() => {
+                  setScopeTab("my_area");
+                  if (userCity) setSelectedArea("All Areas");
+                }}
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                  scopeTab === "my_area"
+                    ? "bg-gradient-to-r from-emerald-600 to-green-600 text-white shadow-md shadow-emerald-600/20"
+                    : "bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                }`}
+              >
+                <Building className="w-4 h-4" />
+                <span>My City / Area {userCity ? `(${userCity})` : ""}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setScopeTab("all")}
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                  scopeTab === "all"
+                    ? "bg-gradient-to-r from-emerald-600 to-green-600 text-white shadow-md shadow-emerald-600/20"
+                    : "bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                }`}
+              >
+                <Compass className="w-4 h-4" />
+                <span>All Cities & Areas</span>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={fetchLiveIssues}
+              disabled={isLoading}
+              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 rounded-xl hover:bg-emerald-100 transition-all"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
+              <span>Refresh Issues</span>
+            </button>
+          </div>
+
           {/* Filters */}
           <motion.div
             className="bg-white/90 dark:bg-green-950/70 p-6 rounded-xl shadow border border-green-100 dark:border-green-800 mb-8"
@@ -229,11 +364,11 @@ const CommunityVotingPage = () => {
             <div className="flex items-center space-x-3 mb-4">
               <Filter className="w-5 h-5 text-green-600 dark:text-green-400" />
               <h3 className="text-lg font-semibold text-green-900 dark:text-green-200">
-                Filters
+                Filter & Sort
               </h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {[{ label: "Area", value: selectedArea, set: setSelectedArea, options: areas },
+              {[{ label: "Filter by City / Zone", value: selectedArea, set: setSelectedArea, options: areas },
                 { label: "Sort By", value: sortBy, set: setSortBy, options: sortOptions }]
                 .map(({ label, value, set, options }) => (
                   <div key={label} className="space-y-2">
@@ -244,7 +379,7 @@ const CommunityVotingPage = () => {
                       <select
                         value={value}
                         onChange={(e) => set(e.target.value)}
-                        className="w-full appearance-none bg-white dark:bg-green-950 border border-green-200 dark:border-green-700 rounded-xl px-4 py-3 text-green-900 dark:text-green-100 focus:ring-2 focus:ring-green-400 dark:focus:ring-green-700 transition"
+                        className="w-full appearance-none bg-white dark:bg-green-950 border border-green-200 dark:border-green-700 rounded-xl px-4 py-3 text-green-900 dark:text-green-100 focus:ring-2 focus:ring-green-400 dark:focus:ring-green-700 transition font-semibold"
                       >
                         {options.map((opt) => (
                           <option key={opt} value={opt}>
