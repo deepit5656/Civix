@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import BackButton from "../components/ui/BackButton";
+import SectionGuide from "../components/ui/SectionGuide";
 
 export default function NearbyServices() {
   const [coords, setCoords] = useState(null);
@@ -149,9 +151,12 @@ export default function NearbyServices() {
       <div className="absolute bottom-20 left-10 w-48 h-48 bg-green-300/15 dark:bg-green-500/8 rounded-full blur-3xl animate-pulse delay-1000"></div>
 
       <div className="relative z-10 max-w-5xl mx-auto p-6">
+        <div className="mb-6">
+          <BackButton />
+        </div>
         {/* Header */}
         <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-3xl border border-green-100/60 dark:border-green-800/40 p-8 mb-8 shadow-lg shadow-green-100/20 dark:shadow-green-900/10">
-          <div className="flex items-center gap-6 mb-8">
+          <div className="flex items-center gap-6 mb-6">
             <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg shadow-green-500/25">
               <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -167,6 +172,21 @@ export default function NearbyServices() {
               </p>
             </div>
           </div>
+
+          <SectionGuide
+            title="Live Emergency & Critical Infrastructure Locator"
+            purpose="Enables citizens anywhere in the country to discover nearby critical infrastructure including hospitals, trauma centers, police stations, and fire stations within a 10km radius of their current GPS location."
+            steps={[
+              "Allow GPS / Location permission on your device or browser when prompted.",
+              "Choose whether to view All emergency amenities or filter specifically for Hospitals, Police, or Fire Stations.",
+              "Click 'Find Services Near Me' to query real-time OpenStreetMap geographic coordinates.",
+              "Click 'Get Directions' on any amenity card to open instant turn-by-turn navigation in Google Maps."
+            ]}
+            source="OpenStreetMap (OSM) Live Overpass API Geocoding Engine"
+            scope="Dynamic Live GPS Radius (Works anywhere in India and globally)"
+            category="Emergency Infrastructure"
+            officialLink="https://www.openstreetmap.org"
+          />
 
           {/* Controls */}
           <div className="flex flex-col md:flex-row gap-4">

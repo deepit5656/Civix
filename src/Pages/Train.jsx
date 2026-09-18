@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Papa from "papaparse";
+import BackButton from "../components/ui/BackButton";
+import SectionGuide from "../components/ui/SectionGuide";
 
 const TrainSchedule = () => {
   const [data, setData] = useState([]);
@@ -67,25 +69,38 @@ const TrainSchedule = () => {
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JhcGgiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDEwMCAwIEwgMCAwIDAgMTAwIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMzQsIDE5NywgOTQsIDAuMSkiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmFwaCkiLz48L3N2Zz4=')] opacity-30"></div>
       
       <div className="relative bg-white/95 backdrop-blur-xl border-b border-green-200/50 sticky top-0 z-50 shadow-lg">
-        <div className="max-w-7xl mx-auto px-8 py-6">
-          <div className="flex items-center justify-center space-x-4">
+        <div className="max-w-7xl mx-auto px-8 py-5 flex flex-col md:flex-row items-center justify-between gap-4">
+          <BackButton />
+          <div className="flex items-center justify-center space-x-4 flex-1 pr-0 md:pr-16">
             <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl shadow-lg">
               <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m-6 3l6-3" />
               </svg>
             </div>
             <div className="text-center">
-              <h1 className="text-4xl font-extrabold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent">
                 Train Schedule
               </h1>
-              <div className="h-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full mt-2 w-32 mx-auto"></div>
-              <p className="text-emerald-600 font-semibold mt-2">Powered by Civix</p>
+              <p className="text-emerald-600 font-semibold text-xs sm:text-sm mt-0.5">Powered by Civix</p>
             </div>
           </div>
         </div>
       </div>
 
       <div className="relative max-w-7xl mx-auto px-8 py-8">
+        <SectionGuide
+          title="Indian Railways Schedule & Train Directory"
+          purpose="This section provides nationwide train timetable and schedule information across Indian Railways stations, showing sequence numbers, arrival/departure timings, distances, and origin/destination stations."
+          howToUse={[
+            "Type any Train Name (e.g. 'Express', 'Superfast', or specific route) or Station Name (e.g. 'Mumbai', 'Ratnagiri', 'Sawantwadi') in the search bar.",
+            "View real sequence stops, scheduled arrival and departure times, and total route kilometers.",
+            "Search works nationwide across indexed Indian Railways network schedules (not limited to any single city).",
+          ]}
+          dataSource="Ministry of Railways / Open Government Data (data.gov.in) Official Timetable"
+          sourceUrl="https://data.gov.in/"
+          scope="National (All Indian Railways Stations)"
+        />
+
         <div className="mb-8">
           <div className="relative max-w-2xl mx-auto group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-green-600 to-emerald-600 rounded-3xl blur opacity-20 group-hover:opacity-30 transition duration-300"></div>
