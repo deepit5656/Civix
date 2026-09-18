@@ -50,7 +50,8 @@ const Login = () => {
       
       const isComplete = Boolean(
         data.user?.isProfileComplete ||
-        (data.user?.name && data.user?.email && data.user?.location)
+        (data.user?.name && data.user?.email && data.user?.location) ||
+        localStorage.getItem('profileComplete') === 'true'
       );
       if (isComplete) {
         localStorage.setItem('profileComplete', 'true');
@@ -111,7 +112,8 @@ const Login = () => {
       
       const isComplete = Boolean(
         data.user?.isProfileComplete ||
-        (data.user?.name && data.user?.email && data.user?.location)
+        (data.user?.name && data.user?.email && data.user?.location) ||
+        localStorage.getItem('profileComplete') === 'true'
       );
       if (isComplete) {
         localStorage.setItem('profileComplete', 'true');

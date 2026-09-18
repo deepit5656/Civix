@@ -71,9 +71,11 @@ class CSRFManager {
    */
   async createHeaders(additionalHeaders = {}) {
     const token = await this.getToken();
+    const authToken = localStorage.getItem('civix_token');
     return {
       "X-CSRF-Token": token,
       "Content-Type": "application/json",
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
       ...additionalHeaders,
     };
   }
@@ -93,6 +95,7 @@ class CSRFManager {
     if (needsCSRF) {
       try {
         const token = await this.getToken();
+        const authToken = localStorage.getItem('civix_token');
 
         // Handle FormData differently
         if (options.body instanceof FormData) {
@@ -102,6 +105,7 @@ class CSRFManager {
           // Ensure headers don't override Content-Type for FormData
           options.headers = {
             "X-CSRF-Token": token,
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
             ...(options.headers || {}),
           };
           // Remove Content-Type if it exists to let browser set boundary

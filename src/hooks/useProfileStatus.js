@@ -1,23 +1,38 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuthContext } from '../context/AuthContext';
 
 const useProfileStatus = () => {
   const { user, isAuthenticated } = useAuthContext();
-  const [isProfileComplete, setIsProfileComplete] = useState(false);
+
+  const computeStatus = (userData, apiData) => {
+    return Boolean(
+      apiData?.isProfileComplete ||
+      apiData?.user?.isProfileComplete ||
+      (apiData?.name && apiData?.email && apiData?.location) ||
+      (apiData?.user?.name && apiData?.user?.email && apiData?.user?.location) ||
+      userData?.isProfileComplete ||
+      (userData?.name && userData?.email && userData?.location) ||
+      localStorage.getItem('profileComplete') === 'true'
+    );
+  };
+
+  const [isProfileComplete, setIsProfileComplete] = useState(() => computeStatus(user, null));
   const [isLoading, setIsLoading] = useState(true);
   const [profileData, setProfileData] = useState(null);
 
-  const checkProfileStatus = async () => {
+  const checkProfileStatus = useCallback(async () => {
     if (!isAuthenticated || !user) {
       setIsLoading(false);
+      setIsProfileComplete(false);
       return;
     }
 
     try {
       const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const token = localStorage.getItem('civix_token');
       const response = await fetch(`${baseUrl}/profile/me`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('civix_token')}`,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         credentials: 'include',
       });
@@ -28,22 +43,31 @@ const useProfileStatus = () => {
           throw new Error('Invalid response format for profile status');
         }
         const data = await response.json();
-        setProfileData(data.user || data);
-        setIsProfileComplete(Boolean(data.user?.isProfileComplete || user?.isProfileComplete));
-      } else {
-        setIsProfileComplete(Boolean(user?.isProfileComplete));
+        const rawUser = data.user || data;
+        setProfileData(rawUser);
+        const complete = computeStatus(user, data);
+        setIsProfileComplete(complete);
+        if (complete) {
+          localStorage.setItem('profileComplete', 'true');
+        }
+        return;
       }
+      
+      // Fallback
+      const complete = computeStatus(user, null);
+      setIsProfileComplete(complete);
     } catch (error) {
       console.error('Error checking profile status:', error);
-      setIsProfileComplete(Boolean(user?.isProfileComplete));
+      const complete = computeStatus(user, null);
+      setIsProfileComplete(complete);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isAuthenticated, user]);
 
   useEffect(() => {
     checkProfileStatus();
-  }, [isAuthenticated, user]);
+  }, [checkProfileStatus]);
 
   return {
     isProfileComplete,

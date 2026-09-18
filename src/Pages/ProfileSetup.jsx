@@ -6,8 +6,8 @@ import useProfileStatus from '../hooks/useProfileStatus';
 import csrfManager from '../utils/csrfManager';
 import 'react-toastify/dist/ReactToastify.css';
 
-const ProfileSetup = ({onComplete}) => {
-  const { user } = useAuthContext();
+const ProfileSetup = ({ onComplete }) => {
+  const { user, updateUser } = useAuthContext();
   const navigate = useNavigate();
   const { refetch } = useProfileStatus();
   const [formData, setFormData] = useState({
@@ -25,8 +25,9 @@ const ProfileSetup = ({onComplete}) => {
     if (user) {
       setFormData(prev => ({
         ...prev,
-        name: user.fullName || '',
-        email: user.primaryEmailAddress?.emailAddress || ''
+        name: user.name || user.fullName || user.username || prev.name || '',
+        email: user.email || user.primaryEmailAddress?.emailAddress || prev.email || '',
+        location: user.location || prev.location || ''
       }));
     }
   }, [user]);
@@ -65,14 +66,15 @@ const ProfileSetup = ({onComplete}) => {
 
     try {
       let uploadedProfileUrl = null;
+      const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const userId = user?.id || user?._id;
 
       // If user selected an image, upload it first
-      const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
       if (profileImageFile) {
         try {
           const fd = new FormData();
           fd.append('image', profileImageFile);
-          const uploadRes = await csrfManager.secureFetch(`${baseUrl}/profile/${user.id}/profile-picture`, {
+          const uploadRes = await csrfManager.secureFetch(`${baseUrl}/profile/me/profile-picture`, {
             method: 'POST',
             body: fd
           });
@@ -93,21 +95,17 @@ const ProfileSetup = ({onComplete}) => {
 
       // Create or update the user profile in our database
       console.log('Saving profile data:', {
-        clerkUserId: user.id,
+        userId,
         email: formData.email,
         name: formData.name,
         location: formData.location,
         profilePictureUrl: uploadedProfileUrl
       });
       
-      localStorage.setItem("profileComplete", "true");
-      console.log(localStorage.getItem("profileComplete"));
-      onComplete();
-      
       const profileResponse = await csrfManager.secureFetch(`${baseUrl}/profile/create-or-update`, {
         method: 'POST',
         body: JSON.stringify({
-          userId: user?.id || user?._id,
+          userId,
           email: formData.email,
           name: formData.name,
           location: formData.location,
@@ -124,12 +122,26 @@ const ProfileSetup = ({onComplete}) => {
       const profileData = await profileResponse.json();
       console.log('Profile saved successfully:', profileData);
       
+      localStorage.setItem("profileComplete", "true");
+      
+      if (updateUser && profileData.user) {
+        updateUser(profileData.user);
+      }
+
+      if (typeof onComplete === 'function') {
+        onComplete();
+      }
+      
       setProfileSubmitted(true);
       toast.success('Profile setup completed successfully! Redirecting to Dashboard...');
-      refetch();
+      if (refetch) refetch();
 
       setTimeout(() => {
-        window.location.replace('/user/dashboard');
+        if (user?.role === 'admin') {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/user/dashboard');
+        }
       }, 1000);
       
     } catch (error) {

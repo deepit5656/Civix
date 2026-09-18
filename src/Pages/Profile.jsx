@@ -97,6 +97,9 @@ const Profile = () => {
         throw new Error('Failed to update profile');
       }
       const updatedProfile = await profileResponse.json();
+      if (updateUser && updatedProfile.user) {
+        updateUser(updatedProfile.user);
+      }
       setUser({
         ...user,
         username: formData.username,

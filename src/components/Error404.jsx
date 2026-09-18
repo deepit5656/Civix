@@ -1,9 +1,16 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Home } from 'lucide-react';
 
 const NotFound = () => {
+  const navigate = useNavigate();
+
   const handleGoBack = () => {
-    window.history.length > 1 ? window.history.back() : window.location.href = '/';
+    if (window.history.length > 1 && window.history.state?.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
   };
 
   return (
@@ -79,7 +86,7 @@ const NotFound = () => {
           </button>
 
           <button
-            onClick={() => window.location.href = '/'}
+            onClick={() => navigate('/')}
             className="flex items-center justify-center gap-2 px-6 py-3 border border-emerald-500 text-emerald-600 bg-white rounded-lg hover:bg-gray-50 transition shadow-md"
           >
             <Home size={20} />

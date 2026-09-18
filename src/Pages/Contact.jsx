@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import BackButton from "../components/ui/BackButton";
 import {
   User,
   Mail,
@@ -232,8 +233,11 @@ const ContactForm = () => {
 
 function Contact() {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 px-4 py-12 sm:py-16 overflow-x-hidden select-none transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 px-4 py-8 sm:py-12 overflow-x-hidden select-none transition-colors duration-300">
       <div className="max-w-5xl mx-auto">
+        <div className="mb-6">
+          <BackButton />
+        </div>
         <div className="grid lg:grid-cols-5 gap-10 items-start">
           {/* Sidebar Info */}
           <div className="lg:col-span-2 space-y-8">

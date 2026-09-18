@@ -40,11 +40,18 @@ const Home = () => {
   // Redirect incomplete profiles to profile-setup if signed in
   useEffect(() => {
     const profileJustSubmitted = sessionStorage.getItem("profileJustSubmitted") === "true";
+    const profileCompleteStored = localStorage.getItem("profileComplete") === "true";
+    const userHasProfile = Boolean(
+      isProfileComplete ||
+      profileCompleteStored ||
+      user?.isProfileComplete ||
+      (user?.name && user?.email && user?.location)
+    );
 
-    if (isSignedIn && !profileLoading && !isProfileComplete && !profileJustSubmitted) {
+    if (isSignedIn && !profileLoading && !userHasProfile && !profileJustSubmitted) {
       navigate("/profile-setup");
     }
-  }, [isSignedIn, profileLoading, isProfileComplete, navigate]);
+  }, [isSignedIn, profileLoading, isProfileComplete, user, navigate]);
 
   const questions = [
     {

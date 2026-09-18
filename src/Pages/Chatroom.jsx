@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Users, MessageCircle, Sparkles } from 'lucide-react';
+import BackButton from '../components/ui/BackButton';
 
 export default function CivixChatRoom() {
   const [messages, setMessages] = useState([
@@ -86,17 +87,18 @@ export default function CivixChatRoom() {
       <div className="bg-white/80 backdrop-blur-xl border-b border-green-100/50 shadow-sm sticky top-0 z-10">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center space-x-3">
+            <BackButton />
             <div className="relative">
-              <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-3 rounded-2xl shadow-lg">
-                <MessageCircle className="w-6 h-6 text-white" />
+              <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-2.5 rounded-2xl shadow-lg">
+                <MessageCircle className="w-5 h-5 text-white" />
               </div>
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+              <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse"></div>
             </div>
             <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent">
+              <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent">
                 Civix Community
               </h1>
-              <p className="text-sm text-gray-500">Community Services & Local Initiatives</p>
+              <p className="text-xs sm:text-sm text-gray-500">Community Services & Local Initiatives</p>
             </div>
           </div>
           <div className="flex items-center space-x-2 bg-green-100/70 backdrop-blur-sm px-4 py-2 rounded-full border border-green-200/50">
