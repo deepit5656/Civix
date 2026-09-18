@@ -73,7 +73,7 @@ const Profile = () => {
   };
 
   const handleSave = async () => {
-    if (!clerkUser) {
+    if (!authUser) {
       toast.error('You must be logged in to update your profile');
       return;
     }
@@ -87,7 +87,7 @@ const Profile = () => {
       const profileResponse = await csrfManager.secureFetch(`${baseUrl}/profile/create-or-update`, {
         method: 'POST',
         body: JSON.stringify({
-          clerkUserId: clerkUser.id,
+          userId: authUser.id || authUser._id,
           email: formData.email,
           name: formData.username,
           location: formData.location
