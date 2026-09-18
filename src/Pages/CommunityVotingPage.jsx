@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import BackButton from "../components/ui/BackButton";
 import SectionGuide from "../components/ui/SectionGuide";
@@ -21,6 +22,7 @@ import {
 } from "lucide-react";
 
 const CommunityVotingPage = () => {
+  const navigate = useNavigate();
   const { user } = useAuthContext();
   const [scopeTab, setScopeTab] = useState("all"); // 'my_area' or 'all'
   const [selectedArea, setSelectedArea] = useState("All Areas");
@@ -506,19 +508,41 @@ const CommunityVotingPage = () => {
           </AnimatePresence>
           {filteredIssues.length === 0 && (
             <motion.div
-              className="text-center py-16"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              className="bg-white/95 dark:bg-green-950/80 rounded-3xl border border-green-100 dark:border-green-800 p-10 sm:p-12 text-center shadow-lg mb-8"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
             >
-              <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
-                <AlertTriangle className="w-8 h-8 text-green-300 animate-bounce" />
+              <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/60 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <MapPin className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <h3 className="text-lg font-semibold text-green-900 dark:text-green-100">
-                No issues found
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+                No Issues Listed in {scopeTab === 'my_area' && userCity ? userCity : (selectedArea !== 'All Areas' ? selectedArea : 'this filter')}
               </h3>
-              <p className="text-green-700 dark:text-green-200 mt-2">
-                Try adjusting your filters to see more issues.
+              <p className="text-sm text-slate-600 dark:text-slate-300 max-w-md mx-auto mb-6">
+                {scopeTab === 'my_area'
+                  ? `There are no community issues registered for ${userCity || 'your city'} yet. You can report the first issue here or switch to 'All Cities & Areas' to view and vote on issues from other cities (e.g. Anand, Delhi, Noida).`
+                  : 'No issues match your current filter criteria. Try resetting the filter to All Areas.'}
               </p>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setScopeTab('all');
+                    setSelectedArea('All Areas');
+                  }}
+                  className="px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+                >
+                  <Compass className="w-4 h-4 inline mr-1.5" />
+                  View All Cities & Areas
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/report-issue')}
+                  className="px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm bg-gradient-to-r from-emerald-600 to-green-600 text-white shadow-md shadow-emerald-600/20 hover:from-emerald-500 hover:to-green-500 transition"
+                >
+                  + Report New Issue in {userCity || 'Your City'}
+                </button>
+              </div>
             </motion.div>
           )}
         </div>
