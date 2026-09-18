@@ -1,4 +1,6 @@
 import React from 'react';
+import BackButton from '../components/ui/BackButton';
+import SectionGuide from '../components/ui/SectionGuide';
 
 const CarIcon = () => (
   <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,12 +70,30 @@ export default function GovtLinksSection() {
   ];
 
   return (
-    <section className="py-8 md:py-14">
-      <div className="text-center mb-10">
-        <h2 className="text-4xl font-extrabold bg-gradient-to-r from-emerald-700 via-green-600 to-teal-500 bg-clip-text text-transparent mb-2 tracking-tight">Government Services</h2>
-        <div className="w-24 h-1 bg-gradient-to-r from-emerald-400 to-green-500 mx-auto rounded-full"></div>
-        <p className="text-green-800/80 dark:text-emerald-200/80 mt-4 text-lg font-medium">Quick access to essential vehicle & transport services</p>
+    <section className="py-8 md:py-12 max-w-6xl mx-auto px-4 sm:px-6">
+      <div className="mb-6">
+        <BackButton />
       </div>
+      <div className="text-center mb-8">
+        <h2 className="text-4xl font-extrabold bg-gradient-to-r from-emerald-700 via-green-600 to-teal-500 bg-clip-text text-transparent mb-2 tracking-tight">Government Vehicle Services</h2>
+        <div className="w-24 h-1 bg-gradient-to-r from-emerald-400 to-green-500 mx-auto rounded-full"></div>
+        <p className="text-green-800/80 dark:text-emerald-200/80 mt-3 text-lg font-medium">Direct access to official MoRTH Vahan & Sarathi transport portals</p>
+      </div>
+
+      <SectionGuide
+        title="Official Vehicle & Transport Services Gateway"
+        purpose="Direct verified gateway to Ministry of Road Transport and Highways (MoRTH) portals for checking Vehicle Registration (RC), electronic e-Challan payments, motor insurance verification, and Pollution Under Control (PUC) certificate validity."
+        steps={[
+          "Select the required transport service card (RC Check, e-Challan, Insurance, or PUC).",
+          "Click the service action button to navigate securely to the official Parivahan/Vahan portal.",
+          "Enter your Vehicle Registration Number / DL number to view real-time RTO records.",
+          "Complete any required fee payments directly on the authenticated government gateway."
+        ]}
+        source="Ministry of Road Transport and Highways (MoRTH) - Parivahan Seva / Vahan / Sarathi"
+        scope="Nationwide (All States & Union Territory RTOs across India)"
+        category="National Transport Services"
+        officialLink="https://parivahan.gov.in"
+      />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-3 md:px-0">
         {sections.map((section, idx) => {
           const Icon = section.icon;

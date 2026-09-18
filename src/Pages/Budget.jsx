@@ -6,6 +6,8 @@ import {
   AreaChart, Area, ComposedChart
 } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
+import BackButton from "../components/ui/BackButton";
+import SectionGuide from "../components/ui/SectionGuide";
 
 export default function BudgetDashboard() {
   const [rows, setRows] = useState([]);
@@ -122,8 +124,11 @@ export default function BudgetDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-100 dark:from-emerald-950 dark:via-gray-900 dark:to-green-950 p-6">
       <div className="max-w-7xl mx-auto">
+        <div className="mb-6">
+          <BackButton />
+        </div>
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <div className="flex items-center gap-5 mb-1.5">
             <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-green-500 rounded-2xl flex items-center justify-center shadow-lg">
               <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,11 +136,25 @@ export default function BudgetDashboard() {
               </svg>
             </div>
             <div>
-              <h1 className="text-4xl font-black bg-gradient-to-r from-emerald-700 via-green-700 to-teal-500 bg-clip-text text-transparent">Financial Analytics Dashboard</h1>
-              <p className="text-emerald-700/80 dark:text-emerald-200/80 font-medium text-lg">Advanced financial data visualization and insights</p>
+              <h1 className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-emerald-700 via-green-700 to-teal-500 bg-clip-text text-transparent">Financial Analytics Dashboard</h1>
+              <p className="text-emerald-700/80 dark:text-emerald-200/80 font-medium text-base sm:text-lg">Advanced financial data visualization and insights</p>
             </div>
           </div>
         </motion.div>
+
+        {/* Section Guide */}
+        <SectionGuide
+          title="Union Budget Estimates & Revenue Performance"
+          purpose="This section illustrates official budgetary performance, comparing Budget Estimates (BE) vs Revised Estimates (RE) against Actual Collections to analyze revenue targets, achievement percentages, and financial variance."
+          howToUse={[
+            "Analyze KPI summary cards for total budget estimates, actual revenue realized, and net fiscal variance.",
+            "Use the Financial Year filter to zoom in on specific budgetary periods.",
+            "Toggle between 'Dashboard', 'Charts', and 'Insights' modes for visual trend breakdowns.",
+          ]}
+          dataSource="Rajya Sabha Parliamentary Session Questions & Ministry of Finance / Union Budget"
+          sourceUrl="https://sansad.in/"
+          scope="Union Government of India (National Budget)"
+        />
 
         {/* Toggle */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">

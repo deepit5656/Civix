@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Scale, Info, Phone, HelpCircle, ChevronDown, FileText } from 'lucide-react';
+import SectionGuide from '../components/ui/SectionGuide';
 
 const AnimatedAccordion = ({ item, index, isOpen, onToggle }) => {
     const contentRef = useRef(null);
@@ -56,10 +58,19 @@ const faqData = [
 ];
 
 const Resources = () => {
+    const navigate = useNavigate();
     const [openIndex, setOpenIndex] = useState(null);
 
     const toggleFAQ = (index) => {
         setOpenIndex(openIndex === index ? null : index);
+    };
+
+    const handleBack = () => {
+        if (window.history.length > 1 && window.history.state?.idx > 0) {
+            navigate(-1);
+        } else {
+            navigate('/user/dashboard');
+        }
     };
 
     return (
@@ -71,7 +82,8 @@ const Resources = () => {
             {/* Back button */}
             <button
                 className="absolute top-7 left-7 z-20 group flex items-center gap-2 px-4 py-2.5 text-emerald-800 hover:text-emerald-900 dark:text-emerald-200 dark:hover:text-white bg-white/80 dark:bg-green-950/80 backdrop-blur-md rounded-xl border border-emerald-100/70 dark:border-green-800/50 hover:border-emerald-200 dark:hover:border-green-700 transition-all duration-200 hover:shadow"
-                onClick={() => window.history.back()}
+                onClick={handleBack}
+                type="button"
             >
                 <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
                 <span className="text-base font-medium">Back</span>
@@ -79,14 +91,28 @@ const Resources = () => {
 
             <div className="relative z-10 max-w-3xl mx-auto px-6 pt-24 pb-16">
                 {/* Header */}
-                <div className="text-center mb-14">
+                <div className="text-center mb-10">
                     <h1 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-emerald-800 via-green-700 to-green-500 dark:from-white dark:via-green-300 dark:to-green-400 bg-clip-text text-transparent mb-4 tracking-tight">
-                        Citizen Resources
+                        Citizen Resources & Guidance
                     </h1>
                     <p className="text-emerald-600 dark:text-green-200 max-w-xl mx-auto text-lg">
-                        Everything you need to know about filing complaints and accessing civic services
+                        Everything you need to know about citizen rights, dispute escalation, and civic protocols
                     </p>
                 </div>
+
+                <SectionGuide
+                    title="Civic Knowledge Base & Citizen Rights Portal"
+                    purpose="Provides legal awareness, citizen rights, grievance redressal timeframes, escalation helplines, and FAQs to empower residents when interacting with municipal corporations."
+                    steps={[
+                        "Read your citizen rights regarding municipal accountability and transparency.",
+                        "Follow the standard 4-step procedure to report civic problems effectively.",
+                        "Consult the FAQ accordion below for common queries on ticket tracking and escalation.",
+                        "Use emergency municipal helpline numbers for immediate life-safety issues."
+                    ]}
+                    source="Ministry of Housing and Urban Affairs (MoHUA) Civic Charter & Municipal By-laws"
+                    scope="National Civic Rights & Municipal Grievance Guidelines"
+                    category="Civic Knowledge"
+                />
 
                 <div className="space-y-8">
                     {/* Rights & Responsibilities */}

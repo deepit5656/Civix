@@ -3,6 +3,8 @@ import Papa from 'papaparse';
 import { Vote, Users, Calendar, Search, Target, Award, MapPin, Activity, BarChart3, PieChart, BarChart, Download, TrendingUp } from 'lucide-react';
 import { LineChart as RechartsLineChart, Line, BarChart as RechartsBarChart, Bar, PieChart as RechartsPieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
+import BackButton from '../components/ui/BackButton';
+import SectionGuide from '../components/ui/SectionGuide';
 
 export default function ElectionsDashboard() {
   const [elections, setElections] = useState([]);
@@ -173,16 +175,17 @@ export default function ElectionsDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50">
       {/* Header */}
       <div className="bg-white/70 backdrop-blur-sm border-b border-green-100 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <Vote className="w-8 h-8 text-green-600" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+          <BackButton />
+          <div className="flex items-center space-x-3">
+            <Vote className="w-7 h-7 text-green-600" />
+            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 bg-clip-text text-transparent">
               Elections Dashboard
             </h1>
           </div>
           
           {/* Navigation */}
-          <div className="flex justify-center">
+          <div className="flex">
             <div className="flex bg-green-100 rounded-xl p-1">
               {[
                 { key: 'dashboard', label: 'Dashboard', icon: Activity },
@@ -211,6 +214,19 @@ export default function ElectionsDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+        <SectionGuide
+          title="Elections & Democratic Governance Insights"
+          purpose="This section analyzes voter registration statistics, male/female voter participation ratios, and national election schedules to keep citizens informed about democratic processes."
+          howToUse={[
+            "Review registered voter counts and average turnout percentages on the KPI cards.",
+            "Filter by State or Election Type to analyze specific parliamentary or assembly segments.",
+            "Switch to Analytics or Insights to see visual gender and turnout charts.",
+          ]}
+          dataSource="Election Commission of India (ECI) / Open Government Data (data.gov.in)"
+          sourceUrl="https://eci.gov.in/"
+          scope="National & State Constituencies (All India)"
+        />
+
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
           <KPICard title="Total Voters" value={kpiMetrics.totalVoters} icon={<Users />} subtitle="Registered voters" />

@@ -3,6 +3,8 @@ import Papa from "papaparse";
 import { Search, Users, Droplets, Download, FileText, BarChart3 } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import BackButton from "../components/ui/BackButton";
+import SectionGuide from "../components/ui/SectionGuide";
 
 export default function CsvDashboard() {
   const [populationData, setPopulationData] = useState([]);
@@ -101,17 +103,31 @@ export default function CsvDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50/30 to-emerald-50/20">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
+          <BackButton />
+          <div className="text-center flex-1 pr-12">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
               Civic Statistics Dashboard
             </h1>
-            <p className="text-gray-600">Population & Water Resources Analytics</p>
+            <p className="text-xs sm:text-sm text-gray-600">Population & Water Resources Analytics</p>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+        <SectionGuide
+          title="Demographic Population & Water Resource Analytics"
+          purpose="This section provides civic demographic statistics on population distribution across States & Union Territories of India, alongside district-wise water resource and coverage analytics."
+          howToUse={[
+            "Search for your specific State or District in the search bar below.",
+            "Compare population statistics and district water resource coverage.",
+            "Export data anytime as CSV or PDF report using the export action buttons.",
+          ]}
+          dataSource="Office of the Registrar General & Census Commissioner / Ministry of Jal Shakti (data.gov.in)"
+          sourceUrl="https://data.gov.in/"
+          scope="All Indian States & Districts (National Demographics)"
+        />
+
         {/* Search */}
         <div className="flex justify-center">
           <div className="relative w-full max-w-md">

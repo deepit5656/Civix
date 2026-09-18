@@ -14,6 +14,8 @@ import {
   Area, ComposedChart, ScatterChart as RechartsScatterChart, Scatter
 } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
+import BackButton from '../components/ui/BackButton';
+import SectionGuide from '../components/ui/SectionGuide';
 
 export default function GovernmentSchemesDashboard() {
   const [schemes, setSchemes] = useState([]);
@@ -289,20 +291,36 @@ export default function GovernmentSchemesDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-slate-800">
       {/* Header */}
       <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-green-100 dark:border-gray-700 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-center space-x-3">
-            <Building2 className="w-8 h-8 text-green-600 dark:text-green-400" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 dark:from-green-400 dark:to-emerald-400 bg-clip-text text-transparent">
-              Government Schemes Dashboard
-            </h1>
+        <div className="max-w-7xl mx-auto px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-4">
+          <BackButton />
+          <div className="text-center flex-1 pr-0 md:pr-12">
+            <div className="flex items-center justify-center space-x-3">
+              <Building2 className="w-7 h-7 text-green-600 dark:text-green-400" />
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-green-700 to-emerald-600 dark:from-green-400 dark:to-emerald-400 bg-clip-text text-transparent">
+                Government Schemes Dashboard
+              </h1>
+            </div>
+            <p className="text-center text-green-600/70 dark:text-green-400/70 mt-1 text-xs sm:text-sm font-medium">
+              Advanced Analytics & Interactive Visualizations
+            </p>
           </div>
-          <p className="text-center text-green-600/70 dark:text-green-400/70 mt-2 font-medium">
-            Advanced Analytics & Interactive Visualizations
-          </p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+        <SectionGuide
+          title="Government Welfare Schemes & Fund Allocation Analytics"
+          purpose="This section provides citizens and researchers with transparent access to Central & State welfare schemes, scholarship funds for underprivileged communities, and budgetary allocations over multiple fiscal years."
+          howToUse={[
+            "Switch between 'Dashboard', 'Analytics', 'Insights', and 'Comparison' views to analyze fund distributions across different government programs.",
+            "Use the search and category filters to locate specific programs like 'Post Matric Scholarship', 'Pradhan Mantri Adharsh Gram Yojana', etc.",
+            "Click on any scheme card to review year-by-year financial growth and multi-year fund trends.",
+          ]}
+          dataSource="Ministry of Social Justice & Empowerment / Open Government Data Portal (data.gov.in)"
+          sourceUrl="https://data.gov.in/"
+          scope="National & State-level Schemes (Union of India)"
+        />
+
         {/* View Mode Selector */}
         <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-green-100 dark:border-gray-700">
           <div className="flex flex-wrap items-center justify-between gap-4">

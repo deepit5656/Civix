@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Papa from "papaparse";
+import BackButton from "../components/ui/BackButton";
+import SectionGuide from "../components/ui/SectionGuide";
 
 export default function CsvImportPage() {
   const [nfsaData, setNfsaData] = useState([]);
@@ -125,25 +127,38 @@ export default function CsvImportPage() {
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JhcGgiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDEwMCAwIEwgMCAwIDAgMTAwIiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMzQsIDE5NywgOTQsIDAuMSkiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmFwaCkiLz48L3N2Zz4=')] opacity-30"></div>
       
       <div className="relative bg-white/95 backdrop-blur-xl border-b border-green-200/50 shadow-lg">
-        <div className="max-w-7xl mx-auto px-8 py-8">
-          <div className="flex items-center justify-center space-x-6">
-            <div className="p-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-3xl shadow-xl">
-              <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="max-w-7xl mx-auto px-8 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <BackButton />
+          <div className="flex items-center justify-center space-x-6 flex-1 pr-0 md:pr-16">
+            <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl shadow-xl">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 2v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
             <div className="text-center">
-              <h1 className="text-4xl font-extrabold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2">
+              <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 bg-clip-text text-transparent mb-1">
                 SDRF & NFSA Analytics
               </h1>
-              <div className="h-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full mx-auto w-40 mb-3"></div>
-              <p className="text-lg text-gray-600 font-medium">Government data analysis and visualization platform</p>
+              <p className="text-sm text-gray-600 font-medium">Government data analysis and visualization platform</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-8 py-12 space-y-12">
+      <div className="relative max-w-7xl mx-auto px-8 py-8 space-y-8">
+        <SectionGuide
+          title="State Disaster Response Fund (SDRF) & Food Security (NFSA)"
+          purpose="This section provides state-by-state data on emergency disaster relief fund allocations (SDRF) and grain/food security distribution under the National Food Security Act (NFSA)."
+          howToUse={[
+            "Browse state rows to see total disaster mitigation funds released across government fiscal periods.",
+            "Review food grain quotas and coverage under NFSA for targeted beneficiaries across each state.",
+            "Use table pagination to explore detailed state statistics.",
+          ]}
+          dataSource="Ministry of Home Affairs (Disaster Management) & Ministry of Consumer Affairs, Food & Public Distribution (data.gov.in)"
+          sourceUrl="https://data.gov.in/"
+          scope="State-wise (All States & UTs of India)"
+        />
+
         {nfsaData.length > 0 && (
           <DataTable
             data={nfsaData}

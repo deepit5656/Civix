@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Zap, Droplets, Clock, AlertTriangle, CheckCircle, XCircle, Calendar, MapPin, Bell, TrendingUp, TrendingDown, Activity, BarChart3, PieChart } from 'lucide-react';
 import { LineChart, Line, BarChart as ReBarChart, Bar, PieChart as RePieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import BackButton from '../components/ui/BackButton';
+import SectionGuide from '../components/ui/SectionGuide';
 
 const UtilitiesDashboard = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -128,12 +130,13 @@ const UtilitiesDashboard = () => {
       {/* Header */}
       <header className="bg-white/90 dark:bg-emerald-950/95 shadow border-b border-emerald-100/50 dark:border-emerald-900/30">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex justify-between items-center py-7">
+          <div className="flex justify-between items-center py-5">
             <div className="flex items-center space-x-4">
-              <span className="w-10 h-10 bg-gradient-to-br from-emerald-500 via-green-500 to-teal-500 text-white rounded-lg shadow-md flex items-center justify-center text-xl font-extrabold">
-                C
+              <BackButton />
+              <span className="w-10 h-10 bg-gradient-to-br from-emerald-500 via-green-500 to-teal-500 text-white rounded-xl shadow-md flex items-center justify-center text-xl font-extrabold">
+                <Zap className="w-5 h-5" />
               </span>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent tracking-tight">Civix Utilities</h1>
+              <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent tracking-tight">Civix Utilities</h1>
             </div>
             <div className="flex items-center gap-3 text-sm text-emerald-700/80 dark:text-emerald-200/90">
               <Clock className="w-5 h-5" />
@@ -143,7 +146,21 @@ const UtilitiesDashboard = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-10 space-y-10">
+      <main className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+        <SectionGuide
+          title="Municipal Utilities & Power/Water Grid Monitor"
+          purpose="Monitors municipal electricity and water distribution grids across city sectors. Displays real-time uptime percentages, scheduled maintenance windows, active power cuts, and historical grid consumption trends."
+          steps={[
+            "Switch between 'Dashboard', 'Analytics', and 'Insights' views to see utility telemetry.",
+            "Filter grid status by utility type (Electricity, Water, or Both) and sector zones.",
+            "Check the Outage Schedule to plan ahead for maintenance downtime in your ward.",
+            "Use the consumption trends to monitor peak load timings across the power grid."
+          ]}
+          source="Municipal Power Corporation (Discom) & Jal Board Feeder Monitoring Systems"
+          scope="City Sector & Municipal Zone Level"
+          category="Municipal Utilities"
+        />
+
         {/* Controls */}
         <section className="bg-white/90 dark:bg-emerald-950/95 rounded-2xl p-6 border border-emerald-100/60 dark:border-emerald-800/40 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-6">
