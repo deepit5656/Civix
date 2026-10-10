@@ -13,11 +13,14 @@ import {
   Navigation,
   Loader2,
   Lock,
-  ShieldCheck
+  ShieldCheck,
+  Sparkles,
+  Wand2,
+  CheckCircle2
 } from "lucide-react";
 import { useAuthContext } from "../context/AuthContext";
 import { toast } from "react-hot-toast";
-import { issuesAPI } from "../utils/api";
+import { issuesAPI, aiAPI } from "../utils/api";
 import SectionGuide from "../components/ui/SectionGuide";
 
 const FormInput = ({
@@ -143,6 +146,8 @@ export default function ReportIssue() {
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
   const [errors, setErrors] = useState({});
+  const [isAnalyzingAI, setIsAnalyzingAI] = useState(false);
+  const [aiAnalysisResult, setAiAnalysisResult] = useState(null);
 
   // Auto-fill user email and phone if logged in
   useEffect(() => {
@@ -154,6 +159,45 @@ export default function ReportIssue() {
       }));
     }
   }, [user]);
+
+  // AI Auto-Detect Handler
+  const handleAIAnalyze = useCallback(async () => {
+    if (!file && !formData.title && !formData.description) {
+      toast.error("Please attach a photo or write notes to analyze with AI.");
+      return;
+    }
+
+    setIsAnalyzingAI(true);
+    const toastId = toast.loading("🤖 AI analyzing civic hazard & severity...");
+
+    try {
+      const payload = new FormData();
+      if (file) payload.append("file", file);
+      if (formData.title) payload.append("title", formData.title);
+      if (formData.description) payload.append("description", formData.description);
+
+      const res = await aiAPI.analyzeIssue(payload);
+      if (res && res.success && res.analysis) {
+        const { title, description, category, priority } = res.analysis;
+        
+        setFormData((prev) => ({
+          ...prev,
+          title: title || prev.title,
+          description: description || prev.description,
+        }));
+
+        setAiAnalysisResult(res.analysis);
+        toast.success(`✨ AI identified: ${category} (${priority} Priority)`, { id: toastId });
+      } else {
+        throw new Error("Analysis failed");
+      }
+    } catch (err) {
+      console.warn("AI analysis error:", err);
+      toast.error("AI service could not process image. Please enter details manually.", { id: toastId });
+    } finally {
+      setIsAnalyzingAI(false);
+    }
+  }, [file, formData.title, formData.description]);
 
   const isEmailLocked = Boolean(user?.email);
   const isPhoneLocked = Boolean(user?.phone);
@@ -451,9 +495,32 @@ export default function ReportIssue() {
 
           {/* File Attachment */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Attach Photo / Document <span className="text-gray-400 font-normal">(Optional)</span>
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Attach Photo / Document <span className="text-gray-400 font-normal">(Optional)</span>
+              </label>
+
+              {/* ✨ AI Auto-Fill Button */}
+              <button
+                type="button"
+                onClick={handleAIAnalyze}
+                disabled={isAnalyzingAI || isSubmitting}
+                className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-emerald-600 hover:from-purple-500 hover:to-emerald-500 rounded-lg shadow-sm transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+              >
+                {isAnalyzingAI ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>AI Analyzing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5 animate-pulse text-amber-300" />
+                    <span>AI Auto-Detect</span>
+                  </>
+                )}
+              </button>
+            </div>
+
             <div className="relative">
               <input
                 type="file"
@@ -467,9 +534,43 @@ export default function ReportIssue() {
               } ${isSubmitting ? "opacity-60" : ""}`}>
                 <Upload className={`w-6 h-6 mx-auto mb-2 ${file ? "text-emerald-500" : "text-gray-400"}`} />
                 <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">{file ? file.name : "Click to upload image or drag and drop"}</p>
-                <p className="text-[11px] text-gray-400 mt-0.5">PNG, JPG, PDF up to 10MB</p>
+                <p className="text-[11px] text-gray-400 mt-0.5">Attach photo to auto-detect category, title & severity with AI</p>
               </div>
             </div>
+
+            {/* AI Analysis Result Card */}
+            {aiAnalysisResult && (
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-purple-50 via-indigo-50 to-emerald-50 dark:from-purple-950/40 dark:via-slate-900 dark:to-emerald-950/40 border border-purple-200/80 dark:border-purple-800/60 space-y-2 mt-2">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-purple-900 dark:text-purple-300">
+                    <Sparkles className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                    <span>AI Grievance Assessment</span>
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-200/60 dark:bg-purple-900/60 text-purple-800 dark:text-purple-200 font-semibold">
+                    {aiAnalysisResult.aiEngine || "Civix AI"}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
+                  <div className="bg-white/80 dark:bg-slate-800/80 p-2 rounded-xl border border-purple-100 dark:border-slate-700">
+                    <span className="text-gray-500 dark:text-gray-400 block text-[10px]">Predicted Category</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-100">{aiAnalysisResult.category}</span>
+                  </div>
+                  <div className="bg-white/80 dark:bg-slate-800/80 p-2 rounded-xl border border-purple-100 dark:border-slate-700">
+                    <span className="text-gray-500 dark:text-gray-400 block text-[10px]">Assessed Priority</span>
+                    <span className={`font-bold ${aiAnalysisResult.priority === 'Urgent' ? 'text-red-600' : aiAnalysisResult.priority === 'High' ? 'text-amber-600' : 'text-emerald-600'}`}>
+                      {aiAnalysisResult.priority}
+                    </span>
+                  </div>
+                </div>
+
+                {aiAnalysisResult.suggestedAction && (
+                  <p className="text-[11px] text-purple-950 dark:text-purple-200 italic pt-0.5">
+                    💡 <strong>Recommended Field Action:</strong> {aiAnalysisResult.suggestedAction}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Submit Button */}

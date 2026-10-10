@@ -102,6 +102,13 @@ export const contributorsAPI = {
   getAll: () => apiFetch('/contributors'),
 };
 
+// ─── ARTIFICIAL INTELLIGENCE (AI) ──────────────────────────────────────────────
+export const aiAPI = {
+  analyzeIssue: (formData) => apiFetch('/ai/analyze-issue', { method: 'POST', body: formData }),
+  chat: (data) => apiFetch('/ai/chat', { method: 'POST', body: JSON.stringify(data) }),
+  verifyResolution: (formData) => apiFetch('/ai/verify-resolution', { method: 'POST', body: formData }),
+};
+
 // ─── AUTH HELPERS ──────────────────────────────────────────────────────────────
 export const saveAuthData = (token, user) => {
   localStorage.setItem('civix_token', token);

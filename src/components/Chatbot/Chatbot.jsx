@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { aiAPI } from '../../utils/api';
 import {
   MessageSquare,
   X,
@@ -115,7 +116,7 @@ const ChatBot = () => {
     setIsOpen((prev) => !prev);
   };
 
-  const handleSend = (textToSend) => {
+  const handleSend = async (textToSend) => {
     const query = (textToSend || inputValue).trim();
     if (!query) return;
 
@@ -130,55 +131,75 @@ const ChatBot = () => {
     setInputValue('');
     setIsTyping(true);
 
-    setTimeout(() => {
+    try {
+      // 1. Check quick FAQ match first for instant responses
       const lower = query.toLowerCase();
-      
-      // Match against CIVIC_FAQS
       let matchedFaq = CIVIC_FAQS.find((faq) =>
         faq.keywords.some((kw) => lower.includes(kw))
       );
 
-      let botResponse;
-
       if (matchedFaq) {
-        botResponse = {
-          id: `bot-${Date.now()}`,
-          sender: 'bot',
-          text: matchedFaq.answer,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          actionLabel: matchedFaq.actionLabel,
-          actionRoute: matchedFaq.actionRoute
-        };
-      } else if (lower.includes('hi') || lower.includes('hello') || lower.includes('hey')) {
-        botResponse = {
-          id: `bot-${Date.now()}`,
-          sender: 'bot',
-          text: 'Hello! I am here to assist with all municipal services, grievance tracking, and smart civic tools. Ask me anything or pick a quick option below.',
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          quickActions: [
-            { label: 'Report Issue', route: '/report-issue' },
-            { label: 'Track Complaints', route: '/complaints' },
-            { label: 'Govt Schemes', route: '/govt-schemes' }
-          ]
-        };
+        setTimeout(() => {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `bot-${Date.now()}`,
+              sender: 'bot',
+              text: matchedFaq.answer,
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              actionLabel: matchedFaq.actionLabel,
+              actionRoute: matchedFaq.actionRoute,
+              aiEngine: 'Civix Verified Knowledge'
+            }
+          ]);
+          setIsTyping(false);
+        }, 500);
+        return;
+      }
+
+      // 2. Query Backend AI Service
+      const res = await aiAPI.chat({
+        message: query,
+        conversationHistory: messages
+      });
+
+      if (res && res.reply) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `bot-${Date.now()}`,
+            sender: 'bot',
+            text: res.reply,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            actionLabel: res.actionLabel,
+            actionRoute: res.actionRoute,
+            aiEngine: res.aiEngine || 'Civix AI'
+          }
+        ]);
       } else {
-        botResponse = {
+        throw new Error('No AI reply returned');
+      }
+    } catch (err) {
+      console.warn('AI Chat API fallback:', err.message);
+      // Fallback local response
+      setMessages((prev) => [
+        ...prev,
+        {
           id: `bot-${Date.now()}`,
           sender: 'bot',
-          text: `I understand you are asking about: "${query}". You can report civic problems directly to city authorities, track existing tickets in your dashboard, or access open public services anytime. Would any of these quick resources help?`,
+          text: `I'm here to assist with civic issues, municipal welfare, and emergency services. You can file a new report, track tickets, or find emergency services anytime.`,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           quickActions: [
             { label: 'Report Issue', route: '/report-issue' },
             { label: 'My Complaints', route: '/complaints' },
-            { label: 'Nearby Services', route: '/nearby-services' },
-            { label: 'Govt Schemes', route: '/govt-schemes' }
-          ]
-        };
-      }
-
-      setMessages((prev) => [...prev, botResponse]);
+            { label: 'Emergency SOS', route: '/sos' }
+          ],
+          aiEngine: 'Civix Offline Assistant'
+        }
+      ]);
+    } finally {
       setIsTyping(false);
-    }, 700);
+    }
   };
 
   const handleKeyDown = (e) => {

@@ -86,6 +86,7 @@ app.use('/api/profile', require('./routes/profileRoutes'));
 app.use('/api/contributors', require('./routes/contributions'));
 app.use('/api/polls', require('./routes/pollRoutes'));
 app.use('/api/feedback', require('./routes/feedbackRoutes'));
+app.use('/api/ai', require('./routes/aiRoutes'));
 
 // ─── Swagger Docs ─────────────────────────────────────────────────────────────
 const { swaggerUi, specs } = require('./config/swagger');

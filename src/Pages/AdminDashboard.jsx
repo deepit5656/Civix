@@ -19,7 +19,8 @@ import {
   Home,
   FileText,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Sparkles
 } from "lucide-react";
 
 import { issuesAPI } from "../utils/api";
@@ -235,6 +236,7 @@ const AdminDashboard = () => {
                     <th className="p-4">Issue Details</th>
                     <th className="p-4">Contact Info</th>
                     <th className="p-4">Category</th>
+                    <th className="p-4">AI Triage</th>
                     <th className="p-4">Status</th>
                     <th className="p-4 text-right">Update Status</th>
                   </tr>
@@ -253,6 +255,12 @@ const AdminDashboard = () => {
                       <td className="p-4">
                         <span className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 font-semibold text-[11px] text-slate-700 dark:text-slate-300">
                           {issue.category}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/40">
+                          <Sparkles className="w-3 h-3 text-purple-500" />
+                          <span>{issue.priority || "AI Triaged"}</span>
                         </span>
                       </td>
                       <td className="p-4">
