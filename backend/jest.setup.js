@@ -9,9 +9,9 @@ beforeAll(async () => {
     const mongoUri = mongoServer.getUri();
     await mongoose.connect(mongoUri);
   } catch (err) {
-    console.log('ℹ️ Running Jest tests without mongodb-memory-server');
+    console.log('ℹ️ Running Jest tests without mongodb-memory-server:', err.message);
   }
-});
+}, 30000);
 
 afterAll(async () => {
   if (mongoose.connection.readyState !== 0) {

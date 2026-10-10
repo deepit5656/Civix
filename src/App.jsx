@@ -63,6 +63,7 @@ import AirSeva from './Pages/AirSeva';
 import Train from './Pages/Train';
 import School from './Pages/School';
 import UserMap from './Pages/UserMap';
+import ChatBot from './components/Chatbot';
 
 const App = () => {
   const { user, isAuthenticated: isSignedIn } = useAuthContext();
@@ -195,23 +196,9 @@ const App = () => {
       </main>
 
       {!isAdminRoute && <Footer />}
-
+      {!isAdminRoute && <ChatBot />}
     </>
   );
 };
 
 export default App;
-// import ChatBot from './components/Chatbot';
-
-// // Add this to your Layout component's return statement
-// function Layout({ children }) {
-//   return (
-//     <div className="relative min-h-screen">
-//       {/* Your existing layout code */}
-//       {children}
-
-//       {/* Add the ChatBot component at the end */}
-//       <ChatBot />
-//     </div>
-//   );
-// }

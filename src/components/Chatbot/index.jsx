@@ -1,1 +1,1 @@
-// export { default } from './Chatbot.jsx';
+export { default } from './Chatbot';
