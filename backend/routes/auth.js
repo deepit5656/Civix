@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
-const { signup, login, logout, getMe, changePassword, sendOTP, verifyOTP } = require('../controllers/authController');
+const { signup, login, logout, getMe, changePassword, resetPassword, sendOTP, verifyOTP } = require('../controllers/authController');
 const { validateRequest, verifyToken } = require('../middlewares/validate');
 
 // POST /api/auth/send-otp
@@ -51,5 +51,16 @@ router.get('/me', verifyToken, getMe);
 
 // PUT /api/auth/change-password
 router.put('/change-password', verifyToken, changePassword);
+
+// POST /api/auth/reset-password
+router.post('/reset-password',
+  [
+    body('email').trim().isEmail().normalizeEmail().withMessage('Valid email required'),
+    body('otp').trim().isLength({ min: 6, max: 6 }).withMessage('OTP must be 6 digits'),
+    body('newPassword').isLength({ min: 6 }).withMessage('Password min 6 characters'),
+  ],
+  validateRequest,
+  resetPassword
+);
 
 module.exports = router;

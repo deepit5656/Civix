@@ -130,11 +130,11 @@ const updateIssueStatus = asyncHandler(async (req, res) => {
   if (issue.notifyByEmail && issue.email) {
     sendEmail(
       issue.email,
-      `Civix - Issue Status Updated: ${newStatus}`,
+      `Civix - Issue Status Updated: ${matchedStatus}`,
       `<h2>Issue Update</h2>
        <p>Your issue <strong>"${issue.title}"</strong> status has changed.</p>
        <p>Previous status: <strong>${oldStatus}</strong></p>
-       <p>New status: <strong>${newStatus}</strong></p>
+       <p>New status: <strong>${matchedStatus}</strong></p>
        ${adminNote ? `<p>Admin note: ${adminNote}</p>` : ''}
        <p>Issue ID: <code>${issue._id}</code></p>`
     );
@@ -173,6 +173,24 @@ const updateIssue = asyncHandler(async (req, res) => {
   if (!updated) return res.status(404).json({ error: 'Issue not found' });
 
   res.json({ message: 'Issue updated successfully', issue: updated });
+});
+
+const escalateIssue = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const reason = String(req.body.reason || '').trim();
+  if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ error: 'Invalid issue ID' });
+  if (reason.length < 10) return res.status(400).json({ error: 'Please provide at least 10 characters explaining the escalation' });
+  const issue = await Issue.findById(id);
+  if (!issue) return res.status(404).json({ error: 'Issue not found' });
+  const isOwner = String(issue.submittedBy || '') === String(req.user.id) || issue.email === String(req.user.email || '').toLowerCase();
+  if (!isOwner) return res.status(403).json({ error: 'Only the issue reporter can escalate this issue' });
+  if (!['Resolved', 'Rejected'].includes(issue.status)) return res.status(400).json({ error: 'Only resolved or rejected issues can be escalated' });
+  issue.status = 'Pending';
+  issue.escalated = true;
+  issue.escalationReason = reason;
+  issue.escalatedAt = new Date();
+  await issue.save();
+  res.json({ message: 'Issue escalated for review', issue });
 });
 
 // ─── DELETE ISSUE ─────────────────────────────────────────────────────────────
@@ -241,13 +259,49 @@ const getMyIssues = asyncHandler(async (req, res) => {
   res.json(issues);
 });
 
+// ─── UPVOTE / DEMOCRATIC VOTING ──────────────────────────────────────────────
+const upvoteIssue = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ error: 'Invalid issue ID' });
+  }
+
+  const voterIdentifier = req.user?.id || req.body?.voterId || req.ip || 'anonymous';
+  const issue = await Issue.findById(id);
+  if (!issue) return res.status(404).json({ error: 'Issue not found' });
+
+  if (!Array.isArray(issue.upvotedBy)) {
+    issue.upvotedBy = [];
+  }
+
+  const hasVoted = issue.upvotedBy.includes(voterIdentifier);
+  if (hasVoted) {
+    issue.upvotedBy = issue.upvotedBy.filter((u) => u !== voterIdentifier);
+    issue.upvotes = Math.max(0, (issue.upvotes || 1) - 1);
+  } else {
+    issue.upvotedBy.push(voterIdentifier);
+    issue.upvotes = (issue.upvotes || 0) + 1;
+  }
+
+  await issue.save();
+
+  res.json({
+    message: hasVoted ? 'Vote removed' : 'Vote recorded successfully',
+    issueId: issue._id,
+    upvotes: issue.upvotes,
+    hasVoted: !hasVoted,
+  });
+});
+
 module.exports = {
   createIssue,
   getAllIssues,
   getIssueById,
   updateIssueStatus,
   updateIssue,
+  escalateIssue,
   deleteIssue,
   getIssueStats,
   getMyIssues,
+  upvoteIssue,
 };

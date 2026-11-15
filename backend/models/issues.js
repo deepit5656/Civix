@@ -32,8 +32,13 @@ const issueSchema = new mongoose.Schema({
     default: 'Pending',
   },
   notifyByEmail: { type: Boolean, default: false },
+  upvotes: { type: Number, default: 0 },
+  upvotedBy: [{ type: String }],
   submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   adminNote: { type: String, default: null },
+  escalated: { type: Boolean, default: false },
+  escalationReason: { type: String, default: null, maxlength: 1000 },
+  escalatedAt: { type: Date, default: null },
 }, { timestamps: true });
 
 // Index for faster queries

@@ -48,7 +48,7 @@ const getUserByClerkId = asyncHandler(async (req, res) => {
 // ─── UPDATE USER PROFILE ──────────────────────────────────────────────────────
 const updateUserProfile = asyncHandler(async (req, res) => {
   const userId = req.params.id || req.user?.id;
-  const { name, email, location, bio, phone, profilePictureUrl } = req.body;
+  const { name, email, location, bio, phone, profilePictureUrl, medical } = req.body;
 
   if (!name || !email || !location) {
     return res.status(400).json({ error: 'Name, email, and location are required' });
@@ -61,6 +61,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     ...(bio !== undefined && { bio: xss(bio) }),
     ...(phone !== undefined && { phone: xss(phone) }),
     ...(profilePictureUrl && { profilePictureUrl: xss(profilePictureUrl) }),
+    ...(medical !== undefined && { medical }),
   };
 
   // Check email uniqueness (exclude self)

@@ -33,6 +33,7 @@ app.use(cors({
     if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
       callback(null, true);
     } else {
+      console.warn(`⚠️  CORS blocked origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -82,6 +83,9 @@ app.get('/api/csrf-token', (req, res) => {
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/issues', require('./routes/issues'));
+app.use('/api/lost-found', require('./routes/lostFoundRoutes'));
+app.use('/api/chat', require('./routes/chatRoutes'));
+app.use('/api/community-requests', require('./routes/communityRequestRoutes'));
 app.use('/api/profile', require('./routes/profileRoutes'));
 app.use('/api/contributors', require('./routes/contributions'));
 app.use('/api/polls', require('./routes/pollRoutes'));

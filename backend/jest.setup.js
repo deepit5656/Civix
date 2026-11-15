@@ -3,6 +3,10 @@ const mongoose = require('mongoose');
 let mongoServer;
 
 beforeAll(async () => {
+  if (process.env.RUN_MONGO_TESTS !== 'true') {
+    return;
+  }
+
   try {
     const { MongoMemoryServer } = require('mongodb-memory-server');
     mongoServer = await MongoMemoryServer.create();

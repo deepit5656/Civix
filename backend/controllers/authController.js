@@ -38,6 +38,7 @@ const determineUserRole = (email) => {
 };
 
 const inMemoryOtpCache = new Map();
+const verifiedEmailsCache = new Map();
 
 // ─── SEND OTP ─────────────────────────────────────────────────────────────────
 exports.sendOTP = asyncHandler(async (req, res) => {
@@ -72,6 +73,8 @@ exports.sendOTP = asyncHandler(async (req, res) => {
     inMemoryOtpCache.set(`${cleanEmail}_${type}`, { otp: generatedOtp, expiresAt });
   }
 
+  console.log(`🔐 [Civix Auth] OTP generated for ${cleanEmail} (${type}): ${generatedOtp}`);
+
   // Compose Email
   const subject = type === 'signup' 
     ? 'Verify your Civix Account OTP 🔐' 
@@ -92,11 +95,8 @@ exports.sendOTP = asyncHandler(async (req, res) => {
   // Send Email asynchronously
   sendEmail(cleanEmail, subject, htmlContent);
 
-  console.log(`🔑 OTP generated for ${cleanEmail}: ${generatedOtp}`);
-
   res.json({
     message: 'Verification code sent to your email',
-    ...(process.env.NODE_ENV !== 'production' ? { debugOtp: generatedOtp } : {}),
   });
 });
 
@@ -111,14 +111,15 @@ exports.verifyOTP = asyncHandler(async (req, res) => {
   }
 
   const cleanEmail = email.toLowerCase().trim();
+  const cleanOtp = String(otp).trim();
   let otpRecord = null;
 
   if (mongoose.connection.readyState === 1) {
     try {
-      otpRecord = await OTP.findOne({ email: cleanEmail, otp, type });
+      otpRecord = await OTP.findOne({ email: cleanEmail, otp: cleanOtp, type });
     } catch (err) {
       const cached = inMemoryOtpCache.get(`${cleanEmail}_${type}`);
-      if (cached && cached.otp === String(otp).trim()) {
+      if (cached && String(cached.otp).trim() === cleanOtp) {
         otpRecord = cached;
       }
     }
@@ -126,7 +127,7 @@ exports.verifyOTP = asyncHandler(async (req, res) => {
   
   if (!otpRecord) {
     const cached = inMemoryOtpCache.get(`${cleanEmail}_${type}`);
-    if (cached && cached.otp === String(otp).trim()) {
+    if (cached && String(cached.otp).trim() === cleanOtp) {
       otpRecord = cached;
     }
   }
@@ -142,6 +143,9 @@ exports.verifyOTP = asyncHandler(async (req, res) => {
     }
     return res.status(400).json({ error: 'Verification code has expired' });
   }
+
+  // Record verified status for 15 minutes so signup/login flow can proceed
+  verifiedEmailsCache.set(`${cleanEmail}_${type}`, Date.now());
 
   // Delete OTP after successful validation
   inMemoryOtpCache.delete(`${cleanEmail}_${type}`);
@@ -176,11 +180,34 @@ exports.signup = asyncHandler(async (req, res) => {
 
   // Validate OTP if provided
   if (otp) {
-    const otpRecord = await OTP.findOne({ email: cleanEmail, otp, type: 'signup' });
+    const cleanOtp = String(otp).trim();
+    let otpRecord = null;
+    if (mongoose.connection.readyState === 1) {
+      try {
+        otpRecord = await OTP.findOne({ email: cleanEmail, otp: cleanOtp, type: 'signup' });
+      } catch (err) {
+        console.warn('⚠️ OTP find error:', err.message);
+      }
+    }
     if (!otpRecord) {
+      const cached = inMemoryOtpCache.get(`${cleanEmail}_signup`);
+      if (cached && String(cached.otp).trim() === cleanOtp && new Date() <= cached.expiresAt) {
+        otpRecord = cached;
+      }
+    }
+
+    const verifiedTimestamp = verifiedEmailsCache.get(`${cleanEmail}_signup`);
+    const isRecentlyVerified = verifiedTimestamp && (Date.now() - verifiedTimestamp < 15 * 60 * 1000);
+
+    if (!otpRecord && !isRecentlyVerified) {
       return res.status(400).json({ error: 'Invalid or expired OTP code' });
     }
-    await OTP.deleteOne({ _id: otpRecord._id });
+
+    if (otpRecord && otpRecord._id && mongoose.connection.readyState === 1) {
+      await OTP.deleteOne({ _id: otpRecord._id }).catch(() => {});
+    }
+    inMemoryOtpCache.delete(`${cleanEmail}_signup`);
+    verifiedEmailsCache.delete(`${cleanEmail}_signup`);
   }
 
   // Check duplicates
@@ -234,11 +261,30 @@ exports.login = asyncHandler(async (req, res) => {
 
   // Handle OTP Quick Login
   if (otp) {
-    const otpRecord = await OTP.findOne({ email: cleanEmail, otp, type: 'login' });
+    const cleanOtp = String(otp).trim();
+    let otpRecord = null;
+    if (mongoose.connection.readyState === 1) {
+      try {
+        otpRecord = await OTP.findOne({ email: cleanEmail, otp: cleanOtp, type: 'login' });
+      } catch (err) {
+        console.warn('⚠️ OTP find error in login:', err.message);
+      }
+    }
+    if (!otpRecord) {
+      const cached = inMemoryOtpCache.get(`${cleanEmail}_login`);
+      if (cached && String(cached.otp).trim() === cleanOtp && new Date() <= cached.expiresAt) {
+        otpRecord = cached;
+      }
+    }
+
     if (!otpRecord) {
       return res.status(400).json({ error: 'Invalid or expired OTP code' });
     }
-    await OTP.deleteOne({ _id: otpRecord._id });
+
+    if (otpRecord && otpRecord._id && mongoose.connection.readyState === 1) {
+      await OTP.deleteOne({ _id: otpRecord._id }).catch(() => {});
+    }
+    inMemoryOtpCache.delete(`${cleanEmail}_login`);
 
     // Auto-create user if logging in via OTP for the first time
     if (!user) {
@@ -344,4 +390,45 @@ exports.changePassword = asyncHandler(async (req, res) => {
   await user.save();
 
   res.json({ message: 'Password changed successfully' });
+});
+
+// ─── RESET PASSWORD ──────────────────────────────────────────────────────────
+exports.resetPassword = asyncHandler(async (req, res) => {
+  if (!await checkDbConnection(res)) return;
+
+  const { email, otp, newPassword } = req.body;
+  const cleanEmail = String(email || '').toLowerCase().trim();
+
+  if (!/\S+@\S+\.\S+/.test(cleanEmail) || !otp || !newPassword) {
+    return res.status(400).json({ error: 'Email, OTP, and new password are required' });
+  }
+  if (String(newPassword).length < 6) {
+    return res.status(400).json({ error: 'New password must be at least 6 characters' });
+  }
+
+  let otpRecord = null;
+  if (mongoose.connection.readyState === 1) {
+    otpRecord = await OTP.findOne({ email: cleanEmail, otp: String(otp).trim(), type: 'reset-password' });
+  }
+  if (!otpRecord) {
+    const cached = inMemoryOtpCache.get(`${cleanEmail}_reset-password`);
+    if (cached && String(cached.otp) === String(otp).trim() && new Date() <= cached.expiresAt) {
+      otpRecord = cached;
+    }
+  }
+  if (!otpRecord || new Date() > otpRecord.expiresAt) {
+    return res.status(400).json({ error: 'Invalid or expired reset code' });
+  }
+
+  const user = await User.findOne({ email: cleanEmail });
+  if (!user) return res.status(404).json({ error: 'No account exists for this email' });
+
+  user.password = newPassword;
+  await user.save();
+  inMemoryOtpCache.delete(`${cleanEmail}_reset-password`);
+  if (otpRecord._id && mongoose.connection.readyState === 1) {
+    await OTP.deleteOne({ _id: otpRecord._id }).catch(() => {});
+  }
+
+  res.json({ message: 'Password reset successfully' });
 });
