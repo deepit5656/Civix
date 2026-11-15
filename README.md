@@ -1,286 +1,136 @@
-# 🚧 Civix – Local Civic Issue Reporting App  
+# Civix
 
-**Domain**: Governance / Public Welfare  
-**Tagline**: Empowering citizens, enabling better governance.  
+Civix is a full-stack civic engagement platform for reporting local issues, tracking municipal responses, finding nearby services, and exploring public information.
 
-![Issues](https://img.shields.io/github/issues/Harshs16/civix)
-![Forks](https://img.shields.io/github/forks/Harshs16/civix)
-![Stars](https://img.shields.io/github/stars/Harshs16/civix)
+## What is included
 
-## 🧠 Overview
-  
-**Civix** is a full-stack web application designed to streamline the process of reporting, tracking, and resolving local civic issues such as potholes, broken streetlights, and uncollected garbage. It provides a bridge between citizens and municipal authorities, bringing accountability and transparency to local issue resolution. 
+### Citizen services
 
-![Image](https://github.com/user-attachments/assets/a5c04052-c62e-4885-ad14-9084a63272f2)
-*Caption: Citizen view showing issue reporting interface*
+- Report issues with descriptions, location, and optional evidence uploads.
+- Track complaint status and request a review or escalation.
+- Upvote community issues and participate in civic polls.
+- Find nearby hospitals, police, fire, pharmacies, blood banks, shelters, and food banks.
+- Submit Lost & Found notices and use the persistent community chat.
+- Request blood donation, general help, or volunteering through Community Support.
+- Manage profile, password reset, medical information, and emergency contacts.
+- Use Civibot for service discovery, guided issue reporting, voice input, and spoken replies.
+- Access SOS contacts and official public-service portals.
 
-## 🚨 Problem Addressed  
-Local civic issues often go unnoticed or unresolved due to:  
-- Lack of structured, user-friendly reporting systems  
-- No transparent status tracking  
-- Difficulty in community prioritization  
+### Public information
 
-## ✨ Features  
+Civix includes labelled datasets and service pages for transport, trains, elections, government schemes, budgets, disaster relief, schools, civic statistics, utilities, and vehicle services. Dataset pages identify the source or academic/timetable year where available; the data is not a substitute for the latest official notice.
 
-![Image](https://github.com/user-attachments/assets/b7f86a3e-3f51-4098-a5e7-eb14b134b111)
-*Caption: Step-by-step issue reporting process*
+### Administration
 
-### 🧍 Citizens  
-- 📍 **Report Issues**: Submit problems with description, live location (via map), and image  
-- 🔁 **Track Status**: View transitions from *Open → In Progress → Resolved*  
-- 👍 **Upvote Issues**: Support others' reports to highlight common concerns  
+Admins can review issues, filter complaints, update statuses, view live analytics, manage users and polls, and export issue data as CSV, JSON, or browser-printable PDF.
 
-### 🧑‍💼 Admins (City Workers)  
-- 📊 **Dashboard**: View, filter, and manage all reported issues  
-- 🔧 **Status Management**: Update progress and mark resolutions  
-- 🔒 **Role-Based Access**: Secure login for Citizens and Admins  
+## Technology
 
-### 📘 Civic Education & Rights  
+- **Frontend:** React, React Router, Tailwind utility classes, Lucide, Leaflet, Recharts
+- **Backend:** Node.js, Express, MongoDB/Mongoose
+- **Authentication:** JWT, OTP verification, protected citizen/admin routes
+- **Uploads and email:** Cloudinary and Nodemailer
+- **AI:** Google Gemini with a local service-aware fallback
+- **Testing:** Vitest, React Testing Library, Jest, Supertest, Cypress
 
-Civix now includes a fully frontend civic learning module to educate users—especially students and first-time voters—about their rights and responsibilities.
+## Requirements
 
-**Route**: `/civic-education`  
-**File**: `src/Pages/CivicEducation.jsx`
+- Node.js 18 or newer
+- npm 9 or newer
+- MongoDB locally or a MongoDB Atlas connection
+- Optional: Cloudinary, email provider, and Gemini API credentials for their related features
 
-#### ✨ Highlights  
-- 🧠 Interactive Quiz System with progress tracking and localStorage-based scores  
-- 🏆 Gamified XP system, achievements, and level-ups  
-- 🗂️ Tabbed layout for Overview, Learn, Quiz, and Resources  
-- 🔖 Bookmark favorite sections and save them locally  
-- 📊 Reading Progress Bar and Civic Journey visualization  
-- 💡 Animated “Did You Know?” facts carousel  
-- 📥 Downloadable PDFs and curated civic resources  
-- 🎉 Celebration animations on milestone completions  
+## Local setup
 
-### 🧭 Civic Simulator
-
-Civix now includes a standalone interactive simulator that allows users to step into civic leadership roles. Through animated dilemmas and slider-based decisions, users make trade-offs and explore the consequences of their choices—all within a frontend-only experience.
-
-**Route**: `/civic-simulator`  
-**File**: `src/Pages/CivicSimulator.jsx`
-
-#### ✨ Highlights  
-- 🎮 **Scenario Cards** – Solve dilemmas like budget allocation or policy conflicts using sliders and toggles  
-- 🧠 **Outcome Feedback** – Dynamic responses based on user choices (public satisfaction, resource balance)  
-- 📊 **Civic Style Profiling** – Discover civic personas like “Planner” or “Advocate” based on decisions  
-- 🔁 **Replayable Challenges** – Rerun scenarios to improve your score and try alternate outcomes  
-- 🏅 **XP & Badges** – Earn experience points and unlock achievement badges locally  
-- 💡 **Frontend-Only Logic** – Built entirely in React with `localStorage` persistence for decision history and XP tracking
-
-### 🏛️ Verified Public Governance Portals & Official Data Sources
-Every section now includes a clear **Section Purpose & Guide** banner detailing its purpose, usage steps, and official data provenance:
-
-| Portal / Section | Route | Official Authenticated Source | Geographic Scope |
-| :--- | :--- | :--- | :--- |
-| **Transit Stops** | `/transport` | OpenStreetMap Overpass (Live GPS) + Delhi DTC GTFS | Dynamic GPS Nearby (Nationwide) + Delhi |
-| **Train Schedules** | `/train` | Ministry of Railways / data.gov.in | All India Indian Railways Network |
-| **Govt Schemes** | `/govt-schemes` | Ministry of Social Justice & Empowerment (data.gov.in) | All 28 States & 8 UTs |
-| **Union Budget** | `/budget` | Rajya Sabha / Ministry of Finance (sansad.in) | Union & State Allocations |
-| **Disaster Relief & NFSA** | `/sdrf` | Ministry of Home Affairs & Consumer Affairs | State & District-wise Quotas |
-| **Civic Statistics** | `/civic-stats` | Census of India & Ministry of Jal Shakti | National & State Indicators |
-| **School Data** | `/school` | UDISE+ / Ministry of Education (udiseplus.gov.in) | State, District & Block Level |
-| **Voter & Election Portal** | `/elections-info` | Election Commission of India (eci.gov.in) | National & Constituency Level |
-| **Vehicle Services** | `/vehical` | MoRTH Parivahan Seva / Vahan / Sarathi | All State & UT RTOs |
-| **Emergency Services** | `/nearby-services`| OpenStreetMap Overpass Geocoder | Live 10km GPS Radius |
-
-### 🗳️ Community Civic Voting & Lost-and-Found
-- **City & Area Filtering**: Toggle between **"📍 In My City / Area"** (auto-detected from your verified profile) and **"🌐 All Areas / Nationwide"**.
-- **Live Civic Upvoting**: Real-time community upvoting on reported municipal hazards (potholes, streetlights, sanitation issues) to elevate municipal priority.
-- **Lost & Found Registry**: Area-based notices to reunite lost belongings with citizens.
-
-### 🛡️ Unified Navigation & Admin Sync
-- **Smart Back Navigation**: Integrated universal `BackButton` component across all subpages with history detection and dashboard fallback.
-- **Live Admin Redressal**: Real-time status updates (*Pending → In Progress → Resolved → Rejected*) synchronized between the Admin Dashboard and Citizen's *My Complaints* portal.
-
-## 🛠️ Tech Stack  
-### Frontend  
-- React.js  
-- Tailwind CSS – Modern responsive UI  
-- Leaflet.js – Interactive maps for location tagging  
-
-### Backend  
-- Node.js + Express.js  
-- PostgreSQL – Relational DB for reports and user data  
-- JWT Authentication – Secure role-based access
-- Multer – File upload handling
-- Swagger – API documentation
-- Helmet.js – Security middleware
-- Express Rate Limit – API protection
-
-### Integrations  
-- Cloudinary – Image uploads and hosting  
-- JWT Authentication – Secure role-based access
-
-## 🔧 Backend API Features
-
-Detailed backend setup, environment configuration, database schemas, and complete API endpoint documentation can now be found in the [Backend Documentation](./backend/README.md).
-
-## 🌗 Dark Mode Toggle  
-**Implementation**:  
-- `darkMode: 'class'` in `tailwind.config.js`  
-- User preference saved via `localStorage`  
-- Toggle switch: `src/ThemeToggle.jsx` (used in `Home.jsx`)  
-
-**How to Use**:  
-1. Locate the toggle button (🌙/☀️) in the header  
-2. Click to switch between:  
-   - **Light Mode**: White/light gray backgrounds (`bg-slate-50`) with dark text (`text-gray-900`)  
-   - **Dark Mode**: Dark gray backgrounds (`dark:bg-gray-800`) with light text (`dark:text-gray-100`)  
-
-## 🚀 Getting Started  
-
-![Image](https://github.com/user-attachments/assets/2cd2d4e6-f9b4-4322-aad2-5475277ce2ff)
-*Caption: Admin dashboard with issue management tools*
-
-### Prerequisites  
-- Node.js 16+  
-- npm 8+  
-- PostgreSQL 14+  
-- Cloudinary account (for image uploads)
-
-
-
-
-
-
-### Testing
-*   **Backend Testing:** Jest, Supertest, MongoDB Memory Server
-*   **Frontend Unit/Component Testing:** Vitest, React Testing Library
-*   **Frontend E2E Testing:** Cypress
-
----
-
-
-## ✅ Running Tests
-
-We have a comprehensive testing suite to ensure code quality and stability.
-
-### Backend Tests (Jest & Supertest)
-
-These tests cover the API endpoints. They run against an in-memory MongoDB database to ensure a clean, isolated environment for each test run, preventing any impact on your development database.
-
-To run all backend tests, navigate to the `/backend` directory and run:
-```sh
-npm test
-```
-
-### Frontend Unit & Component Tests (Vitest)
-
-These tests verify that individual React components render and behave correctly in isolation. We use Vitest and React Testing Library for this.
-
-To run all frontend unit tests, navigate to the `/frontend` directory and run:
-```sh
-npm test
-```
-
-### Frontend End-to-End (E2E) Tests (Cypress)
-
-E2E tests simulate real user workflows in a browser from start to finish. This helps catch bugs in critical user journeys like logging in, creating a post, or navigating the application.
-
-To open the Cypress Test Runner, navigate to the `/frontend` directory and run:
-```sh
-npm run cypress:open
-
-### 📥 Installation  
-📦 1.**Clone the repository**:  
-   ```bash
-   git clone https://github.com/Harshs16/civix.git
-   cd Civix
-  
-📦 2. **Install Dependencies**
-
-Make sure you have **Node.js** and **npm** installed.  
-Then, install the project dependencies:
+Clone the repository and install dependencies:
 
 ```bash
-
+git clone https://github.com/deepit5656/Civix.git
+cd Civix
 npm install
-
+cd backend
+npm install
 ```
 
+Create the backend environment file:
 
-
-### 🌱 3. **Create a New Branch**
-Use a meaningful branch name:
 ```bash
-
-git checkout -b your-feature-name
-
+copy .env.example .env
 ```
 
-Example:
+On macOS/Linux, use `cp .env.example .env` instead. Fill in the required values in `backend/.env`; never commit that file.
+
+Start the backend in one terminal:
+
 ```bash
-
-git checkout -b improve-readme
-
+cd backend
+npm run dev
 ```
 
+Start the frontend from the repository root in another terminal:
 
- 🛠️ 4. **Make Your Changes**
-- Improve the code, fix bugs, or update docs.
-- If you're running the project:
-  ```bash
-
-  npm start
-
-  ```
-
-
-
- ✅ 5. **Stage and Commit**
 ```bash
-
-git add .
-git commit -m "feat: your clear and concise commit message"
-
+npm start
 ```
 
-🚀 6. **Push Your Branch**
+The frontend runs at `http://localhost:3000`. The API runs at `http://localhost:5000`. Health checks are available at `/health` and `/api/health`; Swagger is available at `/api-docs`.
+
+## Environment variables
+
+See [`backend/.env.example`](./backend/.env.example) for the complete template. At minimum, configure:
+
+- `MONGO_URI`
+- `JWT_SECRET`
+- `PORT` (defaults to `5000`)
+- `FRONTEND_URL` (defaults to `http://localhost:3000`)
+
+Cloudinary, email, and Gemini variables are needed only for image uploads, email notifications, and Gemini-assisted features.
+
+## Testing
+
+Run frontend tests from the repository root:
+
 ```bash
-
-git push origin your-feature-name
-
+npm test -- --run
 ```
 
----
+Run the production build:
 
-🔁 7. **Create a Pull Request**
-- Go to your forked repo on GitHub
-- Click **“Compare & pull request”**
-- Add a helpful description of what you changed and why
+```bash
+npm run build
+```
 
----
+Run backend tests:
 
+```bash
+cd backend
+npm test
+```
 
+Run Cypress when the frontend is available:
 
-## 📌 Roadmap / Future Enhancements  
+```bash
+npm run cypress:open
+```
 
-- 🔔 Push notifications for issue updates  
-- 📈 Analytics for civic issue trends  
-- 🌐 Multilingual support  
-- 📱 Mobile app (React Native) 
+The backend test setup can use MongoDB Memory Server. If a local MongoDB instance is unavailable, the application and some integration tests may report a connection warning; configure `MONGO_URI` or allow the test binary to be downloaded for a complete run.
 
---- 
+## Project layout
 
-## 🤝 Contributing
-Pull requests are welcome! For major changes, please open an issue first to discuss your ideas.
+```text
+src/                 React application, pages, components, context, and API clients
+public/              Static assets, dataset files, and service worker
+backend/             Express API, MongoDB models, routes, controllers, and tests
+.github/             Pull request and issue templates
+```
 
---- 
+## Mobile app
 
-## 🌟 Our Awesome Contributors
+The mobile download page currently displays **Coming Soon** because Civix does not yet publish APK or App Store builds. The responsive web application remains available on mobile browsers.
 
-<a href="https://github.com/Harshs16/civix/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=Harshs16/civix" />
-</a>
+## Contributing
 
---- 
-
-## 📄 License
-MIT License. See LICENSE file for more details.
-
-<p align="center">
-  <a href="#top" style="font-size: 18px; padding: 8px 16px; display: inline-block; border: 1px solid #ccc; border-radius: 6px; text-decoration: none;">
-    ⬆️ Back to Top
-  </a>
-</p>
-
+1. Create a focused branch.
+2. Make and test the change.
+3. Keep secrets in local `.env` files.
+4. Open a pull request using the repository template.

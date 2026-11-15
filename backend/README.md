@@ -97,6 +97,8 @@ MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/civix
 | PATCH | `/api/issues/:id` | JWT | Update own issue |
 | PATCH | `/api/issues/:id/status` | Admin | Update issue status |
 | DELETE | `/api/issues/:id` | Admin | Delete issue |
+| PATCH | `/api/issues/:id/upvote` | Optional | Toggle an issue upvote when authenticated |
+| PATCH | `/api/issues/:id/escalate` | JWT | Request issue escalation/review |
 
 **Query params for GET /api/issues:**
 - `status=Pending|In Progress|Resolved|Rejected`
@@ -136,10 +138,17 @@ MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/civix
 | GET | `/api/feedback` | Admin | Get all feedback |
 | PATCH | `/api/feedback/:id/status` | Admin | Update feedback status |
 
+### Community features
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| GET/POST | `/api/lost-found` | JWT | List or create Lost & Found notices |
+| GET/POST | `/api/chat/` | JWT for posting | Read or post community chat messages |
+| GET/POST | `/api/community-requests` | JWT | Read or create support requests |
+
 ### Other
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/health` | Server health check |
+| GET | `/health` or `/api/health` | Server health check |
 | GET | `/api/contributors` | Get contributors |
 | GET | `/api-docs` | Swagger API documentation |
 
