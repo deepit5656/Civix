@@ -178,7 +178,7 @@ Return ONLY a strict JSON object (NO markdown backticks, NO extra commentary) fo
  */
 exports.chat = async (req, res) => {
   try {
-    const { message, conversationHistory = [] } = req.body;
+    const { message, conversationHistory = [], context = '' } = req.body;
 
     if (!message || typeof message !== 'string') {
       return res.status(400).json({ error: 'Message text is required' });
@@ -197,8 +197,11 @@ You provide clear, respectful, actionable advice on:
 - Indian welfare schemes (PM Awas Yojana, PM Surya Ghar, Ayushman Bharat, PM-KUSUM)
 - Municipal taxes, Union Budget & SDRF disaster allocations
 - Emergency SOS protocols (112, 100, 108)
-- Navigating the Civix platform (/report-issue, /complaints, /community-voting, /sos, /nearby-services)
-Keep replies friendly, concise (2-4 sentences max), and accurate. If asked in Hindi, reply in Hindi.`
+- Vehicle and public service navigation, including official Parivahan/Sarathi links
+- Navigating every Civix platform service listed in the supplied catalog
+Use the catalog as product context. If a question is related to a listed service, do not say Civix cannot help. Explain what Civix can do, state any limitation honestly, and name the relevant route. Keep replies friendly, concise (2-4 sentences max), and accurate. If asked in Hindi, reply in Hindi.
+
+${context}`
         });
 
         const chat = model.startChat({
@@ -227,7 +230,11 @@ Keep replies friendly, concise (2-4 sentences max), and accurate. If asked in Hi
     let actionRoute = null;
     let actionLabel = null;
 
-    if (lower.includes('report') || lower.includes('file') || lower.includes('pothole') || lower.includes('light') || lower.includes('garbage')) {
+    if (lower.includes('bike') || lower.includes('vehicle') || lower.includes('car') || lower.includes('scooter') || lower.includes('driving') || lower.includes('license') || lower.includes('licence') || lower.includes('registration') || lower.includes('parivahan') || lower.includes('ownership')) {
+      reply = 'Civix can guide you to official vehicle services for registration, licences, permits, and related tasks. Private ownership records are not stored in Civix, so use the official Parivahan or Sarathi portal for those details.';
+      actionRoute = '/vehical';
+      actionLabel = 'Open Vehicle Services';
+    } else if (lower.includes('report') || lower.includes('file') || lower.includes('pothole') || lower.includes('light') || lower.includes('garbage')) {
       reply = 'To file a complaint, click "Report Issue". You can take a photo, use the "✨ AI Auto-Detect" button to automatically draft the title and category, and tag your GPS coordinates.';
       actionRoute = '/report-issue';
       actionLabel = 'Report an Issue';
@@ -247,14 +254,16 @@ Keep replies friendly, concise (2-4 sentences max), and accurate. If asked in Hi
       reply = 'Civix includes direct integrations with official open datasets for central & state welfare schemes, eligibility criteria, and verified application portals.';
       actionRoute = '/govt-schemes';
       actionLabel = 'Government Schemes';
-    } else if (lower.includes('hospital') || lower.includes('transit') || lower.includes('near') || lower.includes('bus')) {
+    } else if (lower.includes('hospital') || lower.includes('transit') || lower.includes('near') || lower.includes('bus') || lower.includes('pharmacy') || lower.includes('blood bank') || lower.includes('shelter') || lower.includes('food bank')) {
       reply = 'You can locate nearby hospitals, police stations, fire stations, and transit stations using our live OpenStreetMap Overpass GPS locator.';
       actionRoute = '/nearby-services';
       actionLabel = 'Nearby Services';
+    } else if (lower.includes('train') || lower.includes('railway') || lower.includes('school') || lower.includes('election') || lower.includes('statistics') || lower.includes('transport') || lower.includes('budget') || lower.includes('sdrf') || lower.includes('scheme')) {
+      reply = 'That is covered by Civix public-data services. I can open the civic statistics hub, where you can choose the relevant train, school, election, transport, budget, disaster-relief, or scheme dataset.';
+      actionRoute = '/civic-stats';
+      actionLabel = 'Open Civic Statistics';
     } else {
-      reply = `I can help you navigate civic grievance redressal, welfare schemes, emergency services, and community voting. Try selecting one of the quick resources below or ask specifically about municipal services.`;
-      actionRoute = '/report-issue';
-      actionLabel = 'Report Civic Issue';
+      reply = `I can help you find a Civix service, understand what it does, and guide you through the next step. Tell me what you are trying to do in your own words, such as getting a vehicle service, finding a hospital, requesting blood, reporting a problem, or checking public data.`;
     }
 
     return res.json({

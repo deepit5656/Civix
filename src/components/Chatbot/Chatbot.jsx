@@ -89,8 +89,36 @@ const CIVIC_FAQS = [
     answer: 'Civix provides open data visualizers for the Union Budget allocations, State Disaster Response Fund (SDRF) disbursements, and personal Tax Impact breakdown calculators.',
     actionLabel: 'View Union Budget',
     actionRoute: '/budget'
+  },
+  {
+    keywords: ['bike', 'bikes', 'vehicle', 'car', 'scooter', 'driving', 'license', 'licence', 'registration', 'rc', 'parivahan', 'ownership'],
+    question: 'Where can I find vehicle services?',
+    answer: 'Civix can take you to the official vehicle services portal for registration, driving licences, permits, and other Parivahan services. Civix does not store private ownership records, so ownership details must be checked through the official portal.',
+    actionLabel: 'Open Vehicle Services',
+    actionRoute: '/vehical'
+  },
+  {
+    keywords: ['train', 'railway', 'rail', 'bus timetable', 'transport', 'school data', 'population', 'election', 'statistics', 'civic data'],
+    question: 'Where can I explore public data?',
+    answer: 'Civix includes public-data tools for train schedules, transport, schools, elections, civic statistics, budgets, disaster relief, and government schemes. I can open the relevant service for you.',
+    actionLabel: 'Explore Civic Data',
+    actionRoute: '/civic-stats'
   }
 ];
+
+const SERVICE_CONTEXT = `Civix service catalog:
+- Report Issue (/report-issue): report potholes, garbage, broken lights, water leaks, drainage, public infrastructure, photos and GPS.
+- My Complaints (/complaints): track submitted issues, status updates, escalation and review requests.
+- Community Voting (/community-voting): upvote live civic issues.
+- Voting System (/voting-system): browse or create community polls.
+- Lost & Found (/lost-found): report lost items and found items.
+- Nearby Services (/nearby-services): hospitals, police, fire stations, blood banks, pharmacies, shelters, food banks and transit.
+- Community Support (/community-support): blood donation requests, general help and volunteering.
+- SOS (/sos): emergency calls, location sharing, medical information and audio recording.
+- Vehicle Services (/vehical): official Parivahan and Sarathi links for registration and driving services; Civix cannot reveal private ownership records.
+- Public data: trains (/train), transport (/transport), schools (/school), elections (/elections-info), civic statistics (/civic-stats), budget (/budget), disaster relief (/sdrf), schemes (/govt-schemes), electricity (/electricity), Air Seva (/airseva), representatives (/repersentative-finder).
+- Account: profile (/profile), password reset (/forgot-password).
+If a question is related to one of these services, explain the limitation honestly but guide the user to the closest service instead of saying Civix cannot help.`;
 
 const SUGGESTED_PROMPTS = [
   'I want to report a pothole',
@@ -259,11 +287,16 @@ const ChatBot = () => {
         setIsTyping(false);
         return;
       }
-      // 1. Check quick FAQ match first for instant responses
+      // 1. Use scored service matching so a single generic keyword cannot
+      // incorrectly route a question to the first FAQ.
       const lower = query.toLowerCase();
-      let matchedFaq = CIVIC_FAQS.find((faq) =>
-        faq.keywords.some((kw) => lower.includes(kw))
-      );
+      const matchedFaq = CIVIC_FAQS
+        .map((faq) => ({
+          faq,
+          score: faq.keywords.reduce((score, keyword) => score + (lower.includes(keyword) ? (keyword.includes(' ') ? 2 : 1) : 0), 0)
+        }))
+        .filter((entry) => entry.score > 0)
+        .sort((a, b) => b.score - a.score)[0]?.faq;
 
       if (matchedFaq) {
         setTimeout(() => {
@@ -289,7 +322,8 @@ const ChatBot = () => {
       // 2. Query Backend AI Service
       const res = await aiAPI.chat({
         message: query,
-        conversationHistory: messages
+        conversationHistory: messages,
+        context: SERVICE_CONTEXT
       });
 
       if (res && res.reply) {
@@ -355,13 +389,13 @@ const ChatBot = () => {
       {!isOpen && (
         <button
           onClick={toggleChat}
-          className="relative group flex items-center justify-center w-14 h-14 rounded-full bg-emerald-700 hover:bg-emerald-600 text-white shadow-xl shadow-emerald-950/20 hover:scale-105 active:scale-95 transition-all duration-300 focus:outline-none"
+          className="relative group flex items-center justify-center w-14 h-14 rounded-full bg-slate-950 hover:bg-cyan-950 text-cyan-300 border border-cyan-400/60 shadow-xl shadow-slate-950/30 hover:scale-105 active:scale-95 transition-all duration-300 focus:outline-none"
           title="Open Civix AI Assistant"
           aria-label="Open Civix AI Assistant"
         >
           <div className="absolute -top-1 -right-1 flex h-4 w-4">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-400 border-2 border-white dark:border-slate-900"></span>
+            <span className="relative inline-flex rounded-full h-4 w-4 bg-cyan-400 border-2 border-white dark:border-slate-900"></span>
           </div>
           <Sparkles className="w-6 h-6 animate-pulse" />
         </button>
@@ -369,20 +403,20 @@ const ChatBot = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="w-[90vw] sm:w-[380px] h-[520px] max-h-[85vh] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
+        <div className="w-[90vw] sm:w-[400px] h-[560px] max-h-[85vh] bg-slate-100 dark:bg-slate-950 border border-cyan-300/50 dark:border-cyan-900 rounded-[28px] shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
           
           {/* Header */}
-          <div className="bg-emerald-700 px-4 py-3.5 text-white flex items-center justify-between shadow-md">
+          <div className="bg-slate-950 px-4 py-4 text-white flex items-center justify-between border-b border-cyan-400/30 shadow-md">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
+              <div className="w-9 h-9 rounded-xl bg-cyan-400/15 border border-cyan-300/50 flex items-center justify-center text-cyan-300">
                 <Bot className="w-5 h-5" />
               </div>
               <div>
                 <h3 className="font-bold text-sm tracking-tight flex items-center gap-1.5">
-                  <span>Civix AI Assistant</span>
-                  <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-emerald-400 text-emerald-950 font-extrabold uppercase">Live</span>
+                  <span>Civibot</span>
+                  <span className="px-1.5 py-0.5 rounded-full text-[9px] bg-cyan-400 text-slate-950 font-extrabold uppercase">Civic guide</span>
                 </h3>
-                <p className="text-[11px] text-emerald-100/90">Instant Civic & Municipal Help</p>
+                <p className="text-[11px] text-slate-300">Find the right Civix service</p>
               </div>
             </div>
 
@@ -396,7 +430,7 @@ const ChatBot = () => {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-3.5 bg-slate-50/60 dark:bg-slate-950/40">
+          <div className="flex-1 p-4 overflow-y-auto space-y-3.5 bg-slate-100 dark:bg-slate-900">
             {messages.map((msg) => {
               const isBot = msg.sender === 'bot';
               return (
@@ -405,7 +439,7 @@ const ChatBot = () => {
                   className={`flex items-start gap-2.5 ${isBot ? 'justify-start' : 'justify-end'}`}
                 >
                   {isBot && (
-                    <div className="w-6 h-6 rounded-md bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 mt-1">
+                    <div className="w-7 h-7 rounded-lg bg-cyan-700 text-white flex items-center justify-center flex-shrink-0 mt-1">
                       <Bot className="w-3.5 h-3.5" />
                     </div>
                   )}
@@ -413,8 +447,8 @@ const ChatBot = () => {
                   <div
                     className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed shadow-sm ${
                       isBot
-                        ? 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200/80 dark:border-slate-700/80'
-                        : 'bg-emerald-600 text-white font-medium'
+                        ? 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-cyan-200 dark:border-slate-700'
+                        : 'bg-cyan-800 text-white font-medium border border-cyan-700'
                     }`}
                   >
                     <p>{msg.text}</p>
@@ -424,7 +458,7 @@ const ChatBot = () => {
                       <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-700">
                         <button
                           onClick={() => handleActionClick(msg.actionRoute)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900 border border-emerald-300 dark:border-emerald-700 rounded-lg text-[11px] font-bold transition-all"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-cyan-50 dark:bg-cyan-950/80 text-cyan-800 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900 border border-cyan-300 dark:border-cyan-700 rounded-lg text-[11px] font-bold transition-all"
                         >
                           <span>{msg.actionLabel || 'View Details'}</span>
                           <ArrowRight className="w-3 h-3" />
@@ -433,7 +467,7 @@ const ChatBot = () => {
                     )}
                     {msg.guidedAction && (
                       <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-700">
-                        <button onClick={() => handleGuidedAction(msg.guidedAction)} className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-[11px] font-bold text-emerald-700 dark:border-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300">
+                        <button onClick={() => handleGuidedAction(msg.guidedAction)} className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-300 bg-cyan-50 px-3 py-1.5 text-[11px] font-bold text-cyan-800 dark:border-cyan-700 dark:bg-cyan-950/80 dark:text-cyan-300">
                           {msg.actionLabel} <ArrowRight className="w-3 h-3" />
                         </button>
                       </div>
@@ -471,13 +505,13 @@ const ChatBot = () => {
             {/* Typing Indicator */}
             {isTyping && (
               <div className="flex items-center gap-2 text-slate-400 text-xs pl-2">
-                <div className="w-5 h-5 rounded-md bg-emerald-600 text-white flex items-center justify-center">
+                <div className="w-5 h-5 rounded-md bg-cyan-700 text-white flex items-center justify-center">
                   <Bot className="w-3 h-3" />
                 </div>
                 <div className="flex gap-1 py-1 px-2.5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce"></span>
-                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                  <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce"></span>
+                  <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                  <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
                 </div>
               </div>
             )}
@@ -491,7 +525,7 @@ const ChatBot = () => {
                     <button
                       key={idx}
                       onClick={() => handleSend(prompt)}
-                      className="w-full text-left p-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 border border-slate-200/80 dark:border-slate-700/80 text-xs text-slate-700 dark:text-slate-200 hover:text-emerald-700 dark:hover:text-emerald-400 transition-all leading-snug"
+                      className="w-full text-left p-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-cyan-50 dark:hover:bg-cyan-950/40 border border-slate-200/80 dark:border-slate-700/80 text-xs text-slate-700 dark:text-slate-200 hover:text-cyan-700 dark:hover:text-cyan-400 transition-all leading-snug"
                     >
                       {prompt}
                     </button>
@@ -504,8 +538,8 @@ const ChatBot = () => {
           </div>
 
           {/* Input Box */}
-          <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
-            <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800/80 rounded-xl px-3 py-2 border border-slate-200 dark:border-slate-700 focus-within:border-emerald-500 focus-within:ring-1 focus-within:ring-emerald-500 transition-all">
+          <div className="p-3 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
+            <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-900 rounded-2xl px-3 py-2 border border-slate-200 dark:border-slate-700 focus-within:border-cyan-500 focus-within:ring-1 focus-within:ring-cyan-500 transition-all">
               <input
                 type="text"
                 value={inputValue}
@@ -523,7 +557,7 @@ const ChatBot = () => {
               <button
                 onClick={() => handleSend()}
                 disabled={!inputValue.trim()}
-                className="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-40 disabled:hover:bg-emerald-600 transition-all"
+                className="p-1.5 rounded-lg bg-cyan-700 hover:bg-cyan-600 text-white disabled:opacity-40 disabled:hover:bg-cyan-700 transition-all"
                 aria-label="Send message"
               >
                 <Send className="w-3.5 h-3.5" />
