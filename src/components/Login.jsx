@@ -279,7 +279,7 @@ const Login = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-3.5 text-gray-400 hover:text-white"
+                      className="absolute right-3.5 top-3.5 text-gray-400 hover:text-slate-700 dark:hover:text-white"
                     >
                       {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </button>
@@ -313,7 +313,7 @@ const Login = () => {
                 className="space-y-4"
               >
                 <div>
-                  <label className="block text-xs font-medium text-gray-300 mb-1">Email Address</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1 dark:text-gray-300">Email Address</label>
                   <div className="relative">
                     <FaEnvelope className="absolute left-3.5 top-3.5 text-gray-400" />
                     <input
@@ -322,7 +322,7 @@ const Login = () => {
                       placeholder="name@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-800/60 border border-slate-700 focus:border-emerald-500 rounded-xl outline-none text-sm text-white placeholder-gray-500 transition"
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 focus:border-emerald-500 rounded-xl outline-none text-sm text-slate-900 placeholder-slate-400 transition dark:bg-slate-800/60 dark:border-slate-700 dark:text-white dark:placeholder-gray-500"
                     />
                   </div>
                 </div>
@@ -353,8 +353,8 @@ const Login = () => {
                 className="space-y-4"
               >
                 <div className="text-center mb-2">
-                  <p className="text-xs text-gray-400">Enter the 6-digit code sent to</p>
-                  <p className="text-sm font-semibold text-emerald-400">{email}</p>
+                  <p className="text-xs text-slate-500 dark:text-gray-400">Enter the 6-digit code sent to</p>
+                  <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">{email}</p>
                 </div>
 
 
@@ -367,7 +367,9 @@ const Login = () => {
                       value={digit}
                       onChange={(e) => handleOtpChange(e.target, idx)}
                       onKeyDown={(e) => handleKeyDown(e, idx)}
-                      className="w-11 h-12 text-center text-lg font-bold bg-slate-800 border border-slate-700 focus:border-emerald-500 rounded-xl outline-none text-emerald-400 transition"
+                      inputMode="numeric"
+                      aria-label={`OTP digit ${idx + 1}`}
+                      className="w-11 h-12 text-center text-lg font-bold bg-slate-50 border border-slate-300 focus:border-emerald-500 rounded-xl outline-none text-emerald-700 transition dark:bg-slate-800 dark:border-slate-700 dark:text-emerald-400"
                     />
                   ))}
                 </div>

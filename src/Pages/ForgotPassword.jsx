@@ -64,7 +64,7 @@ export default function ForgotPassword() {
             <label className="block text-sm font-semibold">Email address
               <span className="relative mt-2 block">
                 <FaEnvelope className="absolute left-3 top-3.5 text-slate-400" />
-                <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-xl border border-slate-300 bg-slate-50 py-3 pl-10 pr-3 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" />
+                <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-xl border border-slate-300 bg-slate-50 py-3 pl-10 pr-3 text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
               </span>
             </label>
             <button disabled={loading} className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 font-semibold text-white hover:bg-emerald-500 disabled:opacity-60">
@@ -78,17 +78,17 @@ export default function ForgotPassword() {
             <label className="block text-sm font-semibold">Six-digit code
               <span className="relative mt-2 block">
                 <FaKey className="absolute left-3 top-3.5 text-slate-400" />
-                <input required inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))} className="w-full rounded-xl border border-slate-300 bg-slate-50 py-3 pl-10 pr-3 tracking-[0.35em] outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" />
+                <input required inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))} className="w-full rounded-xl border border-slate-300 bg-slate-50 py-3 pl-10 pr-3 text-slate-900 tracking-[0.35em] outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
               </span>
             </label>
             <label className="block text-sm font-semibold">New password
               <span className="relative mt-2 block">
                 <FaLock className="absolute left-3 top-3.5 text-slate-400" />
-                <input required minLength={6} type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full rounded-xl border border-slate-300 bg-slate-50 py-3 pl-10 pr-3 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" />
+                <input required minLength={6} type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full rounded-xl border border-slate-300 bg-slate-50 py-3 pl-10 pr-3 text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
               </span>
             </label>
             <label className="block text-sm font-semibold">Confirm password
-              <input required minLength={6} type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800" />
+              <input required minLength={6} type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-3 text-slate-900 outline-none focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
             </label>
             <button disabled={loading} className="w-full rounded-xl bg-emerald-600 py-3 font-semibold text-white hover:bg-emerald-500 disabled:opacity-60">
               {loading ? 'Updating...' : 'Update password'}

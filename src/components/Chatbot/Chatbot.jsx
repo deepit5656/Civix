@@ -5,7 +5,6 @@ import {
   MessageSquare,
   X,
   Send,
-  Sparkles,
   Bot,
   User,
   ArrowRight,
@@ -397,7 +396,7 @@ const ChatBot = () => {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-4 w-4 bg-cyan-400 border-2 border-white dark:border-slate-900"></span>
           </div>
-          <Sparkles className="w-6 h-6 animate-pulse" />
+          <BotMark />
         </button>
       )}
 
@@ -408,9 +407,7 @@ const ChatBot = () => {
           {/* Header */}
           <div className="bg-slate-950 px-4 py-4 text-white flex items-center justify-between border-b border-cyan-400/30 shadow-md">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-cyan-400/15 border border-cyan-300/50 flex items-center justify-center text-cyan-300">
-                <Bot className="w-5 h-5" />
-              </div>
+              <BotMark />
               <div>
                 <h3 className="font-bold text-sm tracking-tight flex items-center gap-1.5">
                   <span>Civibot</span>
@@ -439,9 +436,7 @@ const ChatBot = () => {
                   className={`flex items-start gap-2.5 ${isBot ? 'justify-start' : 'justify-end'}`}
                 >
                   {isBot && (
-                    <div className="w-7 h-7 rounded-lg bg-cyan-700 text-white flex items-center justify-center flex-shrink-0 mt-1">
-                      <Bot className="w-3.5 h-3.5" />
-                    </div>
+                    <BotMark small />
                   )}
 
                   <div
@@ -505,9 +500,7 @@ const ChatBot = () => {
             {/* Typing Indicator */}
             {isTyping && (
               <div className="flex items-center gap-2 text-slate-400 text-xs pl-2">
-                <div className="w-5 h-5 rounded-md bg-cyan-700 text-white flex items-center justify-center">
-                  <Bot className="w-3 h-3" />
-                </div>
+                <BotMark tiny />
                 <div className="flex gap-1 py-1 px-2.5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
                   <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce"></span>
                   <span className="w-1.5 h-1.5 bg-cyan-500 rounded-full animate-bounce [animation-delay:0.2s]"></span>
@@ -575,3 +568,13 @@ const ChatBot = () => {
 };
 
 export default ChatBot;
+
+function BotMark({ small = false, tiny = false }) {
+  const size = tiny ? 'w-5 h-5' : small ? 'w-7 h-7' : 'w-9 h-9';
+  const iconSize = tiny ? 'w-3 h-3' : small ? 'w-3.5 h-3.5' : 'w-5 h-5';
+  return (
+    <div className={`${size} rounded-2xl bg-cyan-400/15 border border-cyan-300/60 text-cyan-300 flex items-center justify-center flex-shrink-0 mt-1 shadow-inner shadow-cyan-300/20`}>
+      <Bot className={iconSize} strokeWidth={2.2} />
+    </div>
+  );
+}
