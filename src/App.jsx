@@ -7,6 +7,8 @@ import { AnimatePresence } from 'framer-motion';
 import Home from './Home';
 import Login from './components/Login';
 import Signup from './components/Signup';
+import ForgotPassword from './Pages/ForgotPassword';
+import CommunitySupport from './Pages/CommunitySupport';
 import PrivateRoute from './components/PrivateRoute';
 import RequireAdmin from './components/auth/RequireAdmin';
 import AdminDashboard from './Pages/AdminDashboard';
@@ -100,9 +102,10 @@ const App = () => {
         }}
       />
           
+      {!isAdminRoute && <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-emerald-600 focus:px-4 focus:py-2 focus:text-white">Skip to content</a>}
       {!isAdminRoute && <Navbar />}
 
-      <main className="min-h-screen">
+      <main id="main-content" className="min-h-screen">
         <AnimatePresence mode="wait" initial={false}>
           <Routes location={location} key={location.pathname}>
             {/* Redirect legacy Clerk routes */}
@@ -118,6 +121,8 @@ const App = () => {
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/community-support" element={<CommunitySupport />} />
             <Route path="/report-issue" element={<ReportIssue />} />
             <Route path="/download-android" element={<DownloadAndroid />} />
             <Route path="/download-ios" element={<DownloadIOS />} />
@@ -127,7 +132,7 @@ const App = () => {
             <Route path="/civic-simulator" element={<CivicSimulator />} />
             <Route path="/community-voting" element={<CommunityVotingPage />} />
             <Route path="/voting-system" element={<VotingSystem />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile" element={<PrivateRoute allowedRoles={['user', 'admin']}><Profile /></PrivateRoute>} />
             <Route path='/electricity' element={<Electricity/>}/>
             <Route path='/budget' element={<Budget/>}/>
             <Route path='/train' element={<Train/>}/>
@@ -149,15 +154,15 @@ const App = () => {
             <Route path="/sos" element={<SOS/>}/>
             <Route path='/chatroom' element={<Chatroom/>}/>
             <Route path='/tax-impact' element={<TaxImpact/>}/>
-            <Route path="/medical-info" element={<MedicalInfo />} />
-            <Route path="/safe-word" element={<SafeWord />} />
-            <Route path="/record-audio" element={<RecordAudio />} />
+            <Route path="/medical-info" element={<PrivateRoute allowedRoles={['user', 'admin']}><MedicalInfo /></PrivateRoute>} />
+            <Route path="/safe-word" element={<PrivateRoute allowedRoles={['user', 'admin']}><SafeWord /></PrivateRoute>} />
+            <Route path="/record-audio" element={<PrivateRoute allowedRoles={['user', 'admin']}><RecordAudio /></PrivateRoute>} />
             <Route path='/repersentative-finder' element={<RepersentativeFinder/>}/>
-            <Route path='/admin/analytics' element={<Analytics/>}/>
-            <Route path='/admin/users' element={<Users/>}/>
-            <Route path='/admin/documents' element={<Documents/>}/>
-            <Route path='/admin/settings' element={<Settings/>}/>
-            <Route path='/admin/notifications' element={<Notification/>}/>
+            <Route path='/admin/analytics' element={<PrivateRoute allowedRoles={['admin']}><Analytics/></PrivateRoute>}/>
+            <Route path='/admin/users' element={<PrivateRoute allowedRoles={['admin']}><Users/></PrivateRoute>}/>
+            <Route path='/admin/documents' element={<PrivateRoute allowedRoles={['admin']}><Documents/></PrivateRoute>}/>
+            <Route path='/admin/settings' element={<PrivateRoute allowedRoles={['admin']}><Settings/></PrivateRoute>}/>
+            <Route path='/admin/notifications' element={<PrivateRoute allowedRoles={['admin']}><Notification/></PrivateRoute>}/>
             <Route path='/nearby-services' element={<NearbyServices/>}/>
             <Route path='/lost-found' element={<LostAndFoundPage/>}/>
             <Route path='/community-holidays' element={<CommunityHolidays/>}/>

@@ -41,6 +41,7 @@ export const authAPI = {
   logout: () => apiFetch('/auth/logout', { method: 'POST' }),
   getMe: () => apiFetch('/auth/me'),
   changePassword: (data) => apiFetch('/auth/change-password', { method: 'PUT', body: JSON.stringify(data) }),
+  resetPassword: (data) => apiFetch('/auth/reset-password', { method: 'POST', body: JSON.stringify(data) }),
 };
 
 // ─── ISSUES ────────────────────────────────────────────────────────────────────
@@ -55,7 +56,40 @@ export const issuesAPI = {
   create: (formData) => apiFetch('/issues', { method: 'POST', body: formData }),
   update: (id, formData) => apiFetch(`/issues/${id}`, { method: 'PATCH', body: formData }),
   updateStatus: (id, data) => apiFetch(`/issues/${id}/status`, { method: 'PATCH', body: JSON.stringify(data) }),
+  escalate: (id, reason) => apiFetch(`/issues/${id}/escalate`, { method: 'PATCH', body: JSON.stringify({ reason }) }),
+  upvote: (id, voterId) => apiFetch(`/issues/${id}/upvote`, { method: 'PATCH', body: JSON.stringify({ voterId }) }),
   delete: (id) => apiFetch(`/issues/${id}`, { method: 'DELETE' }),
+};
+
+export const lostFoundAPI = {
+  getAll: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return apiFetch(`/lost-found${query ? `?${query}` : ''}`);
+  },
+  create: (data) => apiFetch('/lost-found', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+};
+
+export const chatAPI = {
+  getMessages: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return apiFetch(`/chat${query ? `?${query}` : ''}`);
+  },
+  sendMessage: (message) => apiFetch('/chat', {
+    method: 'POST',
+    body: JSON.stringify({ message }),
+  }),
+};
+
+export const communityRequestAPI = {
+  getAll: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return apiFetch(`/community-requests${query ? `?${query}` : ''}`);
+  },
+  create: (data) => apiFetch('/community-requests', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id, data) => apiFetch(`/community-requests/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
 };
 
 // ─── PROFILE ───────────────────────────────────────────────────────────────────
