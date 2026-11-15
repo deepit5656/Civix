@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, useMap, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { MapPin, ArrowLeft, Filter, Layers, Info, Calendar, Tag, CheckCircle, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { issuesAPI } from "../utils/api";
 
 // Custom marker icon (green pin)
 const customIcon = new L.Icon({
@@ -11,6 +12,19 @@ const customIcon = new L.Icon({
   iconSize: [35, 35],
   iconAnchor: [17, 35],
 });
+
+const userIssues = [
+  { id: 1, title: "Pothole near Main Street", description: "Big pothole near bus stop. Needs urgent repair.", status: "Pending", category: "Roads", date: "2025-08-01", lat: 13.0827, lng: 80.2707 },
+  { id: 2, title: "Streetlight not working", description: "Dark street needs repair of light. Safety issue.", status: "Resolved", category: "Lighting", date: "2025-07-20", lat: 19.076, lng: 72.8777 },
+  { id: 3, title: "Overflowing garbage bin", description: "Garbage collection delayed for 3 days.", status: "Under Review", category: "Waste", date: "2025-08-15", lat: 28.7041, lng: 77.1025 },
+  { id: 4, title: "Broken water pipe", description: "Water flooding street due to burst pipe.", status: "In Progress", category: "Water", date: "2025-08-10", lat: 12.9716, lng: 77.5946 },
+  { id: 5, title: "Damaged pedestrian crossing", description: "Zebra crossing faded near school.", status: "Pending", category: "Roads", date: "2025-08-05", lat: 22.5726, lng: 88.3639 },
+  { id: 6, title: "Illegal dumping of waste", description: "Garbage dumped in open land, foul smell.", status: "Pending", category: "Waste", date: "2025-08-17", lat: 17.385, lng: 78.4867 },
+  { id: 7, title: "Traffic signal malfunction", description: "Signal stuck on red causing jams.", status: "In Progress", category: "Roads", date: "2025-08-12", lat: 23.0225, lng: 72.5714 },
+  { id: 8, title: "Public park lights off", description: "No lighting in park, unsafe at evening.", status: "Resolved", category: "Lighting", date: "2025-07-30", lat: 26.9124, lng: 75.7873 },
+  { id: 9, title: "Open manhole", description: "Uncovered manhole near marketplace.", status: "Pending", category: "Safety", date: "2025-08-18", lat: 11.0168, lng: 76.9558 },
+  { id: 10, title: "Sewage overflow", description: "Sewage water overflowing after rain.", status: "Under Review", category: "Water", date: "2025-08-16", lat: 15.2993, lng: 74.124 },
+];
 
 // Fly to selected location
 function FlyToLocation({ position }) {
@@ -25,28 +39,60 @@ export default function UserMap() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [mapView, setMapView] = useState("street");
+  const [allIssues, setAllIssues] = useState(userIssues);
+
+  useEffect(() => {
+    async function loadLiveIssues() {
+      try {
+        const res = await issuesAPI.getAll({ limit: 100 });
+        const live = Array.isArray(res) ? res : (res?.issues || []);
+        if (live.length > 0) {
+          const mapped = live.map((item, idx) => {
+            // Attempt to parse coordinates from location string if present
+            let lat;
+            let lng;
+
+            if (item.location) {
+              const match = item.location.match(/(-?\d+(?:\.\d+)?)[,\s]+(-?\d+(?:\.\d+)?)/);
+              if (match) {
+                lat = parseFloat(match[1]);
+                lng = parseFloat(match[2]);
+              }
+            }
+
+            if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+            return {
+              id: item._id || `live-${idx}`,
+              title: item.title || "Civic Complaint",
+              description: item.description || "Reported municipal hazard",
+              status: item.status || "Pending",
+              category: item.category || "General",
+              date: item.createdAt ? new Date(item.createdAt).toISOString().split("T")[0] : "2025-01-01",
+              lat,
+              lng,
+              isLive: true,
+              fileUrl: item.fileUrl || null
+            };
+          });
+          setAllIssues([...mapped.filter(Boolean), ...userIssues]);
+        }
+      } catch (err) {
+        console.warn("Could not load live issues for map:", err);
+      }
+    }
+    loadLiveIssues();
+  }, []);
 
   const handleBackClick = () => {
-    navigate(-1);
+    if (window.history.state?.idx > 0) navigate(-1);
+    else navigate('/user/dashboard');
   };
 
-  const userIssues = [
-    { id: 1, title: "Pothole near Main Street", description: "Big pothole near bus stop. Needs urgent repair.", status: "Pending", category: "Roads", date: "2025-08-01", lat: 13.0827, lng: 80.2707 },
-    { id: 2, title: "Streetlight not working", description: "Dark street needs repair of light. Safety issue.", status: "Resolved", category: "Lighting", date: "2025-07-20", lat: 19.076, lng: 72.8777 },
-    { id: 3, title: "Overflowing garbage bin", description: "Garbage collection delayed for 3 days.", status: "Under Review", category: "Waste", date: "2025-08-15", lat: 28.7041, lng: 77.1025 },
-    { id: 4, title: "Broken water pipe", description: "Water flooding street due to burst pipe.", status: "In Progress", category: "Water", date: "2025-08-10", lat: 12.9716, lng: 77.5946 },
-    { id: 5, title: "Damaged pedestrian crossing", description: "Zebra crossing faded near school.", status: "Pending", category: "Roads", date: "2025-08-05", lat: 22.5726, lng: 88.3639 },
-    { id: 6, title: "Illegal dumping of waste", description: "Garbage dumped in open land, foul smell.", status: "Pending", category: "Waste", date: "2025-08-17", lat: 17.385, lng: 78.4867 },
-    { id: 7, title: "Traffic signal malfunction", description: "Signal stuck on red causing jams.", status: "In Progress", category: "Roads", date: "2025-08-12", lat: 23.0225, lng: 72.5714 },
-    { id: 8, title: "Public park lights off", description: "No lighting in park, unsafe at evening.", status: "Resolved", category: "Lighting", date: "2025-07-30", lat: 26.9124, lng: 75.7873 },
-    { id: 9, title: "Open manhole", description: "Uncovered manhole near marketplace.", status: "Pending", category: "Safety", date: "2025-08-18", lat: 11.0168, lng: 76.9558 },
-    { id: 10, title: "Sewage overflow", description: "Sewage water overflowing after rain.", status: "Under Review", category: "Water", date: "2025-08-16", lat: 15.2993, lng: 74.124 },
-  ];
-
-  const filteredIssues = userIssues.filter(
+  const filteredIssues = allIssues.filter(
     (issue) =>
-      (statusFilter === "All" || issue.status === statusFilter) &&
-      (categoryFilter === "All" || issue.category === categoryFilter)
+      (statusFilter === "All" || (issue.status || "").toLowerCase() === statusFilter.toLowerCase()) &&
+      (categoryFilter === "All" || (issue.category || "").toLowerCase() === categoryFilter.toLowerCase())
   );
 
   const statusClasses = {

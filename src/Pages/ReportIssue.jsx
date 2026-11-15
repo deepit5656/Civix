@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   AlertCircle,
   CheckCircle,
@@ -131,6 +131,7 @@ const FormInput = ({
 
 export default function ReportIssue() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuthContext();
 
   const [formData, setFormData] = useState({
@@ -159,6 +160,15 @@ export default function ReportIssue() {
       }));
     }
   }, [user]);
+
+  useEffect(() => {
+    const prefill = location.state?.prefill;
+    if (prefill) {
+      setFormData((current) => ({ ...current, ...prefill }));
+      toast.success("The assistant prepared your report details. Please review them before submitting.");
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [location.state]);
 
   // AI Auto-Detect Handler
   const handleAIAnalyze = useCallback(async () => {
@@ -363,7 +373,10 @@ export default function ReportIssue() {
         <div className="mb-6">
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => {
+              if (window.history.state?.idx > 0) navigate(-1);
+              else navigate('/user/dashboard');
+            }}
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-600 transition-all group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />

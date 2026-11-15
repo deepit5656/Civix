@@ -8,7 +8,7 @@ const SchoolDataPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Papa.parse("gtfs/UDISE_2021_22_Table_7.11.csv", {
+    Papa.parse("/gtfs/UDISE_2021_22_Table_7.11.csv", {
       download: true,
       header: true,
       skipEmptyLines: true,
@@ -65,7 +65,7 @@ const SchoolDataPage = () => {
             "Compare educational resources across primary, secondary, and senior secondary schools.",
             "Search or filter by state name in the data table below.",
           ]}
-          dataSource="Department of School Education & Literacy / Ministry of Education (UDISE+ Portal)"
+          dataSource="Department of School Education & Literacy / Ministry of Education (UDISE+ Portal), academic year 2021-22"
           sourceUrl="https://udiseplus.gov.in/"
           scope="State & District Level (All India Education System)"
         />

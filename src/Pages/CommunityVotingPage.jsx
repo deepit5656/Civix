@@ -39,84 +39,50 @@ const CommunityVotingPage = () => {
     return parts[0]?.trim() || "";
   }, [user?.location]);
 
-  const defaultMockIssues = [
-    {
-      id: "mock-1",
-      title: "Pothole on Main Street",
-      area: "Noida",
-      daysOpen: 3,
-      votes: 15,
-      accidentsReported: 2,
-      status: "Open",
-      priority: "high",
-    },
-    {
-      id: "mock-2",
-      title: "Broken Street Light",
-      area: "East Delhi",
-      daysOpen: 5,
-      votes: 8,
-      accidentsReported: 1,
-      status: "Open",
-      priority: "medium",
-    },
-    {
-      id: "mock-3",
-      title: "Garbage Not Collected",
-      area: "South Delhi",
-      daysOpen: 7,
-      votes: 22,
-      accidentsReported: 0,
-      status: "Open",
-      priority: "low",
-    },
-    {
-      id: "mock-4",
-      title: "Water Leakage Issue",
-      area: "West Delhi",
-      daysOpen: 2,
-      votes: 32,
-      accidentsReported: 0,
-      status: "In Progress",
-      priority: "high",
-    },
-  ];
-
-  const [issues, setIssues] = useState(defaultMockIssues);
+  const [issues, setIssues] = useState([]);
 
   const fetchLiveIssues = useCallback(async () => {
     setIsLoading(true);
     try {
       const res = await issuesAPI.getAll({ limit: 100 });
       const liveList = Array.isArray(res) ? res : (res?.issues || []);
+      const userIdentifier = user?.id || user?._id || user?.email || 'guest';
       
       if (liveList.length > 0) {
+        const initialVotedMap = {};
         const transformedLive = liveList.map((item, idx) => {
           const createdDate = item.createdAt ? new Date(item.createdAt) : new Date();
           const diffDays = Math.max(1, Math.floor((new Date() - createdDate) / (1000 * 60 * 60 * 24)));
-          
+          const itemId = item._id || `live-${idx}`;
+          const isVoted = Array.isArray(item.upvotedBy) && item.upvotedBy.includes(userIdentifier);
+          if (isVoted) initialVotedMap[itemId] = true;
+
           return {
-            id: item._id || `live-${idx}`,
+            id: itemId,
+            isLiveDb: Boolean(item._id),
             title: item.title || "Civic Complaint",
             area: item.location ? item.location.split(",")[0].trim() : (item.category || "Local Ward"),
             fullLocation: item.location || "Local Ward",
             daysOpen: diffDays,
-            votes: (item.upvotes || 0) + 1,
+            votes: item.upvotes !== undefined ? item.upvotes : 0,
             accidentsReported: item.priority === 'High' ? 1 : 0,
             status: item.status || "Open",
             priority: item.priority ? item.priority.toLowerCase() : "medium",
           };
         });
 
-        // Merge live issues with defaults
-        setIssues([...transformedLive, ...defaultMockIssues]);
+        setVotedIssues(prev => ({ ...prev, ...initialVotedMap }));
+        setIssues(transformedLive);
+      } else {
+        setIssues([]);
       }
     } catch (err) {
-      console.warn("Could not load live issues for voting, using local set:", err);
+      setIssues([]);
+      toast.error("Could not load live issues for voting. Please try again.");
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     fetchLiveIssues();
@@ -166,12 +132,16 @@ const CommunityVotingPage = () => {
       return 0;
     });
 
-  const handleVote = (id) => {
+  const handleVote = async (id) => {
+    const targetIssue = issues.find(i => i.id === id);
     const hasVoted = votedIssues[id];
+    const userIdentifier = user?.id || user?._id || user?.email || 'guest';
+
+    // Optimistically update UI
     setIssues(
       issues.map((issue) =>
         issue.id === id
-          ? { ...issue, votes: hasVoted ? issue.votes - 1 : issue.votes + 1 }
+          ? { ...issue, votes: hasVoted ? Math.max(0, issue.votes - 1) : issue.votes + 1 }
           : issue
       )
     );
@@ -179,10 +149,29 @@ const CommunityVotingPage = () => {
       ...prev,
       [id]: !prev[id],
     }));
+
     if (!hasVoted) {
       setConfetti(id);
       toast.success("Vote recorded! Thank you for prioritizing this issue.");
       setTimeout(() => setConfetti(null), 1200);
+    } else {
+      toast.info("Vote withdrawn.");
+    }
+
+    // If it's a live MongoDB issue, persist to backend API
+    if (targetIssue?.isLiveDb) {
+      try {
+        const res = await issuesAPI.upvote(id, userIdentifier);
+        if (res && res.upvotes !== undefined) {
+          setIssues(prevIssues =>
+            prevIssues.map(issue =>
+              issue.id === id ? { ...issue, votes: res.upvotes } : issue
+            )
+          );
+        }
+      } catch (err) {
+        console.warn("Could not synchronize vote with server:", err);
+      }
     }
   };
 

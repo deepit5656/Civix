@@ -98,10 +98,10 @@ const DownloadIOS = () => {
                 </span>
               </button>
               
-              <button className="group px-8 py-4 border-2 border-green-500 text-green-600 hover:bg-green-500 hover:text-white dark:border-green-400 dark:text-green-400 dark:hover:bg-green-400 dark:hover:text-gray-900 rounded-2xl font-semibold text-lg transition-all duration-300 transform hover:scale-105">
+              <button type="button" disabled className="group px-8 py-4 border-2 border-slate-300 text-slate-500 dark:border-slate-600 dark:text-slate-400 rounded-2xl font-semibold text-lg cursor-not-allowed">
                 <span className="flex items-center gap-2">
                   <Bell className="w-5 h-5" />
-                  Get Notified
+                  Notifications Coming Soon
                 </span>
               </button>
             </div>

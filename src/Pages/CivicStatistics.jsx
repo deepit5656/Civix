@@ -12,14 +12,14 @@ export default function CsvDashboard() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    Papa.parse("gtfs/population.csv", {
+    Papa.parse("/gtfs/population.csv", {
       download: true,
       header: true,
       skipEmptyLines: true,
       complete: (result) => setPopulationData(result.data),
     });
 
-    Papa.parse("gtfs/water.csv", {
+    Papa.parse("/gtfs/water.csv", {
       download: true,
       header: true,
       skipEmptyLines: true,

@@ -57,7 +57,9 @@ const SOSPage = () => {
     { name: 'Record Audio', action: () => navigate('/record-audio'), icon: Zap, color: 'from-violet-500 to-violet-700' }
   ];
 
-  const callEmergencyNumber = (number) => { /* No-op for design */ };
+  const callEmergencyNumber = (number) => {
+    window.location.href = `tel:${number}`;
+  };
 
   const copyToClipboard = async (number) => {
     try {

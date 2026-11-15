@@ -11,7 +11,7 @@ export default function CsvImportPage() {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      Papa.parse("gtfs/RS_Session_258_AU_1935_2.csv", {
+      Papa.parse("/gtfs/RS_Session_258_AU_1935_2.csv", {
         download: true,
         header: true,
         complete: (result) => {
@@ -19,7 +19,7 @@ export default function CsvImportPage() {
           checkLoadingComplete();
         },
       });
-      Papa.parse("gtfs/RS_Session_258_AU_1997_1.csv", {
+      Papa.parse("/gtfs/RS_Session_258_AU_1997_1.csv", {
         download: true,
         header: true,
         complete: (result) => {

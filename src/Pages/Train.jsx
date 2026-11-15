@@ -96,7 +96,7 @@ const TrainSchedule = () => {
             "View real sequence stops, scheduled arrival and departure times, and total route kilometers.",
             "Search works nationwide across indexed Indian Railways network schedules (not limited to any single city).",
           ]}
-          dataSource="Ministry of Railways / Open Government Data (data.gov.in) Official Timetable"
+          dataSource="Ministry of Railways / Open Government Data (data.gov.in) timetable dataset (2017)"
           sourceUrl="https://data.gov.in/"
           scope="National (All Indian Railways Stations)"
         />

@@ -1,9 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Users, MessageCircle, Sparkles } from 'lucide-react';
 import BackButton from '../components/ui/BackButton';
+import { chatAPI } from '../utils/api';
+import { useAuthContext } from '../context/AuthContext';
+
+const CHAT_STORAGE_KEY = 'civix-community-chat';
 
 export default function CivixChatRoom() {
-  const [messages, setMessages] = useState([
+  const { user, isAuthenticated } = useAuthContext();
+  const starterMessages = [
     {
       id: 1,
       user: 'Rajesh Jain',
@@ -44,10 +49,17 @@ export default function CivixChatRoom() {
       timestamp: '2:45 PM',
       isCurrentUser: false
     }
-  ]);
+  ];
+  const [messages, setMessages] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY)) || starterMessages;
+    } catch {
+      return starterMessages;
+    }
+  });
   
   const [newMessage, setNewMessage] = useState('');
-  const [onlineUsers] = useState(127);
+  const [onlineUsers, setOnlineUsers] = useState(1);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
 
@@ -59,18 +71,87 @@ export default function CivixChatRoom() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = (e) => {
+  useEffect(() => {
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+  }, [messages]);
+
+  useEffect(() => {
+    const channel = typeof BroadcastChannel === 'function'
+      ? new BroadcastChannel('civix-community-chat')
+      : null;
+    const handleStorage = (event) => {
+      if (event.key === CHAT_STORAGE_KEY && event.newValue) {
+        setMessages(JSON.parse(event.newValue));
+      }
+    };
+    const handleBroadcast = (event) => {
+      if (event.data?.type === 'messages') setMessages(event.data.messages);
+      if (event.data?.type === 'presence') setOnlineUsers(event.data.count);
+    };
+    window.addEventListener('storage', handleStorage);
+    channel?.addEventListener('message', handleBroadcast);
+    channel?.postMessage({ type: 'presence', count: 1 });
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      channel?.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const loadMessages = async () => {
+      try {
+        const response = await chatAPI.getMessages({ limit: 50 });
+        const liveMessages = response?.messages || [];
+        if (active && liveMessages.length > 0) {
+          setMessages(liveMessages.map((message) => ({
+            ...message,
+            id: message._id || message.id,
+            timestamp: new Date(message.createdAt || message.timestamp).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+            isCurrentUser: String(message.userId || '') === String(user?.id || user?._id || ''),
+          })));
+        }
+      } catch (error) {
+        console.warn('Could not load live chat messages:', error);
+      }
+    };
+    loadMessages();
+    const intervalId = window.setInterval(loadMessages, 10000);
+    return () => {
+      active = false;
+      window.clearInterval(intervalId);
+    };
+  }, [user?.id, user?._id]);
+
+  const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (newMessage.trim()) {
+    if (newMessage.trim() && isAuthenticated) {
+      const messageText = newMessage.trim();
       const message = {
         id: messages.length + 1,
-        user: 'You',
-        avatar: 'YU',
-        message: newMessage,
+        user: user?.name || user?.username || 'You',
+        avatar: (user?.name || user?.username || 'You').slice(0, 2).toUpperCase(),
+        message: messageText,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         isCurrentUser: true
       };
-      setMessages([...messages, message]);
+      try {
+        const response = await chatAPI.sendMessage(messageText);
+        const saved = response?.message;
+        if (saved) {
+          message.id = saved._id;
+          message.timestamp = new Date(saved.createdAt).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          });
+        }
+      } catch (error) {
+        console.warn('Could not save chat message to server:', error);
+      }
+      setMessages((currentMessages) => [...currentMessages, message]);
       setNewMessage('');
       setIsTyping(false);
     }
@@ -193,7 +274,8 @@ export default function CivixChatRoom() {
                   handleSendMessage(e);
                 }
               }}
-              placeholder="Share your community initiative or ask for help..."
+              placeholder={isAuthenticated ? "Share your community initiative or ask for help..." : "Sign in to join the conversation"}
+              disabled={!isAuthenticated}
               className="w-full p-4 pr-12 bg-white/70 backdrop-blur-sm border-2 border-green-200/50 rounded-2xl focus:outline-none focus:border-green-400 focus:bg-white transition-all duration-300 placeholder-gray-400 text-gray-700 shadow-sm hover:shadow-md focus:shadow-lg"
             />
             <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -205,7 +287,7 @@ export default function CivixChatRoom() {
           
           <button
             onClick={handleSendMessage}
-            disabled={!newMessage.trim()}
+            disabled={!isAuthenticated || !newMessage.trim()}
             className="group bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-white p-4 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:shadow-sm transform hover:scale-105 active:scale-95 disabled:scale-100"
           >
             <Send className="w-5 h-5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />

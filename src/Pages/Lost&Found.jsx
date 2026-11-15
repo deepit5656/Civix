@@ -1,9 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Search, Plus, MapPin, Calendar, User, Phone, Mail, X, Building, Compass } from "lucide-react";
 import BackButton from "../components/ui/BackButton";
 import SectionGuide from "../components/ui/SectionGuide";
 import { useAuthContext } from "../context/AuthContext";
 import { toast } from "react-hot-toast";
+import { lostFoundAPI } from "../utils/api";
 
 export default function LostAndFoundPage() {
   const { user } = useAuthContext();
@@ -11,6 +12,8 @@ export default function LostAndFoundPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [showForm, setShowForm] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Extract user city
   const userCity = useMemo(() => {
@@ -65,25 +68,57 @@ export default function LostAndFoundPage() {
     contactEmail: user?.email || "",
   });
 
-  const handleSubmit = () => {
+  useEffect(() => {
+    let active = true;
+    const loadItems = async () => {
+      try {
+        const response = await lostFoundAPI.getAll({ limit: 100 });
+        const liveItems = Array.isArray(response) ? response : (response?.items || []);
+        if (active && liveItems.length > 0) {
+          setItems(liveItems.map((item) => ({ ...item, id: item._id || item.id })));
+        }
+      } catch (error) {
+        console.warn("Could not load Lost & Found notices:", error);
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    };
+    loadItems();
+    return () => { active = false; };
+  }, []);
+
+  const handleSubmit = async () => {
     if (!formData.name || !formData.description || !formData.location || !formData.date || 
         !formData.contactName || !formData.contactPhone || !formData.contactEmail) {
       toast.error("Please fill in all required fields.");
       return;
     }
-    setItems([{ ...formData, id: Date.now(), type: formData.type }, ...items]);
-    toast.success("Item notice published to community board!");
-    setFormData({
-      type: "lost",
-      name: "",
-      description: "",
-      location: userCity || user?.location || "",
-      date: new Date().toISOString().split("T")[0],
-      contactName: user?.name || "",
-      contactPhone: user?.phone || "",
-      contactEmail: user?.email || "",
-    });
-    setShowForm(false);
+    setIsSubmitting(true);
+    try {
+      const response = await lostFoundAPI.create(formData);
+      const createdItem = response?.item;
+      if (!createdItem) throw new Error("The server did not return the created notice");
+      setItems((currentItems) => [
+        { ...createdItem, id: createdItem._id || createdItem.id },
+        ...currentItems,
+      ]);
+      toast.success("Item notice published to community board!");
+      setFormData({
+        type: "lost",
+        name: "",
+        description: "",
+        location: userCity || user?.location || "",
+        date: new Date().toISOString().split("T")[0],
+        contactName: user?.name || "",
+        contactPhone: user?.phone || "",
+        contactEmail: user?.email || "",
+      });
+      setShowForm(false);
+    } catch (error) {
+      toast.error(error.message || "Could not publish the item notice");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const filteredItems = items.filter((item) => {
@@ -213,7 +248,11 @@ export default function LostAndFoundPage() {
         </div>
 
         {/* Items Grid */}
-        {filteredItems.length === 0 ? (
+        {isLoading ? (
+          <div className="bg-white/90 dark:bg-emerald-900/95 rounded-3xl p-16 text-center shadow-lg">
+            <p className="text-emerald-700 dark:text-emerald-200 font-medium">Loading community notices...</p>
+          </div>
+        ) : filteredItems.length === 0 ? (
           <div className="bg-white/90 dark:bg-emerald-900/95 rounded-3xl border border-emerald-100/70 dark:border-emerald-900/40 p-16 text-center shadow-lg">
             <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/70 rounded-2xl flex items-center justify-center mx-auto mb-6">
               <Search className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
@@ -351,9 +390,10 @@ export default function LostAndFoundPage() {
                 <button
                   type="button"
                   onClick={handleSubmit}
+                  disabled={isSubmitting}
                   className="w-full py-4 mt-2 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-extrabold rounded-xl shadow-lg transition hover:scale-[1.03]"
                 >
-                  Submit Item
+                  {isSubmitting ? "Publishing..." : "Submit Item"}
                 </button>
               </div>
             </div>

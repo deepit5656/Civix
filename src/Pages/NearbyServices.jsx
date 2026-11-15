@@ -37,9 +37,9 @@ export default function NearbyServices() {
     let queryAmenities = "";
     if (filter === "all") {
       queryAmenities = `
-        node["amenity"~"hospital|police|fire_station"](around:10000,${coords.lat},${coords.lon});
-        way["amenity"~"hospital|police|fire_station"](around:10000,${coords.lat},${coords.lon});
-        relation["amenity"~"hospital|police|fire_station"](around:10000,${coords.lat},${coords.lon});
+        node["amenity"~"hospital|police|fire_station|pharmacy|blood_bank|shelter|food_bank"](around:10000,${coords.lat},${coords.lon});
+        way["amenity"~"hospital|police|fire_station|pharmacy|blood_bank|shelter|food_bank"](around:10000,${coords.lat},${coords.lon});
+        relation["amenity"~"hospital|police|fire_station|pharmacy|blood_bank|shelter|food_bank"](around:10000,${coords.lat},${coords.lon});
       `;
     } else {
       queryAmenities = `
@@ -203,6 +203,10 @@ export default function NearbyServices() {
                 <option value="hospital">🏥 Medical Facilities</option>
                 <option value="police">👮 Law Enforcement</option>
                 <option value="fire_station">🚒 Fire & Rescue Services</option>
+                <option value="blood_bank">🩸 Blood Banks</option>
+                <option value="pharmacy">💊 Pharmacies</option>
+                <option value="shelter">🏠 Shelters</option>
+                <option value="food_bank">🥫 Food Banks</option>
               </select>
             </div>
             <div className="flex items-end">

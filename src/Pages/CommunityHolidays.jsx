@@ -20,46 +20,46 @@ export default function Holidays() {
     { code: "AU", name: "Australia", flag: "🇦🇺" }
   ];
 
+  const fallbackHolidays = {
+    IN: [["New Year's Day", "01-01"], ["Republic Day", "01-26"], ["Independence Day", "08-15"], ["Gandhi Jayanti", "10-02"], ["Christmas Day", "12-25"]],
+    US: [["New Year's Day", "01-01"], ["Independence Day", "07-04"], ["Veterans Day", "11-11"], ["Thanksgiving Day", "11-26"], ["Christmas Day", "12-25"]],
+    GB: [["New Year's Day", "01-01"], ["Early May Bank Holiday", "05-04"], ["Summer Bank Holiday", "08-31"], ["Christmas Day", "12-25"], ["Boxing Day", "12-26"]],
+    CA: [["New Year's Day", "01-01"], ["Canada Day", "07-01"], ["Labour Day", "09-07"], ["Remembrance Day", "11-11"], ["Christmas Day", "12-25"]],
+    AU: [["New Year's Day", "01-01"], ["Australia Day", "01-26"], ["ANZAC Day", "04-25"], ["King's Birthday", "06-08"], ["Christmas Day", "12-25"]],
+  };
+
+  const getFallbackHolidays = () => (fallbackHolidays[country] || []).map(([name, monthDay]) => ({
+    name,
+    date: { iso: `${year}-${monthDay}` },
+    description: 'Standard public holiday reference',
+  }));
+
   useEffect(() => {
+    const controller = new AbortController();
     setLoading(true);
     setError("");
-    // Mock data only
-    const mockHolidays = [
-      {
-        name: "New Year's Day",
-        date: { iso: "2025-01-01" },
-        description: "The first day of the Gregorian calendar year"
-      },
-      {
-        name: "Republic Day",
-        date: { iso: "2025-01-26" },
-        description: "National holiday commemorating the adoption of the Constitution of India"
-      },
-      {
-        name: "Independence Day",
-        date: { iso: "2025-08-15" },
-        description: "National holiday commemorating India's independence from British rule"
-      },
-      {
-        name: "Gandhi Jayanti",
-        date: { iso: "2025-10-02" },
-        description: "Birthday of Mahatma Gandhi, celebrated as International Day of Non-Violence"
-      },
-      {
-        name: "Diwali",
-        date: { iso: "2025-10-20" },
-        description: "Festival of lights celebrated by Hindus, Jains, and Sikhs"
-      },
-      {
-        name: "Christmas Day",
-        date: { iso: "2025-12-25" },
-        description: "Christian holiday celebrating the birth of Jesus Christ"
-      }
-    ];
-    setTimeout(() => {
-      setHolidays(mockHolidays);
-      setLoading(false);
-    }, 1000);
+    fetch(`https://date.nager.at/api/v3/PublicHolidays/${year}/${country}`, {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(`Holiday service returned ${response.status}`);
+        return response.json();
+      })
+      .then((data) => {
+        setHolidays(data.map((holiday) => ({
+          name: holiday.localName || holiday.name,
+          date: { iso: holiday.date },
+          description: holiday.name,
+        })));
+      })
+      .catch((requestError) => {
+        if (requestError.name !== "AbortError") {
+          setError("Could not load live holidays. Showing the standard fallback calendar.");
+          setHolidays(getFallbackHolidays());
+        }
+      })
+      .finally(() => setLoading(false));
+    return () => controller.abort();
   }, [country]);
 
   const formatDate = (dateStr) => {
@@ -159,7 +159,7 @@ export default function Holidays() {
         )}
 
         {/* Holidays Grid */}
-        {!loading && !error && (
+        {!loading && (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-7">
             {holidays.length === 0 ? (
               <div className="col-span-full flex flex-col items-center justify-center py-20">

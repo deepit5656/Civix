@@ -63,6 +63,18 @@ const MyComplaints = () => {
     }
   };
 
+  const handleEscalate = async (issue) => {
+    const reason = window.prompt("Why should this complaint be reviewed again?");
+    if (!reason) return;
+    try {
+      await issuesAPI.escalate(issue._id || issue.id, reason);
+      toast.success("Complaint escalated for review");
+      fetchMyComplaints(true);
+    } catch (error) {
+      toast.error(error.message || "Could not escalate complaint");
+    }
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "Recently";
     try {
@@ -381,6 +393,11 @@ const MyComplaints = () => {
                       </span>
                     )}
                   </div>
+                  {["Resolved", "Rejected"].includes(issue.status) && (
+                    <button type="button" onClick={() => handleEscalate(issue)} className="mt-4 rounded-xl border border-amber-300 px-3 py-2 text-xs font-semibold text-amber-700 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-300 dark:hover:bg-amber-950/30">
+                      Request review / escalate
+                    </button>
+                  )}
                 </div>
               );
             })}
