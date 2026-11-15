@@ -20,7 +20,10 @@ export default function NewIssue() {
       <div className="mb-4">
         <button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={() => {
+            if (window.history.state?.idx > 0) navigate(-1);
+            else navigate('/report-issue');
+          }}
           className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:bg-emerald-50 dark:hover:bg-emerald-950/50 hover:text-emerald-600 transition-all group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />

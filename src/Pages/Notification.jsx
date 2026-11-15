@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Bell, Check, X, AlertTriangle, Info, Users, FileText, Settings, Clock, ChevronDown, Home, BarChart3, ChevronRight, ChevronLeft, Search } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
+import AdminLayout from "../components/admin/AdminLayout";
 
 const NotificationsPage = () => {
   const navigate = useNavigate();
@@ -92,6 +93,28 @@ const NotificationsPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeRoute, setActiveRoute] = useState('/admin/notifications');
 
+  useEffect(() => {
+    try {
+      const savedState = JSON.parse(localStorage.getItem('civix-admin-notification-state') || '{}');
+      setNotifications((current) => current
+        .filter((notification) => !savedState.deleted?.includes(notification.id))
+        .map((notification) => savedState.read?.includes(notification.id)
+          ? { ...notification, read: true }
+          : notification));
+    } catch (error) {
+      console.warn('Could not restore notification state:', error);
+    }
+  }, []);
+
+  const persistNotificationState = (nextNotifications) => {
+    localStorage.setItem('civix-admin-notification-state', JSON.stringify({
+      read: nextNotifications.filter((notification) => notification.read).map((notification) => notification.id),
+      deleted: notifications
+        .filter((notification) => !nextNotifications.some((next) => next.id === notification.id))
+        .map((notification) => notification.id),
+    }));
+  };
+
   const getIconColor = (type) => {
     switch (type) {
       case 'urgent':
@@ -106,21 +129,29 @@ const NotificationsPage = () => {
   };
 
   const markAsRead = (id) => {
-    setNotifications(prev =>
-      prev.map(notif =>
+    setNotifications(prev => {
+      const next = prev.map(notif =>
         notif.id === id ? { ...notif, read: true } : notif
-      )
-    );
+      );
+      persistNotificationState(next);
+      return next;
+    });
   };
 
   const markAllAsRead = () => {
-    setNotifications(prev =>
-      prev.map(notif => ({ ...notif, read: true }))
-    );
+    setNotifications(prev => {
+      const next = prev.map(notif => ({ ...notif, read: true }));
+      persistNotificationState(next);
+      return next;
+    });
   };
 
   const deleteNotification = (id) => {
-    setNotifications(prev => prev.filter(notif => notif.id !== id));
+    setNotifications(prev => {
+      const next = prev.filter(notif => notif.id !== id);
+      persistNotificationState(next);
+      return next;
+    });
   };
 
   const filteredNotifications = notifications.filter(notif => {
@@ -132,87 +163,8 @@ const NotificationsPage = () => {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-emerald-100">
-      {/* Sidebar (unchanged) */}
-      <button
-        type="button"
-        aria-label="Open sidebar"
-        onClick={() => setIsSidebarOpen(true)}
-        className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white shadow-lg hover:bg-green-100 text-emerald-600 lg:hidden"
-        style={{ display: isSidebarOpen ? 'none' : 'block' }}
-      ><ChevronRight className="w-6 h-6" /></button>
-      {isSidebarOpen && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setIsSidebarOpen(false)}/>
-      )}
-      <aside className={`fixed top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out border-r border-green-100 flex flex-col shadow-xl bg-white
-        ${isSidebarOpen ? 'w-64 translate-x-0' : 'w-16 -translate-x-full lg:translate-x-0'}`}>
-        <div className="relative flex items-center justify-between p-4 border-b border-green-100">
-          <div className={`flex items-center transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 w-0'}`}>
-            <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-sm">C</span>
-            </div>
-            {isSidebarOpen && (
-              <span className="ml-3 text-xl font-bold bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent">Civix</span>
-            )}
-          </div>
-          <button
-            type="button"
-            aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className={`p-2 rounded-lg hover:bg-green-100 transition-all duration-200 ${!isSidebarOpen ? 'mx-auto' : ''}`}
-          >
-            {isSidebarOpen ? (
-              <ChevronLeft className="w-5 h-5 text-green-600" />
-            ) : (
-              <ChevronRight className="w-5 h-5 text-green-600" />
-            )}
-          </button>
-        </div>
-        {isSidebarOpen && (
-          <div className="p-4 border-b border-green-100">
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-green-400" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full pl-10 pr-4 py-2 bg-green-50 rounded-lg text-sm border-0 focus:ring-2 focus:ring-emerald-300 text-green-900 placeholder-green-500"
-              />
-            </div>
-          </div>
-        )}
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          {sidebarMenu.map((item) => {
-            const isActive = item.route === activeRoute;
-            const Icon = item.icon;
-            return (
-              <div key={item.key} className="relative group">
-                <button
-                  type="button"
-                  className={`
-                    w-full flex items-center py-3 px-3 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden
-                    ${isSidebarOpen ? '' : 'justify-center'}
-                    ${isActive
-                      ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25 scale-105'
-                      : 'text-green-800 hover:bg-green-100 hover:text-green-900 hover:shadow-md'
-                    }
-                  `}
-                  onClick={() => { setActiveRoute(item.route); navigate(item.route); }}
-                  aria-current={isActive ? "page" : undefined}
-                >
-                  {isActive && <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-600 opacity-10 rounded-xl" />}
-                  <div className="relative z-10 flex items-center">
-                    <Icon className={`w-5 h-5 transition-all duration-200 ${isSidebarOpen ? 'mr-3' : ''} ${isActive ? 'text-white' : 'text-green-600'}`} />
-                    {isSidebarOpen && <span className="relative z-10">{item.label}</span>}
-                  </div>
-                </button>
-              </div>
-            );
-          })}
-        </nav>
-      </aside>
-      {/* Main Notifications UI */}
-      <div className="mx-auto max-w-3xl pt-8 px-2 lg:ml-64">
+    <AdminLayout title="Notifications & Alert Center">
+      <div className="p-6 space-y-6 max-w-4xl mx-auto">
         <div className="bg-white rounded-xl shadow-lg border border-green-100 mb-8 p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
@@ -307,7 +259,7 @@ const NotificationsPage = () => {
           <div className="pt-6 text-center text-sm text-green-600">Showing {filteredNotifications.length} of {notifications.length} notifications</div>
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

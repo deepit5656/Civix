@@ -45,6 +45,7 @@ const AdminDashboard = () => {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeRoute, setActiveRoute] = useState('/admin/dashboard');
+  const [exportFormat, setExportFormat] = useState('csv');
 
   // Mock data for demonstration
   const mockIssues = [
@@ -171,6 +172,64 @@ const AdminDashboard = () => {
     const matchesStatus = statusFilter === "all" || issue.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const exportIssues = () => {
+    if (!filteredIssues.length) {
+      toast.error('There are no issues to export');
+      return;
+    }
+
+    const rows = filteredIssues.map(issue => ({
+      id: issue._id || issue.id || '',
+      title: issue.title || '',
+      description: issue.description || '',
+      category: issue.category || '',
+      status: issue.status || '',
+      priority: issue.priority || '',
+      location: issue.location || '',
+      reportedAt: issue.createdAt || issue.dateReported || '',
+      email: issue.email || '',
+    }));
+
+    if (exportFormat === 'pdf') {
+      const printWindow = window.open('', '_blank', 'noopener,noreferrer');
+      if (!printWindow) {
+        toast.error('Please allow pop-ups to export a PDF');
+        return;
+      }
+      const headers = Object.keys(rows[0]);
+      printWindow.document.write(`
+        <html><head><title>Civix issue report</title>
+        <style>body{font-family:Arial,sans-serif;padding:24px}h1{font-size:20px}
+        table{border-collapse:collapse;width:100%;font-size:10px}th,td{border:1px solid #ccc;padding:6px;text-align:left;vertical-align:top}
+        th{background:#e8f5ef}</style></head><body><h1>Civix issue report</h1>
+        <p>Generated ${new Date().toLocaleString()}</p><table><thead><tr>
+        ${headers.map(header => `<th>${header}</th>`).join('')}</tr></thead><tbody>
+        ${rows.map(row => `<tr>${headers.map(header => `<td>${String(row[header]).replace(/[&<>"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]))}</td>`).join('')}</tr>`).join('')}
+        </tbody></table></body></html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      toast.success('PDF print dialog opened');
+      return;
+    }
+
+    const content = exportFormat === 'json'
+      ? JSON.stringify(rows, null, 2)
+      : [
+          Object.keys(rows[0]).join(','),
+          ...rows.map(row => Object.values(row).map(value => `"${String(value).replace(/"/g, '""')}"`).join(',')),
+        ].join('\n');
+    const blob = new Blob([content], { type: exportFormat === 'json' ? 'application/json' : 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `civix-issues-${new Date().toISOString().slice(0, 10)}.${exportFormat}`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success(`${exportFormat.toUpperCase()} export downloaded`);
+  };
 
   const stats = {
     total: issues.length,
@@ -443,13 +502,25 @@ const AdminDashboard = () => {
             </div>
 
             <div className="flex space-x-3">
-              <button
-                onClick={() => {/* Handle export */}}
+              <div className="flex items-center gap-2">
+                <select
+                  aria-label="Export format"
+                  value={exportFormat}
+                  onChange={(e) => setExportFormat(e.target.value)}
+                  className="px-2 py-2 border border-emerald-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100"
+                >
+                  <option value="csv">CSV</option>
+                  <option value="pdf">PDF</option>
+                  <option value="json">JSON</option>
+                </select>
+                <button
+                onClick={exportIssues}
                 className="flex items-center space-x-2 px-4 py-2 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 rounded-lg transition-colors font-medium"
-              >
+                >
                 <Download className="w-4 h-4" />
                 <span>Export</span>
-              </button>
+                </button>
+              </div>
               
               <button
                 onClick={fetchIssues}

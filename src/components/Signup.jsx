@@ -41,7 +41,8 @@ const Signup = () => {
   // OTP Modal State
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [debugOtp, setDebugOtp] = useState('');
+  const [debugOtp, setDebugOtp] = useState(''); // kept for API compat, not displayed
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -104,16 +105,13 @@ const Signup = () => {
 
     setLoading(true);
     try {
-      // 1. Verify OTP first
-      await verifyOTP(formData.email, fullOtp, 'signup');
-
-      // 2. Register User
+      // Register User with OTP
       const data = await signup({
         username: formData.username,
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        otp: fullOtp,
+        otp: fullOtp.trim(),
       });
 
       setShowOtpModal(false);
@@ -154,7 +152,7 @@ const Signup = () => {
   const isAdminEmail = formData.email.trim().toLowerCase() === 'admin123@gmail.com';
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen items-center justify-center bg-gradient-to-br from-emerald-950 via-gray-900 to-slate-950 p-4 md:p-8 font-inter text-white">
+    <div className="flex flex-col md:flex-row min-h-screen items-center justify-center bg-slate-50 p-4 md:p-8 font-inter text-slate-900 dark:bg-slate-950 dark:text-white">
       {/* Left Illustration */}
       <motion.div
         initial={{ opacity: 0, x: -40 }}
@@ -180,17 +178,17 @@ const Signup = () => {
         transition={{ duration: 0.6 }}
         className="md:w-1/2 w-full max-w-md"
       >
-        <div className="rounded-3xl border border-emerald-500/30 bg-slate-900/80 backdrop-blur-xl p-8 shadow-2xl relative overflow-hidden">
+        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-2xl relative overflow-hidden dark:border-slate-700 dark:bg-slate-900">
           {/* Header Glow */}
-          <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/20 rounded-full blur-2xl"></div>
+          <div className="absolute top-0 right-0 w-1 h-full bg-emerald-500"></div>
 
           {/* Title */}
           <div className="text-center mb-6">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mb-3">
               <FaShieldAlt className="text-2xl" />
             </div>
-            <h2 className="text-3xl font-extrabold text-white tracking-tight">Create Account</h2>
-            <p className="text-sm text-gray-400 mt-1">Join Civix to empower your local community</p>
+            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight dark:text-white">Create Account</h2>
+            <p className="text-sm text-slate-500 mt-1 dark:text-gray-400">Join Civix to empower your local community</p>
           </div>
 
           {/* Admin Email Notice */}
@@ -209,7 +207,7 @@ const Signup = () => {
             {/* Username & Full Name */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1">Username *</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1 dark:text-gray-300">Username *</label>
                 <div className="relative">
                   <FaUser className="absolute left-3 top-3 text-gray-400 text-xs" />
                   <input
@@ -219,13 +217,13 @@ const Signup = () => {
                     placeholder="john_doe"
                     value={formData.username}
                     onChange={handleChange}
-                    className="w-full pl-9 pr-3 py-2 bg-slate-800/60 border border-slate-700 focus:border-emerald-500 rounded-xl outline-none text-xs text-white placeholder-gray-500 transition"
+                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 focus:border-emerald-500 rounded-xl outline-none text-xs text-slate-900 placeholder-slate-400 transition dark:bg-slate-800/60 dark:border-slate-700 dark:text-white dark:placeholder-gray-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1">Full Name</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1 dark:text-gray-300">Full Name</label>
                 <div className="relative">
                   <FaUser className="absolute left-3 top-3 text-gray-400 text-xs" />
                   <input
@@ -234,7 +232,7 @@ const Signup = () => {
                     placeholder="John Doe"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full pl-9 pr-3 py-2 bg-slate-800/60 border border-slate-700 focus:border-emerald-500 rounded-xl outline-none text-xs text-white placeholder-gray-500 transition"
+                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 focus:border-emerald-500 rounded-xl outline-none text-xs text-slate-900 placeholder-slate-400 transition dark:bg-slate-800/60 dark:border-slate-700 dark:text-white dark:placeholder-gray-500"
                   />
                 </div>
               </div>
@@ -242,7 +240,7 @@ const Signup = () => {
 
             {/* Email */}
             <div>
-              <label className="block text-xs font-medium text-gray-300 mb-1">Email Address *</label>
+              <label className="block text-xs font-medium text-slate-700 mb-1 dark:text-gray-300">Email Address *</label>
               <div className="relative">
                 <FaEnvelope className="absolute left-3 top-3 text-gray-400 text-xs" />
                 <input
@@ -252,14 +250,14 @@ const Signup = () => {
                   placeholder="name@example.com"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full pl-9 pr-3 py-2 bg-slate-800/60 border border-slate-700 focus:border-emerald-500 rounded-xl outline-none text-xs text-white placeholder-gray-500 transition"
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 focus:border-emerald-500 rounded-xl outline-none text-xs text-slate-900 placeholder-slate-400 transition dark:bg-slate-800/60 dark:border-slate-700 dark:text-white dark:placeholder-gray-500"
                 />
               </div>
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-xs font-medium text-gray-300 mb-1">Password *</label>
+              <label className="block text-xs font-medium text-slate-700 mb-1 dark:text-gray-300">Password *</label>
               <div className="relative">
                 <FaLock className="absolute left-3 top-3 text-gray-400 text-xs" />
                 <input
@@ -269,7 +267,7 @@ const Signup = () => {
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full pl-9 pr-9 py-2 bg-slate-800/60 border border-slate-700 focus:border-emerald-500 rounded-xl outline-none text-xs text-white placeholder-gray-500 transition"
+                  className="w-full pl-9 pr-9 py-2 bg-slate-50 border border-slate-300 focus:border-emerald-500 rounded-xl outline-none text-xs text-slate-900 placeholder-slate-400 transition dark:bg-slate-800/60 dark:border-slate-700 dark:text-white dark:placeholder-gray-500"
                 />
                 <button
                   type="button"
@@ -283,7 +281,7 @@ const Signup = () => {
 
             {/* Confirm Password */}
             <div>
-              <label className="block text-xs font-medium text-gray-300 mb-1">Confirm Password *</label>
+              <label className="block text-xs font-medium text-slate-700 mb-1 dark:text-gray-300">Confirm Password *</label>
               <div className="relative">
                 <FaLock className="absolute left-3 top-3 text-gray-400 text-xs" />
                 <input
@@ -293,7 +291,7 @@ const Signup = () => {
                   placeholder="••••••••"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="w-full pl-9 pr-9 py-2 bg-slate-800/60 border border-slate-700 focus:border-emerald-500 rounded-xl outline-none text-xs text-white placeholder-gray-500 transition"
+                  className="w-full pl-9 pr-9 py-2 bg-slate-50 border border-slate-300 focus:border-emerald-500 rounded-xl outline-none text-xs text-slate-900 placeholder-slate-400 transition dark:bg-slate-800/60 dark:border-slate-700 dark:text-white dark:placeholder-gray-500"
                 />
                 <button
                   type="button"
@@ -308,7 +306,7 @@ const Signup = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold py-3 rounded-xl transition-all duration-200 shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2 text-sm"
+              className="w-full mt-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl transition-all duration-200 shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2 text-sm"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -321,13 +319,13 @@ const Signup = () => {
           </form>
 
           {/* Footer */}
-          <div className="mt-6 pt-4 border-t border-slate-800 text-center text-xs text-gray-400">
+          <div className="mt-6 pt-4 border-t border-slate-200 text-center text-xs text-slate-500 dark:border-slate-800 dark:text-gray-400">
             Already have an account?{' '}
             <Link to="/login" className="text-emerald-400 font-semibold hover:underline">
               Sign in
             </Link>
             <div className="mt-2">
-              <Link to="/" className="text-gray-500 hover:text-gray-300">
+              <Link to="/" className="text-slate-500 hover:text-slate-700 dark:text-gray-500 dark:hover:text-gray-300">
                 ← Back to Home
               </Link>
             </div>
@@ -361,11 +359,6 @@ const Signup = () => {
                 <p className="text-xs font-semibold text-emerald-400">{formData.email}</p>
               </div>
 
-              {debugOtp && (
-                <div className="mb-4 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-center text-xs">
-                  Test Mode OTP Code: <strong>{debugOtp}</strong>
-                </div>
-              )}
 
               <form onSubmit={handleCompleteSignup} className="space-y-5">
                 <div className="flex justify-between gap-1.5">
@@ -385,7 +378,7 @@ const Signup = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold py-3 rounded-xl transition-all text-sm shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2"
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl transition-all text-sm shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

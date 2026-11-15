@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, Filter, Upload, Download, Eye, Edit, Trash2, FileText, Calendar, User, Tag, Plus, MoreHorizontal, Home, BarChart3, Bell, Settings, ChevronRight, ChevronLeft, Users } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
+import AdminLayout from "../components/admin/AdminLayout";
 
 const DocumentsPage = () => {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ const DocumentsPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeRoute, setActiveRoute] = useState('/admin/documents');
 
-  const documents = [
+  const defaultDocuments = [
     { id: 1, name: 'Budget Proposal 2024', category: 'Finance', status: 'approved', date: '2024-01-15', author: 'John Smith', size: '2.4 MB', type: 'PDF' },
     { id: 2, name: 'Policy Update Draft', category: 'Policy', status: 'pending', date: '2024-01-12', author: 'Sarah Johnson', size: '1.8 MB', type: 'DOCX' },
     { id: 3, name: 'Meeting Minutes - Q1', category: 'Meeting', status: 'published', date: '2024-01-10', author: 'Mike Wilson', size: '654 KB', type: 'PDF' },
@@ -19,6 +20,13 @@ const DocumentsPage = () => {
     { id: 5, name: 'Compliance Report', category: 'Legal', status: 'approved', date: '2024-01-05', author: 'Robert Brown', size: '1.1 MB', type: 'DOCX' },
     { id: 6, name: 'Community Feedback Summary', category: 'Community', status: 'published', date: '2024-01-03', author: 'Lisa Chen', size: '890 KB', type: 'PDF' }
   ];
+  const [documents, setDocuments] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('civix-admin-documents') || 'null') || defaultDocuments;
+    } catch {
+      return defaultDocuments;
+    }
+  });
 
   const sidebarMenu = [
     { key: 'dashboard', label: 'Dashboard', icon: Home, route: '/admin/dashboard' },
@@ -31,6 +39,40 @@ const DocumentsPage = () => {
 
   const categories = ['all', 'Finance', 'Policy', 'Meeting', 'Planning', 'Legal', 'Community'];
   const statuses = ['all', 'draft', 'pending', 'approved', 'published'];
+
+  useEffect(() => {
+    localStorage.setItem('civix-admin-documents', JSON.stringify(documents));
+  }, [documents]);
+
+  const handleUpload = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const newDocument = {
+      id: `local-${Date.now()}`,
+      name: file.name,
+      category: 'Community',
+      status: 'draft',
+      date: new Date().toISOString().split('T')[0],
+      author: 'Municipal Admin',
+      size: `${Math.max(1, Math.round(file.size / 1024))} KB`,
+      type: file.name.split('.').pop()?.toUpperCase() || 'FILE',
+      url: URL.createObjectURL(file),
+    };
+    setDocuments((current) => [newDocument, ...current]);
+    event.target.value = '';
+  };
+
+  const handleDownload = (document) => {
+    const link = window.document.createElement('a');
+    link.href = document.url || `data:text/plain;charset=utf-8,${encodeURIComponent(document.name)}`;
+    link.download = document.name;
+    link.click();
+  };
+
+  const handleDelete = (documentId) => {
+    setDocuments((current) => current.filter((document) => document.id !== documentId));
+    setSelectedDocuments((current) => current.filter((id) => id !== documentId));
+  };
 
   const getStatusColor = (status) => {
     const colors = {
@@ -67,104 +109,18 @@ const DocumentsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-emerald-100">
-      {/* Sidebar - unchanged */}
-      <button
-        type="button"
-        aria-label="Open sidebar"
-        onClick={() => setIsSidebarOpen(true)}
-        className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white shadow-lg hover:bg-green-100 text-emerald-600 lg:hidden"
-        style={{ display: isSidebarOpen ? 'none' : 'block' }}
-      >
-        <ChevronRight className="w-6 h-6" />
-      </button>
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-      <aside className={`fixed top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out border-r border-green-100 flex flex-col shadow-xl bg-white
-        ${isSidebarOpen ? 'w-64 translate-x-0' : 'w-16 -translate-x-full lg:translate-x-0'}`}>
-        <div className="relative flex items-center justify-between p-4 border-b border-green-100">
-          <div className={`flex items-center transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 w-0'}`}>
-            <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-sm">C</span>
-            </div>
-            {isSidebarOpen && (
-              <span className="ml-3 text-xl font-bold bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                Civix
-              </span>
-            )}
+    <AdminLayout title="Documents & Municipal Archives">
+      <div className="p-6 space-y-6 max-w-7xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div>
+            <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Documents Repository</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage public governance circulars, legal drafts, and meeting minutes</p>
           </div>
-          <button
-            type="button"
-            aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className={`p-2 rounded-lg hover:bg-green-100 transition-all duration-200 ${!isSidebarOpen ? 'mx-auto' : ''}`}
-          >
-            {isSidebarOpen ? (
-              <ChevronLeft className="w-5 h-5 text-green-600" />
-            ) : (
-              <ChevronRight className="w-5 h-5 text-green-600" />
-            )}
-          </button>
+          <label className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl shadow-sm flex items-center font-semibold text-sm transition-colors cursor-pointer">
+            <Upload className="h-4 w-4 mr-2" /> Upload Document
+            <input type="file" className="hidden" onChange={handleUpload} />
+          </label>
         </div>
-        {isSidebarOpen && (
-          <div className="p-4 border-b border-green-100">
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-green-400" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full pl-10 pr-4 py-2 bg-green-50 rounded-lg text-sm border-0 focus:ring-2 focus:ring-emerald-300 text-green-900 placeholder-green-500"
-              />
-            </div>
-          </div>
-        )}
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          {sidebarMenu.map((item) => {
-            const isActive = item.route === activeRoute;
-            const Icon = item.icon;
-            return (
-              <div key={item.key} className="relative group">
-                <button
-                  type="button"
-                  className={`
-                    w-full flex items-center py-3 px-3 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden
-                    ${isSidebarOpen ? '' : 'justify-center'}
-                    ${isActive
-                      ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25 scale-105'
-                      : 'text-green-800 hover:bg-green-100 hover:text-green-900 hover:shadow-md'
-                    }
-                  `}
-                  onClick={() => { setActiveRoute(item.route); navigate(item.route); }}
-                  aria-current={isActive ? "page" : undefined}
-                >
-                  {isActive && <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-600 opacity-10 rounded-xl" />}
-                  <div className="relative z-10 flex items-center">
-                    <Icon className={`w-5 h-5 transition-all duration-200 ${isSidebarOpen ? 'mr-3' : ''} ${isActive ? 'text-white' : 'text-green-600'}`} />
-                    {isSidebarOpen && <span className="relative z-10">{item.label}</span>}
-                  </div>
-                </button>
-              </div>
-            );
-          })}
-        </nav>
-      </aside>
-      {/* Main Content */}
-      <div className="ml-0 lg:ml-64 p-6 max-w-7xl mx-auto">
-        <header className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-emerald-900 mb-1">Documents Management</h1>
-              <p className="text-green-700">Manage platform documents and files</p>
-            </div>
-            <button className="bg-emerald-700 hover:bg-emerald-900 text-white px-4 py-2 rounded-lg shadow flex items-center font-medium">
-              <Upload className="h-4 w-4 mr-2" /> Upload Document
-            </button>
-          </div>
-        </header>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -244,8 +200,14 @@ const DocumentsPage = () => {
               </div>
               {selectedDocuments.length > 0 && (
                 <div className="flex items-center gap-2">
-                  <button className="px-3 py-1 bg-emerald-700 hover:bg-emerald-900 text-white rounded text-sm">Download</button>
-                  <button className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm">Delete</button>
+                  <button
+                    onClick={() => selectedDocuments.forEach((id) => handleDownload(documents.find((document) => document.id === id)))}
+                    className="px-3 py-1 bg-emerald-700 hover:bg-emerald-900 text-white rounded text-sm"
+                  >Download</button>
+                  <button
+                    onClick={() => selectedDocuments.forEach(handleDelete)}
+                    className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm"
+                  >Delete</button>
                 </div>
               )}
             </div>
@@ -311,13 +273,13 @@ const DocumentsPage = () => {
                         <button className="text-emerald-700 hover:text-emerald-900">
                           <Eye size={16} />
                         </button>
-                        <button className="text-green-600 hover:text-green-700">
+                        <button onClick={() => handleDownload(doc)} className="text-green-600 hover:text-green-700" title="Download document">
                           <Download size={16} />
                         </button>
                         <button className="text-blue-600 hover:text-blue-800">
                           <Edit size={16} />
                         </button>
-                        <button className="text-red-600 hover:text-red-800">
+                        <button onClick={() => handleDelete(doc.id)} className="text-red-600 hover:text-red-800" title="Delete document">
                           <Trash2 size={16} />
                         </button>
                         <button className="text-green-400 hover:text-green-700">
@@ -346,7 +308,7 @@ const DocumentsPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

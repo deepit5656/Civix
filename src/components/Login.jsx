@@ -22,7 +22,8 @@ const Login = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [debugOtp, setDebugOtp] = useState('');
+  const [debugOtp, setDebugOtp] = useState(''); // kept for API compat, not displayed
+
 
   // Redirect if already authenticated
   React.useEffect(() => {
@@ -154,10 +155,13 @@ const Login = () => {
     }
   };
 
-  const isAdminEmail = email.trim().toLowerCase() === 'admin123@gmail.com';
+  const isAdminEmail =
+    email.trim().toLowerCase() === 'admin123@gmail.com' ||
+    email.trim().toLowerCase() === 'dhruvkamariya1@gmail.com' ||
+    email.trim().toLowerCase().endsWith('@admin.civix.com');
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen items-center justify-center bg-gradient-to-br from-emerald-950 via-gray-900 to-slate-950 p-4 md:p-8 font-inter text-white">
+    <div className="flex flex-col md:flex-row min-h-screen items-center justify-center bg-slate-50 p-4 md:p-8 font-inter text-slate-900 dark:bg-slate-950 dark:text-white">
       {/* Left Side Illustration */}
       <motion.div
         initial={{ opacity: 0, x: -40 }}
@@ -183,17 +187,17 @@ const Login = () => {
         transition={{ duration: 0.6 }}
         className="md:w-1/2 w-full max-w-md"
       >
-        <div className="rounded-3xl border border-emerald-500/30 bg-slate-900/80 backdrop-blur-xl p-8 shadow-2xl relative overflow-hidden">
+        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-2xl relative overflow-hidden dark:border-slate-700 dark:bg-slate-900">
           {/* Header Glow */}
-          <div className="absolute -top-24 -left-24 w-48 h-48 bg-emerald-500/20 rounded-full blur-2xl"></div>
+          <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
 
           {/* Title & Badge */}
           <div className="text-center mb-6">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mb-3">
               <FaShieldAlt className="text-2xl" />
             </div>
-            <h2 className="text-3xl font-extrabold text-white tracking-tight">Welcome Back</h2>
-            <p className="text-sm text-gray-400 mt-1">Sign in to access your Civix account</p>
+            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight dark:text-white">Welcome Back</h2>
+            <p className="text-sm text-slate-500 mt-1 dark:text-gray-400">Sign in to access your Civix account</p>
           </div>
 
           {/* Admin Email Notice */}
@@ -209,14 +213,14 @@ const Login = () => {
           )}
 
           {/* Login Mode Toggle Tabs */}
-          <div className="flex bg-slate-800/80 p-1 rounded-xl mb-6 border border-gray-700/50">
+          <div className="flex bg-slate-100 p-1 rounded-xl mb-6 border border-slate-200 dark:bg-slate-800/80 dark:border-gray-700/50">
             <button
               type="button"
               onClick={() => { setMode('password'); setStep(1); }}
               className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
                 mode === 'password'
-                  ? 'bg-emerald-500 text-white shadow-lg'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-emerald-600 text-white shadow-lg'
+                  : 'text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'
               }`}
             >
               Password Login
@@ -226,8 +230,8 @@ const Login = () => {
               onClick={() => { setMode('otp'); setStep(1); }}
               className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
                 mode === 'otp'
-                  ? 'bg-emerald-500 text-white shadow-lg'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-emerald-600 text-white shadow-lg'
+                  : 'text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white'
               }`}
             >
               OTP Quick Login
@@ -246,7 +250,7 @@ const Login = () => {
                 className="space-y-4"
               >
                 <div>
-                  <label className="block text-xs font-medium text-gray-300 mb-1">Email Address</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1 dark:text-gray-300">Email Address</label>
                   <div className="relative">
                     <FaEnvelope className="absolute left-3.5 top-3.5 text-gray-400" />
                     <input
@@ -255,13 +259,13 @@ const Login = () => {
                       placeholder="name@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-800/60 border border-slate-700 focus:border-emerald-500 rounded-xl outline-none text-sm text-white placeholder-gray-500 transition"
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 focus:border-emerald-500 rounded-xl outline-none text-sm text-slate-900 placeholder-slate-400 transition dark:bg-slate-800/60 dark:border-slate-700 dark:text-white dark:placeholder-gray-500"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-300 mb-1">Password</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1 dark:text-gray-300">Password</label>
                   <div className="relative">
                     <FaLock className="absolute left-3.5 top-3.5 text-gray-400" />
                     <input
@@ -270,7 +274,7 @@ const Login = () => {
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-10 pr-10 py-2.5 bg-slate-800/60 border border-slate-700 focus:border-emerald-500 rounded-xl outline-none text-sm text-white placeholder-gray-500 transition"
+                      className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-300 focus:border-emerald-500 rounded-xl outline-none text-sm text-slate-900 placeholder-slate-400 transition dark:bg-slate-800/60 dark:border-slate-700 dark:text-white dark:placeholder-gray-500"
                     />
                     <button
                       type="button"
@@ -285,7 +289,7 @@ const Login = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-2 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold py-3 rounded-xl transition-all duration-200 shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2"
+                  className="w-full mt-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl transition-all duration-200 shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -326,7 +330,7 @@ const Login = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-2 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold py-3 rounded-xl transition-all duration-200 shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2"
+                  className="w-full mt-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl transition-all duration-200 shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -353,11 +357,6 @@ const Login = () => {
                   <p className="text-sm font-semibold text-emerald-400">{email}</p>
                 </div>
 
-                {debugOtp && (
-                  <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-center text-xs">
-                    Test Mode OTP Code: <strong>{debugOtp}</strong>
-                  </div>
-                )}
 
                 <div className="flex justify-between gap-2">
                   {otp.map((digit, idx) => (
@@ -376,7 +375,7 @@ const Login = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-2 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold py-3 rounded-xl transition-all duration-200 shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2"
+                  className="w-full mt-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl transition-all duration-200 shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -399,13 +398,16 @@ const Login = () => {
           </AnimatePresence>
 
           {/* Footer Links */}
-          <div className="mt-6 pt-4 border-t border-slate-800 text-center text-xs text-gray-400">
+          <div className="mt-6 pt-4 border-t border-slate-200 text-center text-xs text-slate-500 dark:border-slate-800 dark:text-gray-400">
             Don't have an account?{' '}
             <Link to="/signup" className="text-emerald-400 font-semibold hover:underline">
               Sign up
             </Link>
+            <Link to="/forgot-password" className="mt-2 block text-emerald-600 hover:underline dark:text-emerald-400">
+              Forgot password?
+            </Link>
             <div className="mt-2">
-              <Link to="/" className="text-gray-500 hover:text-gray-300">
+              <Link to="/" className="text-slate-500 hover:text-slate-700 dark:text-gray-500 dark:hover:text-gray-300">
                 ← Back to Home
               </Link>
             </div>

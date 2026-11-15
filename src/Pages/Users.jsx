@@ -3,6 +3,7 @@ import { Search, Filter, MoreVertical, User, Users, Mail, Phone, MapPin, Calenda
 import { useNavigate } from "react-router-dom";
 import { profileAPI } from "../utils/api";
 import { toast } from "react-hot-toast";
+import AdminLayout from "../components/admin/AdminLayout";
 
 const Usersss = () => {
   const navigate = useNavigate();
@@ -323,122 +324,18 @@ const Usersss = () => {
   };
 
   return (
-    <div className="min-h-screen ml-0 lg:ml-10 bg-gradient-to-br from-green-50 via-emerald-50 to-emerald-100 text-green-900">
-    {/* Sidebar toggle and sidebar menu remain unchanged */}
-    <button
-      type="button"
-      aria-label="Open sidebar"
-      onClick={() => setIsSidebarOpen(true)}
-      className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white shadow-lg hover:bg-gray-50 text-emerald-600 lg:hidden"
-      style={{ display: isSidebarOpen ? 'none' : 'block' }}
-    >
-      <ChevronRight className="w-6 h-6" />
-    </button>
-
-    {isSidebarOpen && (
-      <div
-        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
-        onClick={() => setIsSidebarOpen(false)}
-      />
-    )}
-    <aside
-      className={`fixed top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out backdrop-blur-xl border-r border-gray-200/50 flex flex-col shadow-xl 
-      ${isSidebarOpen ? 'w-64 translate-x-0' : 'w-16 -translate-x-full lg:translate-x-0'}`}
-    >
-      {/* Sidebar and navigation logic UNCHANGED */}
-      <div className="relative flex items-center justify-between p-4 border-b border-gray-200/50 dark:border-gray-700/50">
-        <div className={`flex items-center transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 w-0'}`}>
-          <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-sm">C</span>
+    <AdminLayout title="Users & Citizen Directory">
+      <div className="p-6 space-y-6 max-w-7xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div>
+            <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Citizen Directory</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage registered citizen accounts and administrative roles</p>
           </div>
-          {isSidebarOpen && (
-            <span className="ml-3 text-xl font-bold bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent">
-              Civix
-            </span>
-          )}
+          <button onClick={fetchUsers} disabled={isLoading} className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl shadow-sm text-sm font-semibold transition-colors">
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <span>Refresh Users</span>
+          </button>
         </div>
-        <button
-          type="button"
-          aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className={`p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 ${
-            !isSidebarOpen ? 'mx-auto' : ''
-          }`}
-        >
-          {isSidebarOpen ? (
-            <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-          ) : (
-            <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-          )}
-        </button>
-      </div>
-      {isSidebarOpen && (
-        <div className="p-4 border-b border-gray-200/50 dark:border-gray-700/50">
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm border-0 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            />
-          </div>
-        </div>
-      )}
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        {sidebarMenu.map((item) => {
-          const isActive = item.route === activeRoute;
-          const Icon = item.icon;
-          return (
-            <div key={item.key} className="relative group">
-              <button
-                type="button"
-                className={`
-                  w-full flex items-center py-3 px-3 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden
-                  ${isSidebarOpen ? '' : 'justify-center'}
-                  ${isActive
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25 transform scale-[1.02]'
-                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white hover:shadow-md'
-                  }
-                `}
-                onClick={() => navigate(item.route)}
-                aria-current={isActive ? "page" : undefined}
-              >
-                {isActive && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-600 opacity-10 rounded-xl" />
-                )}
-                <div className="relative z-10 flex items-center">
-                  <Icon
-                    className={`w-5 h-5 transition-all duration-200 ${
-                      isSidebarOpen ? 'mr-3' : ''
-                    } ${
-                      isActive
-                        ? 'text-white'
-                        : 'text-gray-500 dark:text-gray-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400'
-                    }`}
-                  />
-                  {isSidebarOpen && (
-                    <span className="relative z-10 transition-all duration-300">
-                      {item.label}
-                    </span>
-                  )}
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-              </button>
-            </div>
-          );
-        })}
-      </nav>
-    </aside>
-    {/* ---- Main user management UI with fresh green look ---- */}
-    <div className="shadow-sm border-b border-green-200 bg-gradient-to-r from-green-100 to-green-50/50">
-      <div className="px-8 py-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-emerald-700">Users Management</h1>
-          <p className="text-green-600 mt-1">Manage platform users and their permissions</p>
-        </div>
-        <button className="bg-emerald-700 hover:bg-emerald-900 text-white px-4 py-2 rounded-lg shadow font-medium">Add New User</button>
-      </div>
-    </div>
     <div className="px-8 py-6">
       <div className="rounded-xl shadow mb-6 border border-green-100 bg-white">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 p-6 bg-gradient-to-r from-green-50 to-emerald-50">
@@ -604,6 +501,7 @@ const Usersss = () => {
       />
     )}
   </div>
+</AdminLayout>
 );
 };
 

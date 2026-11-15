@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { Users, FileText, MessageCircle, TrendingUp, Calendar, MapPin, Award, AlertCircle, Home, BarChart3, Bell, Settings, ChevronRight, ChevronLeft, Search } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
+import AdminLayout from "../components/admin/AdminLayout";
+import { issuesAPI } from "../utils/api";
 
 
 const Analytics = () => {
@@ -9,6 +11,7 @@ const Analytics = () => {
   const [timeRange, setTimeRange] = useState('7d');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeRoute, setActiveRoute] = useState('/admin/analytics');
+  const [issueStats, setIssueStats] = useState({ total: 0, byStatus: {}, byCategory: {} });
 
   const sidebarMenu = [
     { key: 'dashboard', label: 'Dashboard', icon: Home, route: '/admin/dashboard' },
@@ -38,12 +41,24 @@ const Analytics = () => {
     { day: 'Sun', posts: 29, comments: 76, votes: 54 },
   ];
 
-  const categoryData = [
-    { name: 'Local Issues', value: 35, color: '#059669' },
-    { name: 'Elections', value: 28, color: '#10b981' },
-    { name: 'Policy Discussion', value: 22, color: '#34d399' },
-    { name: 'Community Events', value: 15, color: '#6ee7b7' },
-  ];
+  useEffect(() => {
+    let active = true;
+    issuesAPI.getStats()
+      .then((stats) => {
+        if (active) setIssueStats(stats);
+      })
+      .catch((error) => {
+        console.warn('Could not load live analytics:', error);
+      });
+    return () => { active = false; };
+  }, []);
+
+  const categoryColors = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0'];
+  const categoryData = Object.entries(issueStats.byCategory || {}).map(([name, value], index) => ({
+    name,
+    value,
+    color: categoryColors[index % categoryColors.length],
+  }));
 
   const recentActivity = [
     { type: 'new_post', user: 'Sarah Chen', action: 'created a post about local transportation', time: '2 minutes ago' },
@@ -74,105 +89,32 @@ const Analytics = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50/30 to-emerald-50/50 ml-0 lg:ml-10">
-      {isSidebarOpen && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden" onClick={() => setIsSidebarOpen(false)} />
-      )}
-      
-      <button
-        type="button"
-        aria-label="Open sidebar"
-        onClick={() => setIsSidebarOpen(true)}
-        className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white shadow-lg hover:bg-gray-50 text-emerald-600 lg:hidden"
-        style={{ display: isSidebarOpen ? 'none' : 'block' }}
-      >
-        <ChevronRight className="w-6 h-6" />
-      </button>
-
-      <aside className={`fixed top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out backdrop-blur-xl border-r border-gray-200/50 flex flex-col shadow-xl ${isSidebarOpen ? 'w-64 translate-x-0' : 'w-16 -translate-x-full lg:translate-x-0'}`}>
-        <div className="relative flex items-center justify-between p-4 border-b border-gray-200/50">
-          <div className={`flex items-center transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 w-0'}`}>
-            <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-sm">C</span>
-            </div>
-            {isSidebarOpen && (
-              <span className="ml-3 text-xl font-bold bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                Civix
-              </span>
-            )}
+    <AdminLayout title="Analytics Dashboard">
+      <div className="p-6 space-y-6 max-w-7xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div>
+            <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Performance Overview</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Monitor citizen engagement and municipal resolution analytics</p>
           </div>
-          <button
-            type="button"
-            aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className={`p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 ${!isSidebarOpen ? 'mx-auto' : ''}`}
-          >
-            {isSidebarOpen ? <ChevronLeft className="w-5 h-5 text-gray-600" /> : <ChevronRight className="w-5 h-5 text-gray-600" />}
-          </button>
-        </div>
-        {isSidebarOpen && (
-          <div className="p-4 border-b border-gray-200/50">
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input type="text" placeholder="Search..." className="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-lg text-sm border-0 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all" />
-            </div>
+          <div className="flex items-center space-x-4">
+            <select value={timeRange} onChange={(e) => setTimeRange(e.target.value)} className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-emerald-500/40 shadow-sm">
+              <option value="7d">Last 7 days</option>
+              <option value="30d">Last 30 days</option>
+              <option value="90d">Last 90 days</option>
+            </select>
+            <button className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 px-5 py-2.5 rounded-xl transition-all duration-200 text-white font-medium shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30">
+              Export Report
+            </button>
           </div>
-        )}
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          {sidebarMenu.map((item) => {
-            const isActive = item.route === activeRoute;
-            const Icon = item.icon;
-            return (
-              <div key={item.key} className="relative group">
-                <button
-                  type="button"
-                  className={`w-full flex items-center py-3 px-3 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden
-                    ${isSidebarOpen ? '' : 'justify-center'}
-                    ${isActive ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25 transform scale-[1.02]' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:shadow-md'}
-                  `}
-                  onClick={() => navigate(item.route)}
-                  aria-current={isActive ? "page" : undefined}
-                >
-                  {isActive && <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-600 opacity-10 rounded-xl" />}
-                  <div className="relative z-10 flex items-center">
-                    <Icon className={`w-5 h-5 transition-all duration-200 ${isSidebarOpen ? 'mr-3' : ''} ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-emerald-600'}`} />
-                    {isSidebarOpen && <span className="relative z-10 transition-all duration-300">{item.label}</span>}
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                </button>
-              </div>
-            );
-          })}
-        </nav>
-      </aside>
-
-      <div className="backdrop-blur-sm bg-white/80 border-b border-green-100/50 shadow-sm">
-        <div className="px-4 py-6 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-emerald-700 bg-clip-text text-transparent">Analytics Dashboard</h1>
-              <p className="text-slate-600 mt-2">Monitor platform engagement and community growth</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <select value={timeRange} onChange={(e) => setTimeRange(e.target.value)} className="backdrop-blur-sm bg-white/90 border border-emerald-200/60 rounded-xl px-4 py-2.5 text-slate-700 focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-400 shadow-sm">
-                <option value="7d">Last 7 days</option>
-                <option value="30d">Last 30 days</option>
-                <option value="90d">Last 90 days</option>
-              </select>
-              <button className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 px-5 py-2.5 rounded-xl transition-all duration-200 text-white font-medium shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30">
-                Export Report
-              </button>
-            </div>
           </div>
         </div>
-      </div>
 
       <div className="px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          <StatCard title="Total Users" value="3,247" change="+12.5%" trend="up" icon={Users} />
-          <StatCard title="Active Posts" value="1,582" change="+8.2%" trend="up" icon={FileText} />
-          <StatCard title="Comments" value="4,891" change="+15.7%" trend="up" icon={MessageCircle} />
-          <StatCard title="Civic Actions" value="892" change="+22.1%" trend="up" icon={Award} />
+          <StatCard title="Total Issues" value={issueStats.total} change="Live" trend="up" icon={FileText} />
+          <StatCard title="Pending Issues" value={issueStats.byStatus?.Pending || 0} change="Live" trend="up" icon={AlertCircle} />
+          <StatCard title="In Progress" value={issueStats.byStatus?.['In Progress'] || 0} change="Live" trend="up" icon={MessageCircle} />
+          <StatCard title="Resolved Issues" value={issueStats.byStatus?.Resolved || 0} change="Live" trend="up" icon={Award} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
@@ -223,13 +165,15 @@ const Analytics = () => {
               </PieChart>
             </ResponsiveContainer>
             <div className="space-y-3">
-              {categoryData.map((category, index) => (
+              {categoryData.length === 0 ? (
+                <p className="text-sm text-slate-500">No categorized issues available.</p>
+              ) : categoryData.map((category, index) => (
                 <div key={index} className="flex items-center justify-between p-2 rounded-lg hover:bg-emerald-50/50 transition-colors">
                   <div className="flex items-center">
                     <div className="w-3 h-3 rounded-full mr-3 shadow-sm" style={{ backgroundColor: category.color }}></div>
                     <span className="text-sm text-slate-600 font-medium">{category.name}</span>
                   </div>
-                  <span className="text-sm font-bold text-slate-700">{category.value}%</span>
+                  <span className="text-sm font-bold text-slate-700">{category.value}</span>
                 </div>
               ))}
             </div>
@@ -317,9 +261,8 @@ const Analytics = () => {
           </div>
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
-
 
 export default Analytics;

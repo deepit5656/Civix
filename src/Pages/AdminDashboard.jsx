@@ -25,6 +25,7 @@ import {
 
 import { issuesAPI } from "../utils/api";
 import { toast } from "react-hot-toast";
+import AdminLayout from "../components/admin/AdminLayout";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -93,60 +94,9 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex">
-      {/* Sidebar */}
-      <aside className={`bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 flex flex-col z-30 ${isSidebarOpen ? 'w-64' : 'w-20'}`}>
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center font-bold text-white text-sm">
-              C
-            </div>
-            {isSidebarOpen && <span className="font-extrabold text-slate-900 dark:text-white text-base">Civix Admin</span>}
-          </div>
-          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
-            {isSidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-          </button>
-        </div>
-
-        <nav className="p-3 space-y-1 flex-1">
-          {sidebarMenu.map((item) => {
-            const Icon = item.icon;
-            const isActive = item.route === '/admin/dashboard';
-            return (
-              <button
-                key={item.key}
-                onClick={() => navigate(item.route)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 text-xs font-semibold rounded-xl transition-all ${
-                  isActive
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                {isSidebarOpen && <span>{item.label}</span>}
-              </button>
-            );
-          })}
-        </nav>
-      </aside>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 flex items-center justify-between sticky top-0 z-20">
-          <h1 className="text-lg font-bold text-slate-900 dark:text-white">Admin Dashboard</h1>
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate("/admin/notifications")} className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-300 rounded-xl bg-slate-100 dark:bg-slate-800">
-              <Bell className="w-4 h-4" />
-            </button>
-            <button onClick={() => navigate("/login")} className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/40 rounded-xl">
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Sign Out</span>
-            </button>
-          </div>
-        </header>
-
-        <main className="p-6 space-y-6 max-w-7xl w-full mx-auto">
-          {/* Stats Bar */}
+    <AdminLayout title="Admin Dashboard">
+      <div className="p-6 space-y-6 max-w-7xl w-full mx-auto">
+        {/* Stats Bar */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
               <div>
@@ -289,9 +239,8 @@ const AdminDashboard = () => {
               </table>
             </div>
           </div>
-        </main>
-      </div>
-    </div>
+        </div>
+      </AdminLayout>
   );
 };
 

@@ -5,7 +5,6 @@ import "./Home.css";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthContext } from "./context/AuthContext";
 import { toast, ToastContainer } from "react-toastify";
-import TestimonialCarousel from "./components/TestimonialCarousel";
 import EnhancedQRCode from "./components/EnhancedQRCode";
 import ProfileCompletionBanner from "./components/ProfileCompletionBanner";
 import useProfileStatus from "./hooks/useProfileStatus";
@@ -18,7 +17,6 @@ import {
   FaShieldHalved,
   FaCircleCheck,
   FaArrowRight,
-  FaStar,
   FaChevronDown,
   FaApple,
   FaGooglePlay,
@@ -98,45 +96,6 @@ const Home = () => {
       popular: true,
       category: "Community",
       icon: <FaUserGroup className="text-emerald-500 text-lg" />,
-    },
-  ];
-
-  const testimonials = [
-    {
-      quote:
-        "I submitted a photo of a dangerous open pothole near our school. Within 48 hours, municipal contractors arrived and paved the entire stretch!",
-      name: "Aarav Patel",
-      role: "Resident, Bangalore",
-      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-      rating: 5,
-      category: "Infrastructure",
-    },
-    {
-      quote:
-        "Civix has streamlined city administration workflow. We can pinpoint high-density problem zones instantly and dispatch repair teams with precision.",
-      name: "Akshay Prakash",
-      role: "Public Works Lead, New Delhi",
-      avatar: "https://randomuser.me/api/portraits/men/46.jpg",
-      rating: 5,
-      category: "Management",
-    },
-    {
-      quote:
-        "The real-time status notifications and community voting make everyone in our residential area feel accountable and connected.",
-      name: "Meera Sharma",
-      role: "Community Lead, Chennai",
-      avatar: "https://randomuser.me/api/portraits/women/68.jpg",
-      rating: 5,
-      category: "Community",
-    },
-    {
-      quote:
-        "Our municipal complaint resolution index improved by over 300% after rolling out Civix. Transparent tracking builds genuine public trust.",
-      name: "Rahul Singh",
-      role: "City Officer, Mumbai",
-      avatar: "https://randomuser.me/api/portraits/men/57.jpg",
-      rating: 5,
-      category: "Government",
     },
   ];
 
@@ -269,17 +228,6 @@ const Home = () => {
                   </button>
                 </div>
 
-                {/* Rating & Social Proof */}
-                <div className="pt-4 flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
-                  <div className="flex text-amber-500 dark:text-amber-400 gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <FaStar key={i} className="w-4 h-4 fill-current" />
-                    ))}
-                  </div>
-                  <span className="font-medium text-slate-700 dark:text-slate-300">
-                    <strong>4.9/5</strong> rating from 25,000+ active citizens
-                  </span>
-                </div>
               </motion.div>
 
               {/* Right Column: Interactive Card Demonstration */}
@@ -297,33 +245,39 @@ const Home = () => {
                         <FaShieldHalved className="text-lg" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-bold text-slate-900 dark:text-white">Live Complaint Tracker</h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">Ticket #CX-89420 • Indiranagar</p>
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-white">A transparent civic workflow</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">From report to verified resolution</p>
                       </div>
                     </div>
                     <span className="px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-xs font-semibold">
-                      In Progress
+                      Visible
                     </span>
                   </div>
 
                   {/* Complaint Preview */}
                   <div className="space-y-3">
                     <div className="relative h-44 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800">
-                      <img
-                        src="https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80"
-                        alt="Road Maintenance Demo"
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute top-3 left-3 bg-slate-900/90 dark:bg-slate-950/90 border border-slate-700 dark:border-slate-800 text-slate-100 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1.5">
-                        <FaLocationDot className="text-emerald-400" />
-                        <span>Bengaluru East • 12.9716° N</span>
+                      <div className="h-full w-full bg-slate-100 dark:bg-slate-950 p-5">
+                        <div className="grid grid-cols-2 gap-3 h-full">
+                          {[
+                            ["Report", FaCamera],
+                            ["Locate", FaLocationDot],
+                            ["Track", FaClock],
+                            ["Resolve", FaCircleCheck],
+                          ].map(([label, Icon]) => (
+                            <div key={label} className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300">
+                              <Icon className="text-emerald-600 dark:text-emerald-400" />
+                              <span className="text-xs font-semibold">{label}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
 
                     <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200 dark:border-slate-800/80">
-                      <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1">Pothole Repair Request</h4>
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1">One place for civic action</h4>
                       <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Assigned to Public Works Department. Crew dispatched with road paving equipment.
+                        Add evidence, share the location, and keep the community informed without losing the trail.
                       </p>
                     </div>
                   </div>
@@ -332,7 +286,7 @@ const Home = () => {
                   <div className="pt-1">
                     <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-1.5 font-medium">
                       <span>Verification</span>
-                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">75% Completed</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">Clear progress</span>
                     </div>
                     <div className="w-full h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
                       <div className="h-full bg-emerald-500 rounded-full w-3/4"></div>
@@ -450,7 +404,7 @@ const Home = () => {
           </div>
         </section>
 
-        {/* ─── TESTIMONIALS & CAROUSEL ────────────────────────────────────────────── */}
+        {/* ─── CIVIC SERVICES SECTION ───────────────────────────────────────────── */}
         <section className="py-20 bg-slate-100/70 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -461,18 +415,23 @@ const Home = () => {
               className="text-center max-w-3xl mx-auto mb-16 space-y-3"
             >
               <span className="px-3.5 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
-                Community Feedback
+                Explore Civix
               </span>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                Loved By Citizens & Administration
+                More than issue reporting
               </h2>
               <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400">
-                Read authentic testimonials from residents and municipal leaders using Civix daily.
+                Use the tools that help your neighborhood stay informed, connected, and prepared.
               </p>
             </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-              {testimonials.map((item, idx) => (
+              {[
+                { title: "Find local services", text: "Discover nearby hospitals, police stations, fire services, transport, and public resources.", href: "/nearby-services", label: "Nearby services", icon: FaLocationDot },
+                { title: "Participate in decisions", text: "See community polls and support the issues that matter to your neighborhood.", href: "/voting-system", label: "Community voting", icon: FaUserGroup },
+                { title: "Stay safe and prepared", text: "Access emergency contacts, SOS tools, and practical civic information when it matters.", href: "/sos", label: "Safety tools", icon: FaShieldHalved },
+              { title: "Help one another", text: "Request blood, ask for practical support, or offer time for a local volunteer activity.", href: "/community-support", label: "Community support", icon: FaUserGroup },
+              ].map(({ title, text, href, label, icon: Icon }, idx) => (
                 <motion.div
                   key={idx}
                   initial={{ opacity: 0, y: 30 }}
@@ -484,37 +443,21 @@ const Home = () => {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
-                        {item.category}
+                        {label}
                       </span>
-                      <div className="flex text-amber-500 dark:text-amber-400 gap-1 text-xs">
-                        {[...Array(item.rating)].map((_, i) => (
-                          <FaStar key={i} />
-                        ))}
-                      </div>
+                      <Icon className="text-emerald-600 dark:text-emerald-400" />
                     </div>
-
-                    <p className="text-slate-700 dark:text-slate-300 text-base italic leading-relaxed">
-                      "{item.quote}"
-                    </p>
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white">{title}</h3>
+                    <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{text}</p>
                   </div>
-
-                  <div className="flex items-center gap-4 pt-6 mt-6 border-t border-slate-100 dark:border-slate-900">
-                    <img
-                      src={item.avatar}
-                      alt={item.name}
-                      className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500"
-                    />
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-900 dark:text-white">{item.name}</h4>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{item.role}</p>
-                    </div>
+                  <div className="flex items-center gap-2 pt-6 mt-6 border-t border-slate-100 dark:border-slate-900 text-sm font-semibold text-emerald-700 dark:text-emerald-400">
+                    <Link to={href} className="inline-flex items-center gap-2 hover:gap-3 transition-all">
+                      Open service <FaArrowRight className="text-xs" />
+                    </Link>
                   </div>
                 </motion.div>
               ))}
             </div>
-
-            {/* Testimonial Carousel Component */}
-            <TestimonialCarousel />
           </div>
         </section>
 

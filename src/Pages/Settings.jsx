@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Settings, 
   Shield, 
@@ -17,6 +17,8 @@ import {
   Home, ChevronRight, ChevronLeft, Search, BarChart3, FileText
 } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
+import AdminLayout from "../components/admin/AdminLayout";
+import { toast } from "react-hot-toast";
 
 const SettingsPage = () => {
   const navigate = useNavigate();
@@ -63,6 +65,17 @@ const SettingsPage = () => {
   const [activeRoute, setActiveRoute] = useState('/admin/settings');
   const [saveStatus, setSaveStatus] = useState(null);
 
+  useEffect(() => {
+    try {
+      const savedSettings = JSON.parse(localStorage.getItem('civix-admin-settings') || 'null');
+      if (savedSettings) {
+        setSettings((current) => ({ ...current, ...savedSettings }));
+      }
+    } catch (error) {
+      console.warn('Could not restore admin settings:', error);
+    }
+  }, []);
+
   const sidebarMenu = [
     { key: 'dashboard', label: 'Dashboard', icon: Home, route: '/admin/dashboard' },
     { key: 'analytics', label: 'Analytics', icon: BarChart3, route: '/admin/analytics' },
@@ -86,10 +99,15 @@ const SettingsPage = () => {
 
   const handleSave = () => {
     setSaveStatus('saving');
-    setTimeout(() => {
-      setSaveStatus('success');
-      setTimeout(() => setSaveStatus(null), 3000);
-    }, 1000);
+    const { currentPassword, newPassword, confirmPassword, smtpPassword, ...safeSettings } = settings;
+    if (newPassword && newPassword !== confirmPassword) {
+      setSaveStatus(null);
+      toast.error('New password and confirmation do not match.');
+      return;
+    }
+    localStorage.setItem('civix-admin-settings', JSON.stringify(safeSettings));
+    setSaveStatus('success');
+    setTimeout(() => setSaveStatus(null), 3000);
   };
 
   // --- Render Functions for Each Tab ---
@@ -494,89 +512,8 @@ const SettingsPage = () => {
   };
 
   return (
-   <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-emerald-100">
-      {/* Sidebar - untouched */}
-      <button
-        type="button"
-        aria-label="Open sidebar"
-        onClick={() => setIsSidebarOpen(true)}
-        className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white shadow-lg hover:bg-green-100 text-emerald-600 lg:hidden"
-        style={{ display: isSidebarOpen ? 'none' : 'block' }}
-      >
-        <ChevronRight className="w-6 h-6" />
-      </button>
-      {isSidebarOpen && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden" onClick={() => setIsSidebarOpen(false)}/>
-      )}
-      <aside className={`fixed top-0 left-0 h-full z-50 transition-all duration-300 ease-in-out border-r border-green-100 flex flex-col shadow-xl bg-white
-          ${isSidebarOpen ? 'w-64 translate-x-0' : 'w-16 -translate-x-full lg:translate-x-0'}`}>
-        <div className="relative flex items-center justify-between p-4 border-b border-green-100">
-          <div className={`flex items-center transition-all duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 w-0'}`}>
-            <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-sm">C</span>
-            </div>
-            {isSidebarOpen && (
-              <span className="ml-3 text-xl font-bold bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                Civix
-              </span>
-            )}
-          </div>
-          <button
-            type="button"
-            aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className={`p-2 rounded-lg hover:bg-green-100 transition-all duration-200 ${!isSidebarOpen ? 'mx-auto' : ''}`} >
-            {isSidebarOpen ? (
-              <ChevronLeft className="w-5 h-5 text-green-600" />
-            ) : (
-              <ChevronRight className="w-5 h-5 text-green-600" />
-            )}
-          </button>
-        </div>
-        {isSidebarOpen && (
-          <div className="p-4 border-b border-green-100">
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-green-400" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full pl-10 pr-4 py-2 bg-green-50 rounded-lg text-sm border-0 focus:ring-2 focus:ring-emerald-300 text-green-900 placeholder-green-500"
-              />
-            </div>
-          </div>
-        )}
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          {sidebarMenu.map((item) => {
-            const isActive = item.route === activeRoute;
-            const Icon = item.icon;
-            return (
-              <div key={item.key} className="relative group">
-                <button
-                  type="button"
-                  className={`
-                    w-full flex items-center py-3 px-3 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden
-                    ${isSidebarOpen ? '' : 'justify-center'}
-                    ${isActive
-                      ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25 scale-105'
-                      : 'text-green-800 hover:bg-green-100 hover:text-green-900 hover:shadow-md'
-                    }
-                  `}
-                  onClick={() => { setActiveRoute(item.route); navigate(item.route); }}
-                  aria-current={isActive ? "page" : undefined}
-                >
-                  {isActive && <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-600 opacity-10 rounded-xl" />}
-                  <div className="relative z-10 flex items-center">
-                    <Icon className={`w-5 h-5 transition-all duration-200 ${isSidebarOpen ? 'mr-3' : ''} ${isActive ? 'text-white' : 'text-green-600'}`} />
-                    {isSidebarOpen && <span className="relative z-10">{item.label}</span>}
-                  </div>
-                </button>
-              </div>
-            );
-          })}
-        </nav>
-      </aside>
-      {/* Main settings UI */}
-      <div className="px-4 md:px-8 pt-10 pb-16 lg:ml-64 max-w-7xl mx-auto">
+    <AdminLayout title="System Settings">
+      <div className="p-6 space-y-6 max-w-7xl mx-auto">
         <div className="rounded-2xl shadow-xl border border-emerald-100 mb-8 p-6 bg-white">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-3">
@@ -640,7 +577,7 @@ const SettingsPage = () => {
           </main>
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 };
 

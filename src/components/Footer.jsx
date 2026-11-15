@@ -4,14 +4,7 @@ import {
   Heart,
   Send,
   CheckCircle,
-  Twitter,
-  Linkedin,
-  Youtube,
-  ShieldCheck,
-  Info,
-  MapPin,
-  Phone,
-  Mail
+  MapPin
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import logoF from "../assets/logo1.png";
@@ -23,10 +16,7 @@ const Footer = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const socialLinks = [
-    { name: "GitHub", href: "https://github.com/HarshS16/Civix", icon: Github },
-    { name: "Twitter", href: "https://twitter.com/civix", icon: Twitter },
-    { name: "LinkedIn", href: "https://linkedin.com/company/civix", icon: Linkedin },
-    { name: "YouTube", href: "https://youtube.com/c/civix", icon: Youtube },
+    { name: "GitHub", href: "https://github.com/deepit5656/Civix", icon: Github },
   ];
 
   const handleNewsletterSubmit = useCallback(
@@ -46,7 +36,7 @@ const Footer = () => {
   );
 
   return (
-    <footer id="footer" className="w-full bg-slate-950 text-slate-300 border-t border-slate-800/80 pt-12 pb-8 relative z-10">
+    <footer id="footer" className="w-full bg-white text-slate-600 border-t-4 border-emerald-600 pt-14 pb-8 relative z-10 dark:bg-slate-950 dark:text-slate-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Main Footer Grid */}
@@ -55,14 +45,18 @@ const Footer = () => {
           {/* Brand Info */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="p-1.5 rounded-xl bg-slate-900 border border-slate-800">
+              <div className="p-1.5 rounded-xl bg-slate-100 border border-slate-200 dark:bg-slate-900 dark:border-slate-800">
                 <img src={logoF} alt="Civix Logo" className="w-8 h-8 object-contain" />
               </div>
-              <span className="text-xl font-extrabold text-white tracking-tight">CIVIX</span>
+              <span className="text-xl font-extrabold text-slate-900 tracking-tight dark:text-white">CIVIX</span>
             </div>
-            <p className="text-slate-400 text-sm leading-relaxed max-w-sm">
-              Empowering communities with smart civic engagement. Report issues, participate in public voting, and connect directly with local governance.
+            <p className="text-slate-500 text-sm leading-relaxed max-w-sm dark:text-slate-400">
+              A practical civic workspace for reporting local problems, finding public services, and keeping community action visible.
             </p>
+            <div className="inline-flex items-center gap-2 text-xs text-slate-500 border border-slate-200 rounded-lg px-3 py-2 dark:border-slate-800">
+              <MapPin className="w-3.5 h-3.5 text-emerald-500" />
+              Built for local action
+            </div>
 
             {/* Social Icons */}
             <div className="pt-2 flex items-center gap-2">
@@ -74,7 +68,7 @@ const Footer = () => {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-emerald-600 hover:border-emerald-600 transition-all duration-200"
+                    className="p-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-500 hover:text-white hover:bg-emerald-600 hover:border-emerald-600 transition-all duration-200 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400"
                     aria-label={`Visit our ${social.name} page`}
                   >
                     <Icon className="w-4 h-4" />
@@ -86,19 +80,21 @@ const Footer = () => {
 
           {/* Quick Links Column 1 */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Platform</h4>
-            <ul className="space-y-2 text-sm text-slate-400">
+            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider dark:text-white">Take action</h4>
+            <ul className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
               <li><Link to="/about" className="hover:text-emerald-400 transition-colors">About Mission</Link></li>
               <li><Link to="/voting-system" className="hover:text-emerald-400 transition-colors">Voting System</Link></li>
               <li><Link to="/user-map" className="hover:text-emerald-400 transition-colors">Issue Heatmap</Link></li>
               <li><Link to="/civic-education" className="hover:text-emerald-400 transition-colors">Civic Rights</Link></li>
+              <li><Link to="/nearby-services" className="hover:text-emerald-400 transition-colors">Nearby Services</Link></li>
+              <li><Link to="/community-support" className="hover:text-emerald-400 transition-colors">Community Support</Link></li>
             </ul>
           </div>
 
           {/* Quick Links Column 2 */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Resources & Support</h4>
-            <ul className="space-y-2 text-sm text-slate-400">
+            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider dark:text-white">Learn & support</h4>
+            <ul className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
               <li><Link to="/feedback" className="hover:text-emerald-400 transition-colors">Submit Feedback</Link></li>
               <li><Link to="/contributors" className="hover:text-emerald-400 transition-colors">Our Contributors</Link></li>
               <li><Link to="/privacy" className="hover:text-emerald-400 transition-colors">Privacy Policy</Link></li>
@@ -108,8 +104,8 @@ const Footer = () => {
 
           {/* Newsletter Box */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Civic Updates</h4>
-            <p className="text-xs text-slate-400">Subscribe for local governance notifications and resolution reports.</p>
+            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider dark:text-white">Civic updates</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Get product and public-service updates in your inbox.</p>
             
             <form onSubmit={handleNewsletterSubmit} className="space-y-2">
               <div className="relative">
@@ -119,12 +115,12 @@ const Footer = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
                   required
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors dark:bg-slate-900 dark:border-slate-700 dark:text-white dark:placeholder-slate-500"
                 />
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="absolute right-1 top-1 bottom-1 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold text-xs transition-colors flex items-center gap-1"
+                  className="absolute right-1 top-1 bottom-1 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md font-semibold text-xs transition-colors flex items-center gap-1"
                 >
                   {isSubmitting ? (
                     <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -144,9 +140,9 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4 dark:text-slate-500">
           <p>© {currentYear} Civix Platform. Built for transparent community governance.</p>
-          <div className="flex items-center gap-1 text-slate-400">
+          <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
             <span>Made with</span>
             <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
             <span>for better cities</span>
