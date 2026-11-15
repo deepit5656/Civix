@@ -13,32 +13,44 @@ import {
 } from 'lucide-react';
 import VotingFeedbackModal from '../components/voting/VotingFeedbackModal';
 import toast from 'react-hot-toast';
+import { pollsAPI } from '../utils/api';
 
 const VotingSystem = () => {
   const [activeTab, setActiveTab] = useState('browse');
-  const [polls, setPolls] = useState([
-    {
-      id: 1,
-      title: "Should the city prioritize installing solar streetlights along West Avenue?",
-      options: ["Yes, install solar lights", "No, keep existing electric grid", "Need more information"],
-      votes: [42, 12, 5],
-      category: "Infrastructure"
-    },
-    {
-      id: 2,
-      title: "Proposed community park renovation in Sector 4",
-      options: ["Add children's playground", "Create walking track & gardens", "Install open-air gymnasium"],
-      votes: [28, 35, 19],
-      category: "Community"
-    }
-  ]);
+  const [polls, setPolls] = useState([]);
   const [newTitle, setNewTitle] = useState('');
   const [newOptions, setNewOptions] = useState('');
   const [votedPolls, setVotedPolls] = useState(new Set());
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [currentPollForFeedback, setCurrentPollForFeedback] = useState(null);
 
-  const handleVote = (pollId, optionIndex) => {
+  React.useEffect(() => {
+    async function loadPolls() {
+      try {
+        const res = await pollsAPI.getAll();
+        const list = res?.polls || (Array.isArray(res) ? res : []);
+        if (list.length > 0) {
+          const transformed = list.map(p => ({
+            id: p._id || p.id,
+            isLive: true,
+            title: p.title,
+            options: (p.options || []).map(o => o.text || o),
+            votes: (p.options || []).map(o => o.votes || 0),
+            category: p.category || "General"
+          }));
+          setPolls(transformed);
+        } else {
+          setPolls([]);
+        }
+      } catch (err) {
+        setPolls([]);
+        toast.error('Polls could not be loaded. Please try again.');
+      }
+    }
+    loadPolls();
+  }, []);
+
+  const handleVote = async (pollId, optionIndex) => {
     if (votedPolls.has(pollId)) {
       toast.error('You have already voted on this poll!');
       return;
@@ -58,6 +70,14 @@ const VotingSystem = () => {
     setCurrentPollForFeedback(poll);
     setShowFeedbackModal(true);
     toast.success('Vote recorded successfully!');
+
+    if (poll?.isLive) {
+      try {
+        await pollsAPI.vote(pollId, optionIndex);
+      } catch (err) {
+        console.warn("Vote recording error:", err.message);
+      }
+    }
   };
 
   const handleFeedbackSubmit = async (formData) => {
@@ -68,25 +88,38 @@ const VotingSystem = () => {
     }
   };
 
-  const handleCreatePoll = (e) => {
+  const handleCreatePoll = async (e) => {
     e.preventDefault();
     const optionsArray = newOptions.split('\n').map(opt => opt.trim()).filter(opt => opt);
     if (!newTitle.trim() || optionsArray.length < 2) {
       toast.error('Please enter a valid title and at least two options.');
       return;
     }
-    const newPoll = {
-      id: Date.now(),
-      title: newTitle.trim(),
-      options: optionsArray,
-      votes: Array(optionsArray.length).fill(0),
-      category: "General"
-    };
-    setPolls((prevPolls) => [newPoll, ...prevPolls]);
+
+    try {
+      const res = await pollsAPI.create({
+        title: newTitle.trim(),
+        options: optionsArray,
+        category: "General"
+      });
+      const created = res?.poll;
+      const newPoll = {
+        id: created?._id || Date.now(),
+        isLive: Boolean(created?._id),
+        title: newTitle.trim(),
+        options: optionsArray,
+        votes: Array(optionsArray.length).fill(0),
+        category: "General"
+      };
+      setPolls((prevPolls) => [newPoll, ...prevPolls]);
+      toast.success('Poll created successfully!');
+    } catch (apiErr) {
+      toast.error('Poll could not be created. Please try again.');
+    }
+
     setNewTitle('');
     setNewOptions('');
     setActiveTab('browse');
-    toast.success('Poll created successfully!');
   };
 
   const getTotalVotes = (poll) => poll.votes.reduce((a, v) => a + v, 0);

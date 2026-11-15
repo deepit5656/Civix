@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Shield
 } from 'lucide-react';
+import { pollsAPI } from '../../utils/api';
 
 const PollList = ({ onPollSelect, selectedPoll }) => {
   const [polls, setPolls] = useState([]);
@@ -20,7 +21,6 @@ const PollList = ({ onPollSelect, selectedPoll }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sortBy, setSortBy] = useState('newest');
 
-  // Mock data for demonstration
   const mockPolls = [
     {
       _id: '1',
@@ -144,11 +144,26 @@ const PollList = ({ onPollSelect, selectedPoll }) => {
   const categories = ['All', 'Community', 'Education', 'Transportation', 'Politics', 'Business', 'Health', 'Environment'];
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setPolls(mockPolls);
-      setLoading(false);
-    }, 1000);
+    let active = true;
+    const loadPolls = async () => {
+      try {
+        const response = await pollsAPI.getAll();
+        const list = response?.polls || (Array.isArray(response) ? response : []);
+        if (active) {
+          setPolls(list);
+        }
+      } catch (error) {
+        if (active) {
+          setPolls([]);
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    loadPolls();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const filteredPolls = polls.filter(poll => {

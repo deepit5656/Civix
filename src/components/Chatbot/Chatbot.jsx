@@ -16,15 +16,23 @@ import {
   Vote,
   Compass,
   RefreshCw
+  ,Mic, Volume2, VolumeX
 } from 'lucide-react';
 
 const CIVIC_FAQS = [
   {
+    keywords: ['lost', 'found', 'missing', 'lost item', 'find item', 'lost and found', 'lost & found', 'misplaced', 'lost phone', 'lost wallet', 'lost bag', 'lost keys'],
+    question: 'How do I find my lost item or report a found item?',
+    answer: 'Civix has a dedicated Lost & Found section! You can post about a lost item to alert the community, or report something you\'ve found so the owner can claim it. Browse existing lost & found listings nearby and connect directly with people in your area.',
+    actionLabel: 'Go to Lost & Found',
+    actionRoute: '/lost-found'
+  },
+  {
     keywords: ['report', 'issue', 'complaint', 'file', 'lodge', 'pothole', 'garbage', 'light'],
     question: 'How do I report a civic issue?',
     answer: 'To report an issue, click "Report Issue" in the navigation or dashboard. Provide details, attach a photo, and click "Get Current GPS Location" to auto-tag coordinates. The municipal department will be notified immediately.',
-    actionLabel: 'Report Issue Now',
-    actionRoute: '/report-issue'
+    actionLabel: 'Guide me through a report',
+    guidedAction: 'report'
   },
   {
     keywords: ['track', 'status', 'check', 'progress', 'my complaint', 'ticket'],
@@ -62,6 +70,20 @@ const CIVIC_FAQS = [
     actionRoute: '/nearby-services'
   },
   {
+    keywords: ['blood', 'donor', 'donation', 'volunteer', 'food', 'medicine', 'shelter', 'help request'],
+    question: 'How can I ask for or offer community support?',
+    answer: 'Open Community Support to request blood or practical help, or publish a volunteer activity. Nearby Services can help you find hospitals, blood banks, pharmacies, shelters, and food banks.',
+    actionLabel: 'Open Community Support',
+    actionRoute: '/community-support'
+  },
+  {
+    keywords: ['forgot password', 'reset password', 'password reset', 'cannot login'],
+    question: 'How do I reset my password?',
+    answer: 'Use Forgot password on the login screen. Civix will send a one-time code to your registered email so you can set a new password.',
+    actionLabel: 'Reset Password',
+    actionRoute: '/forgot-password'
+  },
+  {
     keywords: ['budget', 'tax', 'sdrf', 'disaster', 'finance', 'money'],
     question: 'How can I view civic budgets and disaster relief?',
     answer: 'Civix provides open data visualizers for the Union Budget allocations, State Disaster Response Fund (SDRF) disbursements, and personal Tax Impact breakdown calculators.',
@@ -71,7 +93,8 @@ const CIVIC_FAQS = [
 ];
 
 const SUGGESTED_PROMPTS = [
-  'How do I report a pothole or broken streetlight?',
+  'I want to report a pothole',
+  'How can I find my lost item?',
   'How does community voting escalate issues?',
   'Where can I find nearby emergency hospitals?',
   'How do I track my submitted complaint status?'
@@ -79,11 +102,107 @@ const SUGGESTED_PROMPTS = [
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('civix-ai-chat') || '[]');
+    } catch {
+      return [];
+    }
+  });
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [guidedFlow, setGuidedFlow] = useState(null);
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const messagesEndRef = useRef(null);
+  const recognitionRef = useRef(null);
   const navigate = useNavigate();
+
+  const speakText = (text) => {
+    if (!('speechSynthesis' in window) || !text) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const addBotMessage = (message) => {
+    setMessages((prev) => [...prev, {
+      id: `bot-${Date.now()}`,
+      sender: 'bot',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      ...message,
+    }]);
+    if (message.text) speakText(message.text);
+  };
+
+  const startGuidedReport = () => {
+    setGuidedFlow({ step: 'consent', data: {} });
+    addBotMessage({ text: 'I can guide you through a report and fill the form for your review. Would you like me to help? Please say or type yes or no.' });
+  };
+
+  const handleVoiceInput = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      addBotMessage({ text: 'Voice input is not supported in this browser. You can still type your request below.' });
+      return;
+    }
+    if (isListening) {
+      recognitionRef.current?.stop();
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = document.documentElement.lang || 'en-IN';
+    recognition.interimResults = false;
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInputValue(transcript);
+      handleSend(transcript);
+    };
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+    recognitionRef.current = recognition;
+    setIsListening(true);
+    recognition.start();
+  };
+
+  const handleGuidedReply = (query) => {
+    const lower = query.toLowerCase();
+    const current = guidedFlow;
+    if (current.step === 'consent') {
+      if (/\b(yes|sure|okay|ok|help|please)\b/.test(lower)) {
+        setGuidedFlow({ step: 'title', data: {} });
+        addBotMessage({ text: 'Great. What is the issue? For example: broken streetlight near the school.' });
+      } else {
+        setGuidedFlow(null);
+        addBotMessage({ text: 'No problem. You can choose Report Issue whenever you are ready.' });
+      }
+      return true;
+    }
+    const data = { ...current.data };
+    if (current.step === 'title') {
+      data.title = query;
+      setGuidedFlow({ step: 'description', data });
+      addBotMessage({ text: 'Please describe what is happening and how it affects people.' });
+    } else if (current.step === 'description') {
+      data.description = query;
+      setGuidedFlow({ step: 'location', data });
+      addBotMessage({ text: 'Where is the issue located? You can give an address, landmark, or area.' });
+    } else if (current.step === 'location') {
+      data.location = query;
+      setGuidedFlow({ step: 'phone', data });
+      addBotMessage({ text: 'What phone number should the municipality use to contact you? You may say skip.' });
+    } else if (current.step === 'phone') {
+      data.phone = lower === 'skip' ? '' : query;
+      setGuidedFlow(null);
+      addBotMessage({ text: 'Your report details are ready. I will open the form so you can add a photo, review everything, and submit it.' });
+      navigate('/report-issue', { state: { prefill: data } });
+      setIsOpen(false);
+    }
+    return true;
+  };
 
   // Initialize with greeting if opened
   useEffect(() => {
@@ -112,6 +231,10 @@ const ChatBot = () => {
     }
   }, [messages, isTyping, isOpen]);
 
+  useEffect(() => {
+    if (messages.length > 0) localStorage.setItem('civix-ai-chat', JSON.stringify(messages.slice(-30)));
+  }, [messages]);
+
   const toggleChat = () => {
     setIsOpen((prev) => !prev);
   };
@@ -132,6 +255,10 @@ const ChatBot = () => {
     setIsTyping(true);
 
     try {
+      if (guidedFlow && handleGuidedReply(query)) {
+        setIsTyping(false);
+        return;
+      }
       // 1. Check quick FAQ match first for instant responses
       const lower = query.toLowerCase();
       let matchedFaq = CIVIC_FAQS.find((faq) =>
@@ -149,9 +276,11 @@ const ChatBot = () => {
               timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
               actionLabel: matchedFaq.actionLabel,
               actionRoute: matchedFaq.actionRoute,
+              guidedAction: matchedFaq.guidedAction,
               aiEngine: 'Civix Verified Knowledge'
             }
           ]);
+          speakText(matchedFaq.answer);
           setIsTyping(false);
         }, 500);
         return;
@@ -216,13 +345,17 @@ const ChatBot = () => {
     }
   };
 
+  const handleGuidedAction = (action) => {
+    if (action === 'report') startGuidedReport();
+  };
+
   return (
     <div className="fixed bottom-6 right-6 z-50 font-inter">
       {/* Floating Trigger Button */}
       {!isOpen && (
         <button
           onClick={toggleChat}
-          className="relative group flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-xl shadow-emerald-950/20 hover:scale-105 active:scale-95 transition-all duration-300 focus:outline-none"
+          className="relative group flex items-center justify-center w-14 h-14 rounded-full bg-emerald-700 hover:bg-emerald-600 text-white shadow-xl shadow-emerald-950/20 hover:scale-105 active:scale-95 transition-all duration-300 focus:outline-none"
           title="Open Civix AI Assistant"
           aria-label="Open Civix AI Assistant"
         >
@@ -239,7 +372,7 @@ const ChatBot = () => {
         <div className="w-[90vw] sm:w-[380px] h-[520px] max-h-[85vh] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
           
           {/* Header */}
-          <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 px-4 py-3.5 text-white flex items-center justify-between shadow-md">
+          <div className="bg-emerald-700 px-4 py-3.5 text-white flex items-center justify-between shadow-md">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
                 <Bot className="w-5 h-5" />
@@ -295,6 +428,13 @@ const ChatBot = () => {
                         >
                           <span>{msg.actionLabel || 'View Details'}</span>
                           <ArrowRight className="w-3 h-3" />
+                        </button>
+                      </div>
+                    )}
+                    {msg.guidedAction && (
+                      <div className="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-700">
+                        <button onClick={() => handleGuidedAction(msg.guidedAction)} className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-[11px] font-bold text-emerald-700 dark:border-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300">
+                          {msg.actionLabel} <ArrowRight className="w-3 h-3" />
                         </button>
                       </div>
                     )}
@@ -374,6 +514,12 @@ const ChatBot = () => {
                 placeholder="Ask Civix AI Assistant..."
                 className="flex-1 bg-transparent text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none"
               />
+              <button onClick={handleVoiceInput} className={`p-1.5 rounded-lg ${isListening ? 'bg-rose-600' : 'bg-slate-200 dark:bg-slate-700'} text-slate-700 dark:text-white`} aria-label={isListening ? 'Stop voice input' : 'Start voice input'} title={isListening ? 'Stop listening' : 'Speak your request'}>
+                <Mic className="w-3.5 h-3.5" />
+              </button>
+              <button onClick={() => isSpeaking ? window.speechSynthesis.cancel() : speakText(messages.filter((message) => message.sender === 'bot').at(-1)?.text)} className="p-1.5 rounded-lg bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-white" aria-label={isSpeaking ? 'Stop voice output' : 'Read last answer aloud'} title={isSpeaking ? 'Stop speaking' : 'Read last answer aloud'}>
+                {isSpeaking ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+              </button>
               <button
                 onClick={() => handleSend()}
                 disabled={!inputValue.trim()}

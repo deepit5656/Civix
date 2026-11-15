@@ -15,6 +15,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { pollsAPI } from '../../utils/api';
 
 const PollResults = () => {
   const [selectedPoll, setSelectedPoll] = useState(null);
@@ -23,7 +24,6 @@ const PollResults = () => {
   const [viewMode, setViewMode] = useState('chart'); // chart, table, export
   const [showVoterDetails, setShowVoterDetails] = useState(false);
 
-  // Mock data for demonstration
   const mockPolls = [
     {
       _id: '1',
@@ -98,14 +98,10 @@ const PollResults = () => {
   const loadResults = async (pollId) => {
     setLoading(true);
     try {
-      // Here you would make API call to get results
-      // const response = await fetch(`/api/polls/${pollId}/results`);
-      // const data = await response.json();
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setResults(mockResults);
+      const response = await pollsAPI.getById(pollId);
+      setResults(response?.results || response?.poll || response);
     } catch (error) {
+      setResults(null);
       toast.error('Failed to load results');
     } finally {
       setLoading(false);
